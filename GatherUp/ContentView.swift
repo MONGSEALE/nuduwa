@@ -8,27 +8,33 @@
 import SwiftUI
 
 struct ContentView: View {
+    @AppStorage("log_status") var logStatus: Bool = false
    
     var body: some View {
         
-      
-        TabView{
-           MapView()
-                .tabItem{
-                    Label("Map",systemImage:"map.circle")
+        // 로그인변수가 false면 Login뷰로 이동
+        if logStatus {
+            TabView{
+               MapView()
+                    .tabItem{
+                        Label("Map",systemImage:"map.circle")
+                    }
+                MeetingsView()
+                    .tabItem{
+                        Label("Meetings",systemImage: "person.3.sequence")
+                    }
+            
+                ProfileView()
+                    .tabItem{
+                        Label("Profile",systemImage:"person.crop.circle")
+                    }
                 }
-            MeetingsView()
-                .tabItem{
-                    Label("Meetings",systemImage: "person.3.sequence")
-                }
-        
-            ProfileView()
-                .tabItem{
-                    Label("Profile",systemImage:"person.crop.circle")
-                }
-            }
+        } else {
+            Login()
         }
+      
     }
+}
 
 
 struct ContentView_Previews: PreviewProvider {
