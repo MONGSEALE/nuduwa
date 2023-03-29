@@ -13,7 +13,8 @@ struct ContentView: View {
     var body: some View {
         
         // 로그인변수가 false면 Login뷰로 이동
-        if logStatus {
+        if //logStatus {
+        true{   // 로그인 되면 이 줄 삭제
             TabView{
                MapView()
                     .tabItem{

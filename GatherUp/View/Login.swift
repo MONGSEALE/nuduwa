@@ -99,6 +99,7 @@ struct Login: View {
                         }
                     }
                     .clipped()
+                    
                 }
                 .padding(.leading, -60)
                 .frame(maxWidth: .infinity)
