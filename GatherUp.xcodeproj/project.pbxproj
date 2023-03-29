@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		339A0FE329D3DC3200B4DD98 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A0FE229D3DC3200B4DD98 /* User.swift */; };
 		425050EA29D07096009926FF /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425050E929D07096009926FF /* Location.swift */; };
 		429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515CE29C4A744006DD4B3 /* GatherUpApp.swift */; };
 		429515D129C4A744006DD4B3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515D029C4A744006DD4B3 /* ContentView.swift */; };
@@ -18,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		339A0FE229D3DC3200B4DD98 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		425050E929D07096009926FF /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		429515CB29C4A744006DD4B3 /* GatherUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GatherUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		429515CE29C4A744006DD4B3 /* GatherUpApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherUpApp.swift; sourceTree = "<group>"; };
@@ -67,6 +69,7 @@
 				429515D229C4A746006DD4B3 /* Assets.xcassets */,
 				429515D429C4A746006DD4B3 /* Preview Content */,
 				425050E929D07096009926FF /* Location.swift */,
+				339A0FE229D3DC3200B4DD98 /* User.swift */,
 			);
 			path = GatherUp;
 			sourceTree = "<group>";
@@ -155,6 +158,7 @@
 				429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */,
 				425050EA29D07096009926FF /* Location.swift in Sources */,
 				429515E129C4A9AD006DD4B3 /* MeetingsView.swift in Sources */,
+				339A0FE329D3DC3200B4DD98 /* User.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
