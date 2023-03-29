@@ -17,6 +17,9 @@
 		339A0FFB29D3E67800B4DD98 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 339A0FFA29D3E67800B4DD98 /* FirebaseFirestore */; };
 		339A0FFD29D3E67800B4DD98 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 339A0FFC29D3E67800B4DD98 /* FirebaseFirestoreSwift */; };
 		339A0FFF29D3E67800B4DD98 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 339A0FFE29D3E67800B4DD98 /* FirebaseStorage */; };
+		339A101229D3E9C100B4DD98 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101129D3E9C000B4DD98 /* LoginViewModel.swift */; };
+		339A101529D3E9F400B4DD98 /* Login.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101429D3E9F400B4DD98 /* Login.swift */; };
+		339A101829D3EAE500B4DD98 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101729D3EAE500B4DD98 /* User.swift */; };
 		4246ED8329D3E31C00246F48 /* dsddassdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4246ED8229D3E31C00246F48 /* dsddassdView.swift */; };
 		425050EA29D07096009926FF /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425050E929D07096009926FF /* Location.swift */; };
 		429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515CE29C4A744006DD4B3 /* GatherUpApp.swift */; };
@@ -34,6 +37,9 @@
 		339A0FEC29D3E28F00B4DD98 /* ggg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ggg.swift; sourceTree = "<group>"; };
 		339A0FF029D3E5D100B4DD98 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		339A100029D3E68E00B4DD98 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		339A101129D3E9C000B4DD98 /* LoginViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
+		339A101429D3E9F400B4DD98 /* Login.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Login.swift; sourceTree = "<group>"; };
+		339A101729D3EAE500B4DD98 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		4246ED8229D3E31C00246F48 /* dsddassdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dsddassdView.swift; sourceTree = "<group>"; };
 		425050E929D07096009926FF /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		429515CB29C4A744006DD4B3 /* GatherUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GatherUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -63,6 +69,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		339A101029D3E9C000B4DD98 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				339A101129D3E9C000B4DD98 /* LoginViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		339A101329D3E9E900B4DD98 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				339A101429D3E9F400B4DD98 /* Login.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		339A101629D3EA0600B4DD98 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				339A101729D3EAE500B4DD98 /* User.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		429515C229C4A744006DD4B3 = {
 			isa = PBXGroup;
 			children = (
@@ -82,6 +112,9 @@
 		429515CD29C4A744006DD4B3 /* GatherUp */ = {
 			isa = PBXGroup;
 			children = (
+				339A101629D3EA0600B4DD98 /* Model */,
+				339A101329D3E9E900B4DD98 /* View */,
+				339A101029D3E9C000B4DD98 /* ViewModel */,
 				339A100029D3E68E00B4DD98 /* Info.plist */,
 				339A0FF029D3E5D100B4DD98 /* GoogleService-Info.plist */,
 				429515CE29C4A744006DD4B3 /* GatherUpApp.swift */,
@@ -191,8 +224,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				339A101829D3EAE500B4DD98 /* User.swift in Sources */,
 				4246ED8329D3E31C00246F48 /* dsddassdView.swift in Sources */,
 				429515DF29C4A776006DD4B3 /* ProfileView.swift in Sources */,
+				339A101229D3E9C100B4DD98 /* LoginViewModel.swift in Sources */,
+				339A101529D3E9F400B4DD98 /* Login.swift in Sources */,
 				339A0FED29D3E28F00B4DD98 /* ggg.swift in Sources */,
 				429515D129C4A744006DD4B3 /* ContentView.swift in Sources */,
 				429515DD29C4A766006DD4B3 /* MapView.swift in Sources */,
