@@ -31,23 +31,23 @@ struct MapView: View {
                     viewModel.checkIfLocationServicesIsEnabled()
                 }
             
-            
             VStack{
                 HStack{
                     Spacer()
                     Button{
-                        var newLocation = Location(id: UUID(), name: "New location", description: "", latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.longitude)
-                            locations.append(newLocation)
-                        
                         if(showAnnotation==true){
+                            let newLocation = Location(id: UUID(), name: "New location", description: "", latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.longitude)
+                                locations.append(newLocation)
+                            
                             withAnimation(.spring()){
                                 showAnnotation.toggle()
                             }
                         }
                         else{
-                           withAnimation(.spring()){
-                                showAnnotation.toggle()
-                              
+                            locations.removeLast()
+                            
+                            withAnimation(.spring()){
+                               showAnnotation.toggle()
                             }
                         }
                         
