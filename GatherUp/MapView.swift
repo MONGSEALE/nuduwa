@@ -18,18 +18,12 @@ struct MapView: View {
     @State private var annotationLocationLongitude: CLLocationCoordinate2D?
     @State private var annotationLocation: CLLocationCoordinate2D?
     
-    
-  
-    
-    
-    
     var body: some View {
         ZStack(alignment:.bottom){
             
             Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:locations){ location in
                 
-                    MapMarker(coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude))
-                        
+                MapMarker(coordinate: CLLocationCoordinate2D(latitude: location.latitude!, longitude: location.longitude!))
             }
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))
@@ -42,14 +36,12 @@ struct MapView: View {
                 HStack{
                     Spacer()
                     Button{
-                        
                         var newLocation = Location(id: UUID(), name: "New location", description: "", latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.longitude)
                             locations.append(newLocation)
                         
                         if(showAnnotation==true){
                             withAnimation(.spring()){
                                 showAnnotation.toggle()
-                                
                             }
                         }
                         else{
