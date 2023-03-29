@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		339A0FE329D3DC3200B4DD98 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A0FE229D3DC3200B4DD98 /* User.swift */; };
 		339A0FEB29D3E0DB00B4DD98 /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A0FEA29D3E0DB00B4DD98 /* Test.swift */; };
+		339A0FED29D3E28F00B4DD98 /* ggg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A0FEC29D3E28F00B4DD98 /* ggg.swift */; };
 		425050EA29D07096009926FF /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425050E929D07096009926FF /* Location.swift */; };
 		429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515CE29C4A744006DD4B3 /* GatherUpApp.swift */; };
 		429515D129C4A744006DD4B3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515D029C4A744006DD4B3 /* ContentView.swift */; };
@@ -22,6 +23,7 @@
 /* Begin PBXFileReference section */
 		339A0FE229D3DC3200B4DD98 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		339A0FEA29D3E0DB00B4DD98 /* Test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Test.swift; sourceTree = "<group>"; };
+		339A0FEC29D3E28F00B4DD98 /* ggg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ggg.swift; sourceTree = "<group>"; };
 		425050E929D07096009926FF /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		429515CB29C4A744006DD4B3 /* GatherUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GatherUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		429515CE29C4A744006DD4B3 /* GatherUpApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherUpApp.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 				425050E929D07096009926FF /* Location.swift */,
 				339A0FE229D3DC3200B4DD98 /* User.swift */,
 				339A0FEA29D3E0DB00B4DD98 /* Test.swift */,
+				339A0FEC29D3E28F00B4DD98 /* ggg.swift */,
 			);
 			path = GatherUp;
 			sourceTree = "<group>";
@@ -156,6 +159,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				429515DF29C4A776006DD4B3 /* ProfileView.swift in Sources */,
+				339A0FED29D3E28F00B4DD98 /* ggg.swift in Sources */,
 				429515D129C4A744006DD4B3 /* ContentView.swift in Sources */,
 				429515DD29C4A766006DD4B3 /* MapView.swift in Sources */,
 				429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */,
