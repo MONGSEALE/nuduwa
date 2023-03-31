@@ -9,14 +9,19 @@ import SwiftUI
 import MapKit
 import CoreLocationUI
 
+import Firebase
+
 struct MapView: View {
     
     @StateObject private var viewModel = MapViewModel()
-    @State private var locations = [Location]()
+    @State private var locations = [Meeting]()
+    //@State private var locations = [Location]()
     @State var showAnnotation = true
     @State private var annotationLocationLatitude: CLLocationCoordinate2D?
     @State private var annotationLocationLongitude: CLLocationCoordinate2D?
     @State private var annotationLocation: CLLocationCoordinate2D?
+    
+    @StateObject var save: SaveNewMeeting = .init()
     
     var body: some View {
         ZStack(alignment:.bottom){
@@ -36,15 +41,26 @@ struct MapView: View {
                     Spacer()
                     Button{
                         if(showAnnotation==true){
+                            /*
                             let newLocation = Location(id: UUID(), name: "New location", description: "", latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.longitude)
                                 locations.append(newLocation)
+                             */
+                            let user = Auth.auth().currentUser
+                            guard
+                                let userName: String = user?.displayName,
+                                let userUID: String = user?.uid
+                            else{return}
+                            let profileURL = user?.photoURL
+                            let newMeeting = Meeting(name: "모임1", description: "아무나", latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.longitude, userName: userName, userUID: userUID, userImage: profileURL ?? URL(filePath: ""))
+                            save.createMeeting(meeting: newMeeting)
+                            locations.append(newMeeting)
                             
                             withAnimation(.spring()){
                                 showAnnotation.toggle()
                             }
                         }
                         else{
-                            locations.removeLast()
+                            //locations.removeLast()
                             
                             withAnimation(.spring()){
                                showAnnotation.toggle()

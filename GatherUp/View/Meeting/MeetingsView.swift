@@ -8,15 +8,15 @@
 import SwiftUI
 
 struct MeetingsView: View {
-    @State private var recentsPosts: [Meeting] = []
-    @State private var createNewPost: Bool = false
+    @State private var recentsMeetings: [Meeting] = []
+    @State private var createNewMeeting: Bool = false
     var body: some View {
         NavigationStack{
-            ReusableMeetingsView(posts: $recentsPosts)
+            ReusableMeetingsView(meetings: $recentsMeetings)
                 .hAlign(.center).vAlign(.center)
                 .overlay(alignment: .bottomTrailing){
                     Button{
-                        createNewPost.toggle()
+                        createNewMeeting.toggle()
                     } label: {
                         Image(systemName: "plus")
                             .font(.title3)
@@ -29,37 +29,11 @@ struct MeetingsView: View {
                 }
                 .navigationTitle("Post's")
         }
-        .fullScreenCover(isPresented: $createNewPost) {
+        .fullScreenCover(isPresented: $createNewMeeting) {
 //            CreateNewPost { post in
 //                /// - Adding Created post at the Top of the Recent Posts
 //                recentsPosts.insert(post, at: 0)
 //            }
-        }
-        
-        
-        VStack(spacing:30){
-            
-            
-            Text("This is meetings!")
-                .underline()
-            Text("meeting1...........................................")
-                .underline()
-            Text("meeting1...........................................")
-                .underline()
-            Text("meeting1...........................................")
-                .underline()
-            Text("meeting1...........................................")
-                .underline()
-            Text("meeting1...........................................")
-                .underline()
-            Text("meeting1...........................................")
-                .underline()
-            Text("meeting1...........................................")
-                .underline()
-            Text("meeting1...........................................")
-                .underline()
-            Text("meeting1...........................................")
-                .underline()
         }
     }
 }

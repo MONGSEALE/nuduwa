@@ -57,8 +57,8 @@ struct ReusableMeetingsView: View {
                     meeting.id == updatedMeeting.id
                 })
                 {
-                    meetings[index].likedIDs = updatedMeeting.likedIDs
-                    meetings[index].dislikedIDs = updatedMeeting.dislikedIDs
+//                    meetings[index].likedIDs = updatedMeeting.likedIDs
+//                    meetings[index].dislikedIDs = updatedMeeting.dislikedIDs
                 }
             } onDelete: {
                 /// Removing Post From The Array

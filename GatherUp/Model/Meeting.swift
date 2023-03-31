@@ -12,7 +12,11 @@ import Foundation
 
 struct Meeting : Identifiable,Codable,Equatable{
     @DocumentID var id: String?
-    var text: String
+    
+    var name: String
+    var description: String
+    var latitude: Double
+    var longitude: Double
     var publishedDate: Date = Date()
     // MARK: Basic User Info
     var userName: String

@@ -33,29 +33,18 @@ struct MeetingCardView: View {
                 Text(meeting.publishedDate.formatted(date: .numeric, time: .shortened))
                     .font(.caption2)
                     .foregroundColor(.gray)
-                Text(meeting.text)
+                Text(meeting.description)
                     .textSelection(.enabled)
                     .padding(.vertical,8)
                 
-                if let postImageURL = meeting.imageURL{
-                    GeometryReader{
-                        let size = $0.size
-                        WebImage(url: postImageURL)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: size.width, height: size.height)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    }
-                    .frame(height: 200)
-                }
             }
         }
         .hAlign(.leading)
         .overlay(alignment: .topTrailing, content: {
             /// Displaying Delete Button (if it's Author of that post)
-            if post.userUID == Auth.auth().currentUser?.uid {
+            if meeting.userUID == Auth.auth().currentUser?.uid {
                 Menu {
-                    Button("Delete Post", role: .destructive, action: deletePost)
+                    Button("Delete Meeting", role: .destructive, action: deleteMeeting)
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.caption)
@@ -76,8 +65,8 @@ struct MeetingCardView: View {
                         if snapshot.exists{
                             /// - Document Updated
                             /// Fetching Updated Document
-                            if let updatedPost = try? snapshot.data(as: Meeting.self){
-                                onUpdate(updatedPost)
+                            if let updatedMeeting = try? snapshot.data(as: Meeting.self){
+                                onUpdate(updatedMeeting)
                             }
                             
                         }else{
