@@ -21,6 +21,7 @@
 		339A101D29D3EBBF00B4DD98 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101B29D3EBBE00B4DD98 /* LoadingView.swift */; };
 		339A102329D4093800B4DD98 /* ReusableProfileContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A102229D4093800B4DD98 /* ReusableProfileContent.swift */; };
 		339A102629D4098400B4DD98 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 339A102529D4098400B4DD98 /* SDWebImageSwiftUI */; };
+		33ADB13829D6610900352451 /* Meeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13729D6610900352451 /* Meeting.swift */; };
 		425050EA29D07096009926FF /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425050E929D07096009926FF /* Location.swift */; };
 		429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515CE29C4A744006DD4B3 /* GatherUpApp.swift */; };
 		429515D129C4A744006DD4B3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515D029C4A744006DD4B3 /* ContentView.swift */; };
@@ -39,6 +40,7 @@
 		339A101A29D3EBBE00B4DD98 /* ViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		339A101B29D3EBBE00B4DD98 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		339A102229D4093800B4DD98 /* ReusableProfileContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReusableProfileContent.swift; sourceTree = "<group>"; };
+		33ADB13729D6610900352451 /* Meeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meeting.swift; sourceTree = "<group>"; };
 		425050E929D07096009926FF /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		429515CB29C4A744006DD4B3 /* GatherUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GatherUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		429515CE29C4A744006DD4B3 /* GatherUpApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherUpApp.swift; sourceTree = "<group>"; };
@@ -79,10 +81,11 @@
 		339A101329D3E9E900B4DD98 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				33ADB13629D6604A00352451 /* Map */,
+				33ADB13529D6602600352451 /* Profile */,
+				33ADB13429D6601800352451 /* Meeting */,
 				339A101929D3EBBE00B4DD98 /* SubView */,
 				339A101429D3E9F400B4DD98 /* Login.swift */,
-				429515DE29C4A776006DD4B3 /* ProfileView.swift */,
-				339A102229D4093800B4DD98 /* ReusableProfileContent.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -92,6 +95,7 @@
 			children = (
 				339A101729D3EAE500B4DD98 /* User.swift */,
 				425050E929D07096009926FF /* Location.swift */,
+				33ADB13729D6610900352451 /* Meeting.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -103,6 +107,31 @@
 				339A101B29D3EBBE00B4DD98 /* LoadingView.swift */,
 			);
 			path = SubView;
+			sourceTree = "<group>";
+		};
+		33ADB13429D6601800352451 /* Meeting */ = {
+			isa = PBXGroup;
+			children = (
+				429515E029C4A9AD006DD4B3 /* MeetingsView.swift */,
+			);
+			path = Meeting;
+			sourceTree = "<group>";
+		};
+		33ADB13529D6602600352451 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				429515DE29C4A776006DD4B3 /* ProfileView.swift */,
+				339A102229D4093800B4DD98 /* ReusableProfileContent.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		33ADB13629D6604A00352451 /* Map */ = {
+			isa = PBXGroup;
+			children = (
+				429515DC29C4A766006DD4B3 /* MapView.swift */,
+			);
+			path = Map;
 			sourceTree = "<group>";
 		};
 		429515C229C4A744006DD4B3 = {
@@ -130,8 +159,6 @@
 				339A0FF029D3E5D100B4DD98 /* GoogleService-Info.plist */,
 				429515CE29C4A744006DD4B3 /* GatherUpApp.swift */,
 				429515D029C4A744006DD4B3 /* ContentView.swift */,
-				429515E029C4A9AD006DD4B3 /* MeetingsView.swift */,
-				429515DC29C4A766006DD4B3 /* MapView.swift */,
 				429515D229C4A746006DD4B3 /* Assets.xcassets */,
 				429515D429C4A746006DD4B3 /* Preview Content */,
 			);
@@ -233,6 +260,7 @@
 			files = (
 				339A101829D3EAE500B4DD98 /* User.swift in Sources */,
 				429515DF29C4A776006DD4B3 /* ProfileView.swift in Sources */,
+				33ADB13829D6610900352451 /* Meeting.swift in Sources */,
 				339A101229D3E9C100B4DD98 /* LoginViewModel.swift in Sources */,
 				339A101529D3E9F400B4DD98 /* Login.swift in Sources */,
 				429515D129C4A744006DD4B3 /* ContentView.swift in Sources */,

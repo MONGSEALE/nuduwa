@@ -23,7 +23,7 @@ struct MapView: View {
             
             Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:locations){ location in
                 
-                MapMarker(coordinate: CLLocationCoordinate2D(latitude: location.latitude!, longitude: location.longitude!))
+                MapMarker(coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude))
             }
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))

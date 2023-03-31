@@ -16,6 +16,7 @@ struct User: Identifiable, Codable {
     var userEmail: String?
     var userImage: URL?
     
+    /*
     enum CodingKeys: CodingKey {
         case id
         case username
@@ -24,4 +25,5 @@ struct User: Identifiable, Codable {
         case userEmail
         case userImage
     }
+     */
 }
