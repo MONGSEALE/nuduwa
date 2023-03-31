@@ -150,20 +150,7 @@ class LoginViewModel: ObservableObject {
 }
 
 
-// MARK: Extensions
-extension UIApplication{
-    func closeKeyboard() {
-        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-    
-    // Root Controller
-    func rootController() -> UIViewController {
-        guard let window = connectedScenes.first as? UIWindowScene else{return .init()}
-        guard let viewcontroller = window.windows.last?.rootViewController else{return .init()}
-        
-        return viewcontroller
-    }
-}
+
 
 // MARK: Apple Sign in Helpers
 // Adapted from https://auth0.com/docs/api-auth/tutorials/nonce#generate-a-cryptographically-random-nonce

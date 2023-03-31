@@ -24,7 +24,8 @@
 		33ADB13829D6610900352451 /* Meeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13729D6610900352451 /* Meeting.swift */; };
 		33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13929D666A500352451 /* ReusableMeetingsView.swift */; };
 		33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13B29D667E500352451 /* MeetingCardView.swift */; };
-		33ADB13E29D66AC800352451 /* SaveNewMeeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13D29D66AC800352451 /* SaveNewMeeting.swift */; };
+		33ADB14029D673AB00352451 /* MapViewModel2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13F29D673AB00352451 /* MapViewModel2.swift */; };
+		33ADB14529D6748100352451 /* SubViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB14429D6748100352451 /* SubViewModel.swift */; };
 		425050EA29D07096009926FF /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425050E929D07096009926FF /* Location.swift */; };
 		429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515CE29C4A744006DD4B3 /* GatherUpApp.swift */; };
 		429515D129C4A744006DD4B3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515D029C4A744006DD4B3 /* ContentView.swift */; };
@@ -46,7 +47,8 @@
 		33ADB13729D6610900352451 /* Meeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meeting.swift; sourceTree = "<group>"; };
 		33ADB13929D666A500352451 /* ReusableMeetingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableMeetingsView.swift; sourceTree = "<group>"; };
 		33ADB13B29D667E500352451 /* MeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCardView.swift; sourceTree = "<group>"; };
-		33ADB13D29D66AC800352451 /* SaveNewMeeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveNewMeeting.swift; sourceTree = "<group>"; };
+		33ADB13F29D673AB00352451 /* MapViewModel2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewModel2.swift; sourceTree = "<group>"; };
+		33ADB14429D6748100352451 /* SubViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubViewModel.swift; sourceTree = "<group>"; };
 		425050E929D07096009926FF /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		429515CB29C4A744006DD4B3 /* GatherUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GatherUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		429515CE29C4A744006DD4B3 /* GatherUpApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherUpApp.swift; sourceTree = "<group>"; };
@@ -79,7 +81,9 @@
 		339A101029D3E9C000B4DD98 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
+				33ADB14329D6746E00352451 /* SubViewModel */,
 				339A101129D3E9C000B4DD98 /* LoginViewModel.swift */,
+				33ADB13F29D673AB00352451 /* MapViewModel2.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -121,7 +125,6 @@
 				429515E029C4A9AD006DD4B3 /* MeetingsView.swift */,
 				33ADB13929D666A500352451 /* ReusableMeetingsView.swift */,
 				33ADB13B29D667E500352451 /* MeetingCardView.swift */,
-				33ADB13D29D66AC800352451 /* SaveNewMeeting.swift */,
 			);
 			path = Meeting;
 			sourceTree = "<group>";
@@ -141,6 +144,14 @@
 				429515DC29C4A766006DD4B3 /* MapView.swift */,
 			);
 			path = Map;
+			sourceTree = "<group>";
+		};
+		33ADB14329D6746E00352451 /* SubViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				33ADB14429D6748100352451 /* SubViewModel.swift */,
+			);
+			path = SubViewModel;
 			sourceTree = "<group>";
 		};
 		429515C229C4A744006DD4B3 = {
@@ -268,7 +279,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				339A101829D3EAE500B4DD98 /* User.swift in Sources */,
-				33ADB13E29D66AC800352451 /* SaveNewMeeting.swift in Sources */,
 				429515DF29C4A776006DD4B3 /* ProfileView.swift in Sources */,
 				33ADB13829D6610900352451 /* Meeting.swift in Sources */,
 				33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */,
@@ -276,7 +286,9 @@
 				339A101529D3E9F400B4DD98 /* Login.swift in Sources */,
 				429515D129C4A744006DD4B3 /* ContentView.swift in Sources */,
 				33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */,
+				33ADB14529D6748100352451 /* SubViewModel.swift in Sources */,
 				429515DD29C4A766006DD4B3 /* MapView.swift in Sources */,
+				33ADB14029D673AB00352451 /* MapViewModel2.swift in Sources */,
 				339A101D29D3EBBF00B4DD98 /* LoadingView.swift in Sources */,
 				339A101C29D3EBBF00B4DD98 /* ViewExtensions.swift in Sources */,
 				429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */,

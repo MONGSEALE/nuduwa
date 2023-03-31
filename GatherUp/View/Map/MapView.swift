@@ -21,7 +21,7 @@ struct MapView: View {
     @State private var annotationLocationLongitude: CLLocationCoordinate2D?
     @State private var annotationLocation: CLLocationCoordinate2D?
     
-    @StateObject var save: SaveNewMeeting = .init()
+    @StateObject var save: MapViewModel2 = .init()
     
     var body: some View {
         ZStack(alignment:.bottom){
