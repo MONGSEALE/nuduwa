@@ -26,6 +26,7 @@ struct MapView: View {
     /// - View Properties
     @State var isFetching: Bool = true
     
+    
     var body: some View {
         ZStack(alignment:.bottom){
             
@@ -43,8 +44,11 @@ struct MapView: View {
                     guard viewModel2.meetings2.isEmpty else{return}
                     await viewModel2.fetchMeetings()
                 }
-                .onTapGesture {
-                    <#code#>
+                .onTapGesture {coordinate in
+                    if(showAnnotation==false){
+                        viewModel2.addMeeting(la: coordinate.x, lo: coordinate.y)
+                        print("tap")
+                    }
                 }
             
             
@@ -62,6 +66,7 @@ struct MapView: View {
                         }
                         else{
                             //locations.removeLast()
+                            viewModel2.cancleMeeting()
                             
                             withAnimation(.spring()){
                                showAnnotation.toggle()

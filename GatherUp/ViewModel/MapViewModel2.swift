@@ -56,7 +56,13 @@ class MapViewModel2: ObservableObject {
         newMeeting = Meeting(name: "모임1", description: "아무나", latitude: la, longitude: lo, userName: userName, userUID: userUID, userImage: profileURL)
         
         meetings2 = meetings + [newMeeting!]
+        print("add : \(String(describing: newMeeting?.latitude))")
+        
         //createMeeting(meeting: newMeeting)
+    }
+    func cancleMeeting(){
+        newMeeting = nil
+        meetings2 = meetings
     }
     
     
