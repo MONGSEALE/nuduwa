@@ -13,6 +13,8 @@ import Firebase
 
 struct MapView: View {
     
+    @StateObject var viewModel2: MapViewModel2 = .init()
+    
     @StateObject private var viewModel = MapViewModel()
     @State private var locations = [Meeting]()
     //@State private var locations = [Location]()
@@ -21,39 +23,38 @@ struct MapView: View {
     @State private var annotationLocationLongitude: CLLocationCoordinate2D?
     @State private var annotationLocation: CLLocationCoordinate2D?
     
-    @StateObject var save: MapViewModel2 = .init()
+    /// - View Properties
+    @State var isFetching: Bool = true
     
     var body: some View {
         ZStack(alignment:.bottom){
             
-            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:locations){ location in
-                
-                MapMarker(coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude))
+            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:viewModel2.meetings2){ meeting in
+                MapMarker(coordinate: CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
             }
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))
                 .onAppear{
                     viewModel.checkIfLocationServicesIsEnabled()
                 }
+                
+                .task {
+                    /// - Fetching For One Time
+                    guard viewModel2.meetings2.isEmpty else{return}
+                    await viewModel2.fetchMeetings()
+                }
+                .onTapGesture {
+                    <#code#>
+                }
+            
             
             VStack{
                 HStack{
                     Spacer()
                     Button{
                         if(showAnnotation==true){
-                            /*
-                            let newLocation = Location(id: UUID(), name: "New location", description: "", latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.longitude)
-                                locations.append(newLocation)
-                             */
-                            let user = Auth.auth().currentUser
-                            guard
-                                let userName: String = user?.displayName,
-                                let userUID: String = user?.uid
-                            else{return}
-                            let profileURL = user?.photoURL
-                            let newMeeting = Meeting(name: "모임1", description: "아무나", latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.longitude, userName: userName, userUID: userUID, userImage: profileURL ?? URL(filePath: ""))
-                            save.createMeeting(meeting: newMeeting)
-                            locations.append(newMeeting)
+                            viewModel2.addMeeting(la: viewModel.region.center.latitude, lo: viewModel.region.center.longitude)
+                            
                             
                             withAnimation(.spring()){
                                 showAnnotation.toggle()

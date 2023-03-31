@@ -32,7 +32,7 @@ struct MeetingsView: View {
         .fullScreenCover(isPresented: $createNewMeeting) {
 //            CreateNewPost { post in
 //                /// - Adding Created post at the Top of the Recent Posts
-//                recentsPosts.insert(post, at: 0)
+//                recentsMeetings.insert(post, at: 0)
 //            }
         }
     }

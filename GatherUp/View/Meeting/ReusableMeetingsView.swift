@@ -21,13 +21,13 @@ struct ReusableMeetingsView: View {
                         .padding(.top,30)
                 }else{
                     if meetings.isEmpty{
-                        /// No Post's Found on Firestore
+                        /// No Meeting's Found on Firestore
                         Text("No Meeting's Found")
                             .font(.caption)
                             .foregroundColor(.gray)
                             .padding(.top,30)
                     }else{
-                        /// - Displaying Post's
+                        /// - Displaying Meeting's
                         Meetings()
                     }
                 }
@@ -38,21 +38,21 @@ struct ReusableMeetingsView: View {
             /// - Scroll to Refresh
             isFetching = true
             meetings = []
-            await fetchPosts()
+            await fetchMeetings()
         }
         .task {
             /// - Fetching For One Time
             guard meetings.isEmpty else{return}
-            await fetchPosts()
+            await fetchMeetings()
         }
     }
     
-    /// - Displaying Fetched Post's
+    /// - Displaying Fetched Meeting's
     @ViewBuilder
     func Meetings()->some View{
         ForEach(meetings){meeting in
             MeetingCardView(meeting: meeting) { updatedMeeting in
-                /// Updating Post in the Array
+                /// Updating Meeting in the Array
                 if let index = meetings.firstIndex(where: { meeting in
                     meeting.id == updatedMeeting.id
                 })
@@ -61,7 +61,7 @@ struct ReusableMeetingsView: View {
 //                    meetings[index].dislikedIDs = updatedMeeting.dislikedIDs
                 }
             } onDelete: {
-                /// Removing Post From The Array
+                /// Removing Meeting From The Array
                 withAnimation(.easeInOut(duration: 0.25)){
                     meetings.removeAll{meeting.id == $0.id}
                 }
@@ -73,19 +73,19 @@ struct ReusableMeetingsView: View {
         }
     }
     
-    /// - Fetching Post's
-    func fetchPosts()async{
+    /// - Fetching Meeting's
+    func fetchMeetings()async{
         do{
             var query: Query!
-            query = Firestore.firestore().collection("Posts")
+            query = Firestore.firestore().collection("Meetings")
                 .order(by: "publishedDate", descending: true)
                 .limit(to: 20)
             let docs = try await query.getDocuments()
-            let fetchedPosts = docs.documents.compactMap{ doc -> Meeting? in
+            let fetchedMeetings = docs.documents.compactMap{ doc -> Meeting? in
                 try? doc.data(as: Meeting.self)
             }
             await MainActor.run(body: {
-                meetings = fetchedPosts
+                meetings = fetchedMeetings
                 isFetching = false
             })
         }catch{
