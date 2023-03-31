@@ -12,8 +12,7 @@ struct MeetingsView: View {
     @State private var createNewPost: Bool = false
     var body: some View {
         NavigationStack{
-            //ReusablePostsView(posts: $recentsPosts)
-            Text(
+            ReusableMeetingsView(posts: $recentsPosts)
                 .hAlign(.center).vAlign(.center)
                 .overlay(alignment: .bottomTrailing){
                     Button{
