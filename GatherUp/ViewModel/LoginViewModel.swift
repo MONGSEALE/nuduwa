@@ -33,8 +33,7 @@ class LoginViewModel: ObservableObject {
     @Published var nonce: String = ""
     
     //로딩
-    //@AppStorage("isLoading") var isLoading: Bool = false
-    @State var isLoading: Bool = false
+    @Published var isLoading: Bool = false
     
     // Firestore
     //let db = Firestore.firestore()

@@ -91,6 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				339A101729D3EAE500B4DD98 /* User.swift */,
+				425050E929D07096009926FF /* Location.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -133,7 +134,6 @@
 				429515DC29C4A766006DD4B3 /* MapView.swift */,
 				429515D229C4A746006DD4B3 /* Assets.xcassets */,
 				429515D429C4A746006DD4B3 /* Preview Content */,
-				425050E929D07096009926FF /* Location.swift */,
 			);
 			path = GatherUp;
 			sourceTree = "<group>";

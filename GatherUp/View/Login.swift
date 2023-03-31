@@ -17,9 +17,6 @@ import FirebaseFirestore
 struct Login: View {
     @StateObject var loginModel: LoginViewModel = .init()
     
-    //로딩
-    @AppStorage("isLoading") var isLoading: Bool = false
-    
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 15) {
@@ -108,7 +105,7 @@ struct Login: View {
             .padding(.vertical, 15)
         }
         .overlay(content: {
-            LoadingView(show: $isLoading)
+            LoadingView(show: $loginModel.isLoading)
         })
 //        .alert(loginModel.errorMessage, isPresented: $loginModel.showError) {
             
