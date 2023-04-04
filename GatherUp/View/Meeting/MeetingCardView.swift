@@ -16,9 +16,10 @@ struct MeetingCardView: View {
     var onUpdate: (Meeting)->()
     var onDelete: ()->()
     
-    
     /// - View
     @State private var docListner: ListenerRegistration?
+    
+    @State private var fetchedPosts: [Meeting] = []
     
     var body: some View {
         HStack(alignment: .top, spacing: 12){
@@ -46,6 +47,7 @@ struct MeetingCardView: View {
         .hAlign(.leading)
         .overlay(alignment: .topTrailing, content: {
             /// Displaying Delete Button (if it's Author of that meeting)
+            /*
             if meeting.userUID == Auth.auth().currentUser?.uid {
                 Menu {
                     Button("Delete Meeting", role: .destructive, action: deleteMeeting)
@@ -59,6 +61,7 @@ struct MeetingCardView: View {
                 }
                 .offset(x: 8)
             }
+             */
         })
         .onAppear {
             /// - Adding Only Once
@@ -91,18 +94,23 @@ struct MeetingCardView: View {
                 self.docListner = nil
             }
         }
+        .onTapGesture {
+            //tap.toggle()
+        }
+        
+        
     }
     
     /// - Deleting Meeting
-    func deleteMeeting(){
-        Task{
-            do{
-                /// Delete Firestore Document
-                guard let meetingID = meeting.id else{return}
-                try await Firestore.firestore().collection("Meetings").document(meetingID).delete()
-            }catch{
-                print(error.localizedDescription)
-            }
-        }
-    }
+//    func deleteMeeting(){
+//        Task{
+//            do{
+//                /// Delete Firestore Document
+//                guard let meetingID = meeting.id else{return}
+//                try await Firestore.firestore().collection("Meetings").document(meetingID).delete()
+//            }catch{
+//                print(error.localizedDescription)
+//            }
+//        }
+//    }
 }

@@ -33,6 +33,7 @@ struct MapView: View {
             Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:viewModel2.meetings2){ meeting in
                 MapMarker(coordinate: CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
             }
+            
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))
                 .onAppear{
@@ -45,10 +46,12 @@ struct MapView: View {
                     await viewModel2.fetchMeetings()
                 }
                 .onTapGesture {coordinate in
+                    /*
                     if(showAnnotation==false){
                         viewModel2.addMeeting(la: coordinate.x, lo: coordinate.y)
                         print("tap")
                     }
+                     */
                 }
             
             
