@@ -46,20 +46,17 @@ struct DetailMeetingView: View {
             }
             .padding(15)
         }
-        if meeting.userUID == Auth.auth().currentUser?.uid {
-            Button(/*role: .destructive, */action: deleteMeeting){
-                Text("Delete Meeting")
-                    .font(.callout)
-                    .foregroundColor(.white)
-                    .padding(.horizontal,30)
-                    .padding(.vertical,10)
-                    .background(.red,in: Capsule())
-            }
-            .frame(alignment: .bottom)
-            .padding(15)
-            //.offset(y: 18)
+        let meetingOwner = meeting.userUID == Auth.auth().currentUser?.uid ? true : false
+        Button(action: {
+            meetingOwner ? deleteMeeting() : cancleMeeting()
+        }){
+            Text(meetingOwner ? "모임 삭제" : "모임 나가기")
+                .font(.callout)
+                .foregroundColor(.white)
+                .padding(.horizontal,30)
+                .padding(.vertical,10)
+                .background(.red,in: Capsule())
         }
-        
     }
     
     /// - Deleting Meeting
@@ -73,6 +70,10 @@ struct DetailMeetingView: View {
                 print(error.localizedDescription)
             }
         }
+        dismiss()
+    }
+    
+    func cancleMeeting(){
         dismiss()
     }
 }

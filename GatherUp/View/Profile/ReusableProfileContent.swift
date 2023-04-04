@@ -33,14 +33,6 @@ struct ReusableProfileContent: View {
                             .font(.caption)
                             .foregroundColor(.gray)
                             .lineLimit(3)
-                        
-                        // MARK: Displaying Bio Link, If Given While Signing Up Profile Page
-//                        if let bioLink = URL(user.userImage){
-//                            Link(user.userImage, destination: bioLink)
-//                                .font(.callout)
-//                                .tint(.blue)
-//                                .lineLimit(1)
-//                        }
                     }
                     .hAlign(.leading)
                 }

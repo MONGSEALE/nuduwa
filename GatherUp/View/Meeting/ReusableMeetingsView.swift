@@ -9,19 +9,20 @@ import SwiftUI
 import Firebase
 
 struct ReusableMeetingsView: View {
-    @State var meetings: [Meeting] = []
+    //@State var meetings: [Meeting] = []
     /// - View Properties
-    @State var isFetching: Bool = true
+    //@State var isFetching: Bool = true
     /// - Pagination
-    @State private var paginationDoc: QueryDocumentSnapshot?
+    //@State private var paginationDoc: QueryDocumentSnapshot?
+    @StateObject var firebaseViewModel: FirebaseViewModel = .init()
     
     var body: some View {
         NavigationView{//(.vertical, showsIndicators: false) {
-            if isFetching{
+            if firebaseViewModel.isFetching{
                 ProgressView()
                     .padding(.top,30)
             }else{
-                if meetings.isEmpty{
+                if firebaseViewModel.meetings.isEmpty{
                     /// No Meeting's Found on Firestore
                     Text("No Meeting's Found")
                         .font(.caption)
@@ -29,27 +30,26 @@ struct ReusableMeetingsView: View {
                         .padding(.top,30)
                 }else{
                     /// - Displaying Meeting's
-                    List(meetings){ meeting in
+                    List(firebaseViewModel.meetings){ meeting in
                         NavigationLink(destination: DetailMeetingView(meeting: meeting)){
                             MeetingCardView(meeting: meeting) { updatedMeeting in
                                 /// Updating Meeting in the Array
-                //                if let index = meetings.firstIndex(where: { meeting in
-                //                    meeting.id == updatedMeeting.id
-                //                })
-                //                {
-                //                    meetings[index].likedIDs = updatedMeeting.likedIDs
-                //                    meetings[index].dislikedIDs = updatedMeeting.dislikedIDs
-                //                }
+                                if let index = firebaseViewModel.meetings.firstIndex(where: { meeting in
+                                    meeting.id == updatedMeeting.id
+                                })
+                                {
+                                    firebaseViewModel.meetings[index].description = updatedMeeting.description
+                                }
                             } onDelete: {
                                 /// Removing Meeting From The Array
                                 withAnimation(.easeInOut(duration: 0.25)){
-                                    meetings.removeAll{meeting.id == $0.id}
+                                    firebaseViewModel.meetings.removeAll{meeting.id == $0.id}
                                 }
                             }
                             .onAppear {
                                 /// - When Last Post Appears, Fetching New Post (If There)
-                                if meeting.id == meetings.last?.id && paginationDoc != nil{
-                                    Task{await fetchMeetings()}
+                                if meeting.id == firebaseViewModel.meetings.last?.id && firebaseViewModel.paginationDoc != nil{
+                                    Task{await firebaseViewModel.fetchMeetings()}
                                 }
                             }
                         }
@@ -63,56 +63,28 @@ struct ReusableMeetingsView: View {
         }
         .refreshable {
             /// - Scroll to Refresh
-            isFetching = true
-            meetings = []
+            firebaseViewModel.isFetching = true
+            firebaseViewModel.meetings = []
             /// - Resetting Pagination Doc
-            paginationDoc = nil
-            await fetchMeetings()
+            firebaseViewModel.paginationDoc = nil
+            await firebaseViewModel.fetchMeetings()
         }
         .task {
             /// - Fetching For One Time
-            guard meetings.isEmpty else{return}
-            await fetchMeetings()
+            guard firebaseViewModel.meetings.isEmpty else{return}
+            await firebaseViewModel.fetchMeetings()
         }
     }
-    
-//    /// - Displaying Fetched Meeting's
-//    @ViewBuilder
-//    func Meetings()->some View{
-//
-//        ForEach(meetings){meeting in
-//            MeetingCardView(meeting: meeting) { updatedMeeting in
-//                /// Updating Meeting in the Array
-////                if let index = meetings.firstIndex(where: { meeting in
-////                    meeting.id == updatedMeeting.id
-////                })
-////                {
-////                    meetings[index].likedIDs = updatedMeeting.likedIDs
-////                    meetings[index].dislikedIDs = updatedMeeting.dislikedIDs
-////                }
-//
-//
-//            } onDelete: {
-//                /// Removing Meeting From The Array
-//                withAnimation(.easeInOut(duration: 0.25)){
-//                    meetings.removeAll{meeting.id == $0.id}
-//                }
-//            }
-//
-//            Divider()
-//                .padding(.horizontal,-15)
-//        }
-//    }
-    
+    /*
     /// - Fetching Meeting's
     func fetchMeetings()async{
         do{
             var query: Query!
             /// - Implementing Pagination
-            if let paginationDoc{
+            if (firebaseViewModel.paginationDoc != nil){
                 query = Firestore.firestore().collection("Meetings")
                     .order(by: "publishedDate", descending: true)
-                    .start(afterDocument: paginationDoc)
+                    .start(afterDocument: firebaseViewModel.paginationDoc!)
                     .limit(to: 20)
             }else{
                 query = Firestore.firestore().collection("Meetings")
@@ -126,13 +98,14 @@ struct ReusableMeetingsView: View {
             await MainActor.run(body: {
                 //meetings = fetchedMeetings
                 meetings.append(contentsOf: fetchedMeetings)
-                paginationDoc = docs.documents.last
-                isFetching = false
+                firebaseViewModel.paginationDoc = docs.documents.last
+                firebaseViewModel.isFetching = false
             })
         }catch{
             print(error.localizedDescription)
         }
     }
+     */
 }
 
 struct ReusableMeetingsView_Previews: PreviewProvider {

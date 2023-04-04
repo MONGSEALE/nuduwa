@@ -8,35 +8,8 @@
 import SwiftUI
 
 struct MeetingsView: View {
-//    @State private var recentsMeetings: [Meeting] = []
     var body: some View {
         ReusableMeetingsView()
-//        NavigationStack{
-//            ReusableMeetingsView(meetings: $recentsMeetings)
-//                .hAlign(.center).vAlign(.center)
-            /*
-                .overlay(alignment: .bottomTrailing){
-                    Button{
-                        createNewMeeting.toggle()
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .padding(13)
-                            .background(.black,in: Circle())
-                    }
-                    .padding(15)
-                }
-             */
-                .navigationTitle("Meeting's")
-//        }
-//        .fullScreenCover(isPresented: $detailMeeting) {
-//            CreateNewPost { post in
-//                /// - Adding Created post at the Top of the Recent Posts
-//                recentsMeetings.insert(post, at: 0)
-//            }
-//        }
     }
 }
 

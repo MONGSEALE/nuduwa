@@ -13,7 +13,7 @@ import Firebase
 
 struct MapView: View {
     
-    @StateObject var viewModel2: MapViewModel2 = .init()
+    //@StateObject var viewModel2: MapViewModel2 = .init()
     
     @StateObject private var viewModel = MapViewModel()
     @State private var locations = [Meeting]()
@@ -23,6 +23,8 @@ struct MapView: View {
     @State private var annotationLocationLongitude: CLLocationCoordinate2D?
     @State private var annotationLocation: CLLocationCoordinate2D?
     
+    @StateObject var firebaseViewModel: FirebaseViewModel = .init()
+    
     /// - View Properties
     @State var isFetching: Bool = true
     
@@ -30,7 +32,7 @@ struct MapView: View {
     var body: some View {
         ZStack(alignment:.bottom){
             
-            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:viewModel2.meetings2){ meeting in
+            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:firebaseViewModel.meetingsFull){ meeting in
                 MapMarker(coordinate: CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
             }
             
@@ -42,34 +44,24 @@ struct MapView: View {
                 
                 .task {
                     /// - Fetching For One Time
-                    guard viewModel2.meetings2.isEmpty else{return}
-                    await viewModel2.fetchMeetings()
+                    guard firebaseViewModel.meetings.isEmpty else{return}
+                    await firebaseViewModel.fetchMeetings()
                 }
-                .onTapGesture {coordinate in
-                    /*
-                    if(showAnnotation==false){
-                        viewModel2.addMeeting(la: coordinate.x, lo: coordinate.y)
-                        print("tap")
-                    }
-                     */
-                }
-            
             
             VStack{
                 HStack{
                     Spacer()
                     Button{
                         if(showAnnotation==true){
-                            viewModel2.addMeeting(la: viewModel.region.center.latitude, lo: viewModel.region.center.longitude)
-                            
+                            firebaseViewModel.addMeeting(la: viewModel.region.center.latitude, lo: viewModel.region.center.longitude)
+                            print("Button Click")
                             
                             withAnimation(.spring()){
                                 showAnnotation.toggle()
                             }
                         }
                         else{
-                            //locations.removeLast()
-                            viewModel2.cancleMeeting()
+                            //viewModel2.cancleMeeting()
                             
                             withAnimation(.spring()){
                                showAnnotation.toggle()
@@ -98,6 +90,7 @@ struct MapView: View {
             }
         }
     }
+    
 }
 
 
