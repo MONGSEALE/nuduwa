@@ -36,7 +36,7 @@ struct ReusableProfileContent: View {
                     }
                     .hAlign(.leading)
                 }
-                Text("My Meeting's")
+                Text("지난 모임")
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundColor(.black)

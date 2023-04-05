@@ -9,15 +9,24 @@ import SwiftUI
 import FirebaseFirestoreSwift
 
 import Foundation
+import CoreLocation
 
 struct Meeting : Identifiable,Codable,Equatable{
     @DocumentID var id: String?
     
-    var name: String
+    var title: String
     var description: String
     var latitude: Double
     var longitude: Double
+    //let coordinate: CLLocationCoordinate2D
     var publishedDate: Date = Date()
+    var meetingDate: Date = Date()
+    /*
+     모임시간
+     모임참가비
+     참가인원 []
+     최대인원수
+     */
     // MARK: Basic User Info
     var userName: String
     var userUID: String

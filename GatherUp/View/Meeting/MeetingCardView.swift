@@ -31,12 +31,16 @@ struct MeetingCardView: View {
                 .clipShape(Circle())
             
             VStack(alignment: .leading, spacing: 6){
-                Text(meeting.name)
-                    .font(.callout)
-                    .fontWeight(.semibold)
+                HStack(){
+                    Text(meeting.title)
+                        .font(.callout)
+                        .fontWeight(.semibold)
+                    Text(meeting.meetingDate.formatted(date: .abbreviated, time: .shortened))
+                        .font(.callout)
+                }
                 Text(meeting.userName)
                     .font(.callout)
-                Text(meeting.publishedDate.formatted(date: .numeric, time: .shortened))
+                Text(meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))
                     .font(.caption2)
                     .foregroundColor(.gray)
                 Text(meeting.description)

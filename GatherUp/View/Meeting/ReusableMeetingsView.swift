@@ -14,47 +14,48 @@ struct ReusableMeetingsView: View {
     //@State var isFetching: Bool = true
     /// - Pagination
     //@State private var paginationDoc: QueryDocumentSnapshot?
-    @StateObject var firebaseViewModel: FirebaseViewModel = .init()
+    @StateObject var viewModel: MeetingViewModel = .init()
+    var basedOnMeeting: Bool = false
     
     var body: some View {
         NavigationView{//(.vertical, showsIndicators: false) {
-            if firebaseViewModel.isFetching{
+            if viewModel.isFetching{
                 ProgressView()
                     .padding(.top,30)
             }else{
-                if firebaseViewModel.meetings.isEmpty{
+                if viewModel.meetingsFirestore.isEmpty{
                     /// No Meeting's Found on Firestore
-                    Text("No Meeting's Found")
+                    Text("가입한 모임이 없습니다")
                         .font(.caption)
                         .foregroundColor(.gray)
                         .padding(.top,30)
                 }else{
                     /// - Displaying Meeting's
-                    List(firebaseViewModel.meetings){ meeting in
+                    List(viewModel.meetingsFirestore){ meeting in
                         NavigationLink(destination: DetailMeetingView(meeting: meeting)){
                             MeetingCardView(meeting: meeting) { updatedMeeting in
                                 /// Updating Meeting in the Array
-                                if let index = firebaseViewModel.meetings.firstIndex(where: { meeting in
+                                if let index = viewModel.meetingsFirestore.firstIndex(where: { meeting in
                                     meeting.id == updatedMeeting.id
                                 })
                                 {
-                                    firebaseViewModel.meetings[index].description = updatedMeeting.description
+                                    viewModel.meetingsFirestore[index].description = updatedMeeting.description
                                 }
                             } onDelete: {
                                 /// Removing Meeting From The Array
                                 withAnimation(.easeInOut(duration: 0.25)){
-                                    firebaseViewModel.meetings.removeAll{meeting.id == $0.id}
+                                    viewModel.meetingsFirestore.removeAll{meeting.id == $0.id}
                                 }
                             }
                             .onAppear {
                                 /// - When Last Post Appears, Fetching New Post (If There)
-                                if meeting.id == firebaseViewModel.meetings.last?.id && firebaseViewModel.paginationDoc != nil{
-                                    Task{await firebaseViewModel.fetchMeetings()}
+                                if meeting.id == viewModel.meetingsFirestore.last?.id && viewModel.paginationDoc != nil{
+                                    Task{await viewModel.fetchMeetings()}
                                 }
                             }
                         }
                     }
-                    .navigationTitle("Meeting's")
+                    .navigationTitle("내 모임")
                     .listStyle(.plain)
                     .navigationBarTitleDisplayMode(.inline)
                 }
@@ -63,49 +64,18 @@ struct ReusableMeetingsView: View {
         }
         .refreshable {
             /// - Scroll to Refresh
-            firebaseViewModel.isFetching = true
-            firebaseViewModel.meetings = []
+            viewModel.isFetching = true
+            viewModel.meetingsFirestore = []
             /// - Resetting Pagination Doc
-            firebaseViewModel.paginationDoc = nil
-            await firebaseViewModel.fetchMeetings()
+            viewModel.paginationDoc = nil
+            await viewModel.fetchMeetings()
         }
         .task {
             /// - Fetching For One Time
-            guard firebaseViewModel.meetings.isEmpty else{return}
-            await firebaseViewModel.fetchMeetings()
+            guard viewModel.meetingsFirestore.isEmpty else{return}
+            await viewModel.fetchMeetings()
         }
     }
-    /*
-    /// - Fetching Meeting's
-    func fetchMeetings()async{
-        do{
-            var query: Query!
-            /// - Implementing Pagination
-            if (firebaseViewModel.paginationDoc != nil){
-                query = Firestore.firestore().collection("Meetings")
-                    .order(by: "publishedDate", descending: true)
-                    .start(afterDocument: firebaseViewModel.paginationDoc!)
-                    .limit(to: 20)
-            }else{
-                query = Firestore.firestore().collection("Meetings")
-                    .order(by: "publishedDate", descending: true)
-                    .limit(to: 20)
-            }
-            let docs = try await query.getDocuments()
-            let fetchedMeetings = docs.documents.compactMap{ doc -> Meeting? in
-                try? doc.data(as: Meeting.self)
-            }
-            await MainActor.run(body: {
-                //meetings = fetchedMeetings
-                meetings.append(contentsOf: fetchedMeetings)
-                firebaseViewModel.paginationDoc = docs.documents.last
-                firebaseViewModel.isFetching = false
-            })
-        }catch{
-            print(error.localizedDescription)
-        }
-    }
-     */
 }
 
 struct ReusableMeetingsView_Previews: PreviewProvider {

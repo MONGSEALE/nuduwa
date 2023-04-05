@@ -23,7 +23,7 @@ struct MapView: View {
     @State private var annotationLocationLongitude: CLLocationCoordinate2D?
     @State private var annotationLocation: CLLocationCoordinate2D?
     
-    @StateObject var firebaseViewModel: FirebaseViewModel = .init()
+    @StateObject var viewModel2: MapViewModel2 = .init()
     
     /// - View Properties
     @State var isFetching: Bool = true
@@ -32,7 +32,7 @@ struct MapView: View {
     var body: some View {
         ZStack(alignment:.bottom){
             
-            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:firebaseViewModel.meetingsFull){ meeting in
+            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:viewModel2.meetingsMap){ meeting in
                 MapMarker(coordinate: CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
             }
             
@@ -40,12 +40,13 @@ struct MapView: View {
                 .accentColor(Color(.systemPink))
                 .onAppear{
                     viewModel.checkIfLocationServicesIsEnabled()
+                    viewModel2.addMeetingsListner()
                 }
                 
                 .task {
                     /// - Fetching For One Time
-                    guard firebaseViewModel.meetings.isEmpty else{return}
-                    await firebaseViewModel.fetchMeetings()
+                    guard viewModel2.meetings.isEmpty else{return}
+                    await viewModel2.fetchMeetings()
                 }
             
             VStack{
@@ -53,7 +54,7 @@ struct MapView: View {
                     Spacer()
                     Button{
                         if(showAnnotation==true){
-                            firebaseViewModel.addMeeting(la: viewModel.region.center.latitude, lo: viewModel.region.center.longitude)
+                            viewModel2.addMeeting(la: viewModel.region.center.latitude, lo: viewModel.region.center.longitude)
                             print("Button Click")
                             
                             withAnimation(.spring()){

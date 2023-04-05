@@ -28,7 +28,7 @@ struct DetailMeetingView: View {
                     .clipShape(Circle())
                     
                     VStack(alignment: .leading, spacing: 6){
-                        Text(meeting.name)
+                        Text(meeting.title)
                             .font(.title3)
                             .fontWeight(.semibold)
                         Text(meeting.userName)
