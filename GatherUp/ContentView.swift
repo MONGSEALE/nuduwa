@@ -17,16 +17,16 @@ struct ContentView: View {
             TabView{
                MapView()
                     .tabItem{
-                        Label("Map",systemImage:"map.circle")
+                        Label("찾기",systemImage:"map.circle")
                     }
                 MeetingsView()
                     .tabItem{
-                        Label("Meetings",systemImage: "person.3.sequence")
+                        Label("모임",systemImage: "person.3.sequence")
                     }
             
                 ProfileView()
                     .tabItem{
-                        Label("Profile",systemImage:"person.crop.circle")
+                        Label("내 정보",systemImage:"person.crop.circle")
                     }
                 }
         } else {

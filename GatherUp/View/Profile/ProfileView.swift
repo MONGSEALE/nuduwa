@@ -28,7 +28,7 @@ struct ProfileView: View {
                 }
             }
             
-            .navigationTitle("마이페이지")
+            .navigationTitle("내 정보")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {

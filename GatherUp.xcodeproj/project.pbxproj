@@ -88,10 +88,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3372C5D329DFE090000169DD /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				339A101429D3E9F400B4DD98 /* Login.swift */,
+			);
+			path = Login;
+			sourceTree = "<group>";
+		};
 		339A101029D3E9C000B4DD98 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
-				33ADB14329D6746E00352451 /* SubViewModel */,
 				339A101129D3E9C000B4DD98 /* LoginViewModel.swift */,
 				3372C5D129DFA78A000169DD /* MapViewModel2.swift */,
 				33ABB70129DD2B030049D482 /* MeetingViewModel.swift */,
@@ -103,13 +110,11 @@
 		339A101329D3E9E900B4DD98 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */,
-				4285616129DFDACA004DCDB9 /* CustomAnnotationView */,
+				3372C5D329DFE090000169DD /* Login */,
 				33ADB13629D6604A00352451 /* Map */,
 				33ADB13529D6602600352451 /* Profile */,
 				33ADB13429D6601800352451 /* Meeting */,
 				339A101929D3EBBE00B4DD98 /* SubView */,
-				339A101429D3E9F400B4DD98 /* Login.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -156,25 +161,12 @@
 		33ADB13629D6604A00352451 /* Map */ = {
 			isa = PBXGroup;
 			children = (
+				4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */,
+				4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */,
 				4285616429DFDBE7004DCDB9 /* MeetingSetSheetView.swift */,
 				429515DC29C4A766006DD4B3 /* MapView.swift */,
 			);
 			path = Map;
-			sourceTree = "<group>";
-		};
-		33ADB14329D6746E00352451 /* SubViewModel */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = SubViewModel;
-			sourceTree = "<group>";
-		};
-		4285616129DFDACA004DCDB9 /* CustomAnnotationView */ = {
-			isa = PBXGroup;
-			children = (
-				4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */,
-			);
-			path = CustomAnnotationView;
 			sourceTree = "<group>";
 		};
 		429515C229C4A744006DD4B3 = {
