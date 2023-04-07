@@ -7,6 +7,8 @@
 
 import SwiftUI
 import CoreLocation
+import Firebase
+import SDWebImageSwiftUI
 
 
 struct MeetingIconView: View {
@@ -15,7 +17,7 @@ struct MeetingIconView: View {
     
     var body: some View {
         VStack(spacing:0){
-            Image("몽실이")
+            WebImage(url: Auth.auth().currentUser?.photoURL)
                 .resizable()
                 .scaledToFit()
                 .frame(width:30,height: 30)

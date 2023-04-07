@@ -7,11 +7,12 @@
 
 import SwiftUI
 import Firebase
+import FirebaseFirestore
 
 class MapViewModel2: ObservableObject {
-    @Published var meetings: [Location] = []    // Firestore에 있는 모임 장소 배열
-    @Published var meetingsMap: [Location] = []     // meetings + 새로 추가하는 모임(저장전) 배열
-    private var newMeeting: Location?       // 새로 추가하는 모임(저장전)
+    @Published var meetings: [Meeting] = []    // Firestore에 있는 모임 장소 배열
+    @Published var meetingsMap: [Meeting] = []     // meetings + 새로 추가하는 모임(저장전) 배열
+    private var newMeeting: Meeting?       // 새로 추가하는 모임(저장전)
     
     // MARK: Error Properties
     @Published var showError: Bool = false
@@ -42,8 +43,8 @@ class MapViewModel2: ObservableObject {
             //.whereField("latitude", isNotEqualTo: false)
             //.whereField("longitude", isNotEqualTo: false)
             let docs = try await query.getDocuments()
-            let fetchedMeetings = docs.documents.compactMap{ doc -> Location? in
-                try? doc.data(as: Location.self)
+            let fetchedMeetings = docs.documents.compactMap{ doc -> Meeting? in
+                try? doc.data(as: Meeting.self)
             }
             
             await MainActor.run(body: {
@@ -71,7 +72,7 @@ class MapViewModel2: ObservableObject {
                     switch meeting.type {
                     case .added:
                         print("추가 전")
-                        if let addMeeting = try? meeting.document.data(as: Location.self){
+                        if let addMeeting = try? meeting.document.data(as: Meeting.self){
                             self.meetingsMap.append(addMeeting)
                             print("추가 후")
                         }
@@ -94,29 +95,29 @@ class MapViewModel2: ObservableObject {
             self.docListner = nil
         }
     }
-    
-    func addMeeting(la:Double, lo:Double){
-        /*
-        let user = Auth.auth().currentUser
-        guard
-            let userName: String = user?.displayName,
-            let userUID: String = user?.uid
-        else{return}
-        let profileURL = user?.photoURL ?? URL(filePath: "")
-         */
-        
-        let my = Auth.auth().currentUser
-        
-        print("위치 \(la)")
-        newMeeting = Location(latitude: la, longitude: lo, userUID: my?.uid)
-        meetingsMap = meetings + [newMeeting!]
-        print("add : \(String(describing: newMeeting?.latitude))")
-        
-        // 임시 모임 데이터
-        let meeting2: Meeting = Meeting(title: "모임1", description: "아무나", latitude: newMeeting!.latitude, longitude: newMeeting!.longitude, userName: my?.displayName ?? "", userUID: my?.uid ?? "", userImage: my?.photoURL ?? URL(fileURLWithPath: ""))
-        
-        createMeeting(meeting: meeting2)
-    }
+//
+//    func addMeeting(la:Double, lo:Double){
+//        /*
+//        let user = Auth.auth().currentUser
+//        guard
+//            let userName: String = user?.displayName,
+//            let userUID: String = user?.uid
+//        else{return}
+//        let profileURL = user?.photoURL ?? URL(filePath: "")
+//         */
+//
+//        let my = Auth.auth().currentUser
+//
+//        print("위치 \(la)")
+//        newMeeting = Meeting(latitude: la, longitude: lo, userUID: my!.uid)
+//        meetingsMap = meetings + [newMeeting!]
+//        print("add : \(String(describing: newMeeting?.latitude))")
+//
+//        // 임시 모임 데이터
+//        let meeting2: Meeting = Meeting(title: "모임1", description: "아무나", latitude: newMeeting!.latitude, longitude: newMeeting!.longitude, userName: my?.displayName ?? "", userUID: my?.uid ?? "", userImage: my?.photoURL ?? URL(fileURLWithPath: ""))
+//
+//        createMeeting(meeting: meeting2)
+//    }
     func cancleMeeting(){
         newMeeting = nil
         meetingsMap = meetings
