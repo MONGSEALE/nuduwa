@@ -8,10 +8,11 @@
 import SwiftUI
 import Firebase
 import FirebaseFirestore
+import CoreLocation
 
 class MapViewModel2: ObservableObject {
-    @Published var meetings: [Meeting] = []    // Firestore에 있는 모임 장소 배열
-    @Published var meetingsMap: [Meeting] = []     // meetings + 새로 추가하는 모임(저장전) 배열
+    @Published var meetings: [Location] = []    // Firestore에 있는 모임 장소 배열
+    @Published var meetingsMap: [Location] = []     // meetings + 새로 추가하는 모임(저장전) 배열
     private var newMeeting: Meeting?       // 새로 추가하는 모임(저장전)
     
     // MARK: Error Properties
@@ -48,11 +49,14 @@ class MapViewModel2: ObservableObject {
             }
             
             await MainActor.run(body: {
-                meetings = fetchedMeetings
+                for meeting in fetchedMeetings{
+                    meetings.append(Location(coordinate: CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude)))
+                }
                 //meetingsFirestore.append(contentsOf: fetchedMeetings)
                 paginationDoc = docs.documents.last
                 isFetching = false
-                meetingsMap = (newMeeting != nil) ? meetings + [newMeeting!] : meetings
+                //meetingsMap = (newMeeting != nil) ? meetings + [newMeeting!] : meetings
+                meetingsMap = meetings
                 print("fetch수: \(fetchedMeetings.count)")
                 print("모임수: \(meetings.count)")
             })
@@ -73,7 +77,7 @@ class MapViewModel2: ObservableObject {
                     case .added:
                         print("추가 전")
                         if let addMeeting = try? meeting.document.data(as: Meeting.self){
-                            self.meetingsMap.append(addMeeting)
+                            self.meetingsMap.append(Location(coordinate: CLLocationCoordinate2D(latitude: addMeeting.latitude, longitude: addMeeting.longitude)))
                             print("추가 후")
                         }
                     case .modified:
@@ -95,29 +99,7 @@ class MapViewModel2: ObservableObject {
             self.docListner = nil
         }
     }
-//
-//    func addMeeting(la:Double, lo:Double){
-//        /*
-//        let user = Auth.auth().currentUser
-//        guard
-//            let userName: String = user?.displayName,
-//            let userUID: String = user?.uid
-//        else{return}
-//        let profileURL = user?.photoURL ?? URL(filePath: "")
-//         */
-//
-//        let my = Auth.auth().currentUser
-//
-//        print("위치 \(la)")
-//        newMeeting = Meeting(latitude: la, longitude: lo, userUID: my!.uid)
-//        meetingsMap = meetings + [newMeeting!]
-//        print("add : \(String(describing: newMeeting?.latitude))")
-//
-//        // 임시 모임 데이터
-//        let meeting2: Meeting = Meeting(title: "모임1", description: "아무나", latitude: newMeeting!.latitude, longitude: newMeeting!.longitude, userName: my?.displayName ?? "", userUID: my?.uid ?? "", userImage: my?.photoURL ?? URL(fileURLWithPath: ""))
-//
-//        createMeeting(meeting: meeting2)
-//    }
+    
     func cancleMeeting(){
         newMeeting = nil
         meetingsMap = meetings

@@ -60,7 +60,7 @@ class MeetingViewModel: ObservableObject {
     func addMeetingsListner(){
         if docListner == nil{
             print("addListner")
-            guard let uid:String = Auth.auth().currentUser?.uid else{return}
+            guard let uid = Auth.auth().currentUser?.uid else{return}
             docListner = Firestore.firestore().collection("Meetings")
                 .whereField("userUID", isEqualTo:uid)
                 .addSnapshotListener({ snapshot, error in
@@ -83,7 +83,6 @@ class MeetingViewModel: ObservableObject {
                 }
             })
         print("갯수: \(self.meetings.count)")
-            
         }
     }
     func removeListner(){
