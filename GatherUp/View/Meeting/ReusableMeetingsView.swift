@@ -15,7 +15,8 @@ struct ReusableMeetingsView: View {
     /// - Pagination
     //@State private var paginationDoc: QueryDocumentSnapshot?
     @StateObject var viewModel: MeetingViewModel = .init()
-    var basedOnMeeting: Bool = false
+    var title: String = ""
+    var passMeeting: Bool = false
     
     var body: some View {
         NavigationView{//(.vertical, showsIndicators: false) {
@@ -23,7 +24,7 @@ struct ReusableMeetingsView: View {
                 ProgressView()
                     .padding(.top,30)
             }else{
-                if viewModel.meetingsFirestore.isEmpty{
+                if viewModel.meetings.isEmpty{
                     /// No Meeting's Found on Firestore
                     Text("가입한 모임이 없습니다")
                         .font(.caption)
@@ -31,33 +32,33 @@ struct ReusableMeetingsView: View {
                         .padding(.top,30)
                 }else{
                     /// - Displaying Meeting's
-                    List(viewModel.meetingsFirestore){ meeting in
+                    List(viewModel.meetings){ meeting in
                         NavigationLink(destination: DetailMeetingView(meeting: meeting)){
                             MeetingCardView(meeting: meeting) { updatedMeeting in
                                 /// Updating Meeting in the Array
-                                if let index = viewModel.meetingsFirestore.firstIndex(where: { meeting in
+                                if let index = viewModel.meetings.firstIndex(where: { meeting in
                                     meeting.id == updatedMeeting.id
                                 })
                                 {
-                                    viewModel.meetingsFirestore[index].description = updatedMeeting.description
+                                    viewModel.meetings[index].description = updatedMeeting.description
                                 }
                             } onDelete: {
                                 /// Removing Meeting From The Array
                                 withAnimation(.easeInOut(duration: 0.25)){
-                                    viewModel.meetingsFirestore.removeAll{meeting.id == $0.id}
+                                    viewModel.meetings.removeAll{meeting.id == $0.id}
                                 }
                             }
                             .onAppear {
                                 /// - When Last Post Appears, Fetching New Post (If There)
-                                if meeting.id == viewModel.meetingsFirestore.last?.id && viewModel.paginationDoc != nil{
-                                    Task{await viewModel.fetchMeetings()}
+                                if meeting.id == viewModel.meetings.last?.id && viewModel.paginationDoc != nil{
+                                    Task{await viewModel.fetchMeetings(passMeeting: passMeeting)}
                                 }
                             }
                         }
                     }
-                    .navigationTitle("내 모임")
-                    .listStyle(.plain)
+                    .navigationTitle(title)
                     .navigationBarTitleDisplayMode(.inline)
+                    .listStyle(.plain)
                 }
             }
             //.padding(15)
@@ -65,15 +66,21 @@ struct ReusableMeetingsView: View {
         .refreshable {
             /// - Scroll to Refresh
             viewModel.isFetching = true
-            viewModel.meetingsFirestore = []
+            viewModel.meetings = []
             /// - Resetting Pagination Doc
             viewModel.paginationDoc = nil
-            await viewModel.fetchMeetings()
+            await viewModel.fetchMeetings(passMeeting: passMeeting)
+        }
+        .onAppear{
+            viewModel.addMeetingsListner()
+        }
+        .onDisappear{
+            viewModel.removeListner()
         }
         .task {
             /// - Fetching For One Time
-            guard viewModel.meetingsFirestore.isEmpty else{return}
-            await viewModel.fetchMeetings()
+            guard viewModel.meetings.isEmpty else{return}
+            await viewModel.fetchMeetings(passMeeting: passMeeting)
         }
     }
 }

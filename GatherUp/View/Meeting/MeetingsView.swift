@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MeetingsView: View {
     var body: some View {
-        ReusableMeetingsView()
+        ReusableMeetingsView(title: "내 모임")
     }
 }
 

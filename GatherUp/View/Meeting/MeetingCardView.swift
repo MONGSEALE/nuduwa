@@ -50,11 +50,13 @@ struct MeetingCardView: View {
             }
         }
         .hAlign(.leading)
+        /*
         .onAppear {
             /// - Adding Only Once
+            
             if docListner == nil{
                 guard let meetingID = meeting.id else{return}
-                print("doListner1")
+                print("doListner")
                 docListner = Firestore.firestore().collection("Meetings").document(meetingID).addSnapshotListener({ snapshot, error in
                     if let snapshot{
                         if snapshot.exists{
@@ -70,6 +72,7 @@ struct MeetingCardView: View {
                     }
                 })
             }
+             
         }
         .onDisappear {
             // 화면 보는동안만 실시간 동기화
@@ -77,6 +80,8 @@ struct MeetingCardView: View {
                 docListner.remove()
                 self.docListner = nil
             }
+             
         }
+        */
     }
 }

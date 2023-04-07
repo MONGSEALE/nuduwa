@@ -42,6 +42,9 @@ struct MapView: View {
                     viewModel.checkIfLocationServicesIsEnabled()
                     viewModel2.addMeetingsListner()
                 }
+                .onDisappear{
+                    viewModel2.removeListner()
+                }
                 
                 .task {
                     /// - Fetching For One Time

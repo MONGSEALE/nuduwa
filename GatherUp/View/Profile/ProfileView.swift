@@ -10,38 +10,33 @@ import Firebase
 import FirebaseFirestore
 
 struct ProfileView: View {
-    // MARK: MY Profile Data
-    @State private var myProfile: User?
-    @AppStorage("log_status") var logStatus: Bool = false
-    // MARK: View Properties
-    @State var errorMessage: String = ""
-    @State var showError: Bool = false
-    @State var isLoading: Bool = false
+    
+    @StateObject var viewModel: ProfileViewModel = .init()
     
     var body: some View {
         NavigationStack{
             VStack{
-                if let myProfile{
-                    ReusableProfileContent(user: myProfile)
+                if (viewModel.myProfile != nil) {
+                    ReusableProfileContent(user: viewModel.myProfile!)
                         .refreshable {
                             // MARK: Refresh User Data
-                            self.myProfile = nil
-                            await fetchUserData()
+                            viewModel.myProfile = nil
+                            await viewModel.fetchUserData()
                         }
                 }else{
                     ProgressView()
                 }
             }
             
-            .navigationTitle("My Profile")
+            .navigationTitle("마이페이지")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         // MARK: Two Action's
                         // 1. Logout
-                        Button("Logout", action: logOutUser)
+                        Button("로그아웃", action: viewModel.logOutUser)
                         // 2. Delete Account
-                        Button("Delete Account", role: .destructive, action: deleteAccount)
+                        Button("계정 삭제", role: .destructive, action: viewModel.deleteAccount)
                     } label: {
                         Image(systemName: "ellipsis")
                             .rotationEffect(.init(degrees: 90))
@@ -51,69 +46,19 @@ struct ProfileView: View {
                 }
             }
             .overlay {
-                LoadingView(show: $isLoading)
+                LoadingView(show: $viewModel.isLoading)
             }
-            .alert(errorMessage, isPresented: $showError) {
+            .alert(viewModel.errorMessage, isPresented: $viewModel.showError) {
                 
             }
             .task {
                 // This Modifer is like onAppear
                 // So Fetching for the First Time Only
-                if myProfile != nil{return }
+                if viewModel.myProfile != nil{return }
                 // MARK: Initial Fetch
-                await fetchUserData()
+                await viewModel.fetchUserData()
             }
         }
-    }
-    
-    // MARK: Fetching User Data
-    func fetchUserData()async{
-        guard let userUID = Auth.auth().currentUser?.uid else{return}
-        guard let user = try? await Firestore.firestore().collection("Users").document(userUID).getDocument(as: User.self) else{return}
-        await MainActor.run(body: {
-            myProfile = user
-        })
-    }
-    
-    // MARK: Logging User Out
-    func logOutUser() {
-        try? Auth.auth().signOut()
-        //GIDSignIn.sharedInstance.signOut()
-        withAnimation(.easeInOut) {
-            logStatus = false
-        }
-    }
-    
-    // MARK: Deleting User Entire Account
-    func deleteAccount() {
-        isLoading = true
-        Task{
-            do{
-                guard let userUID = Auth.auth().currentUser?.uid else{return}
-                print(userUID)
-                // Step 1: First Deleting Profile Image From Storage
-//                let reference = Storage.storage().reference().child("Profile_Images").child(userUID)
-//                try await reference.delete()
-                // Step 2 : Deleting Firestore User Document
-                try await Firestore.firestore().collection("Users").document(userUID).delete()
-                // Final Step: Deleting Auth Account and Setting Log Status to False
-                try await Auth.auth().currentUser?.delete()
-                logStatus = false
-                isLoading = false
-            } catch {
-                // await setError(error)
-            }
-        }
-    }
-    
-    // MARK: Setting Error
-    func setError(_ error: Error)async{
-        // MARK: UI Must be run on Main Thread
-        await MainActor.run(body: {
-            isLoading = false
-            errorMessage = error.localizedDescription
-            showError.toggle()
-        })
     }
 }
 

@@ -30,6 +30,6 @@ struct Meeting : Identifiable,Codable,Equatable{
     // MARK: Basic User Info
     var userName: String
     var userUID: String
-    var userImage: URL
+    var userImage: URL?
 
 }
