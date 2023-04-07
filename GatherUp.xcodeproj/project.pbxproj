@@ -29,6 +29,8 @@
 		33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13929D666A500352451 /* ReusableMeetingsView.swift */; };
 		33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13B29D667E500352451 /* MeetingCardView.swift */; };
 		425050EA29D07096009926FF /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425050E929D07096009926FF /* Location.swift */; };
+		4285616029DFDAAB004DCDB9 /* MeetingIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */; };
+		4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */; };
 		429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515CE29C4A744006DD4B3 /* GatherUpApp.swift */; };
 		429515D129C4A744006DD4B3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515D029C4A744006DD4B3 /* ContentView.swift */; };
 		429515D329C4A746006DD4B3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 429515D229C4A746006DD4B3 /* Assets.xcassets */; };
@@ -54,6 +56,8 @@
 		33ADB13929D666A500352451 /* ReusableMeetingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableMeetingsView.swift; sourceTree = "<group>"; };
 		33ADB13B29D667E500352451 /* MeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCardView.swift; sourceTree = "<group>"; };
 		425050E929D07096009926FF /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
+		4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingIconView.swift; sourceTree = "<group>"; };
+		4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMapAnnotationView.swift; sourceTree = "<group>"; };
 		429515CB29C4A744006DD4B3 /* GatherUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GatherUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		429515CE29C4A744006DD4B3 /* GatherUpApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherUpApp.swift; sourceTree = "<group>"; };
 		429515D029C4A744006DD4B3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -97,6 +101,8 @@
 		339A101329D3E9E900B4DD98 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */,
+				4285616129DFDACA004DCDB9 /* CustomAnnotationView */,
 				33ADB13629D6604A00352451 /* Map */,
 				33ADB13529D6602600352451 /* Profile */,
 				33ADB13429D6601800352451 /* Meeting */,
@@ -158,6 +164,14 @@
 			children = (
 			);
 			path = SubViewModel;
+			sourceTree = "<group>";
+		};
+		4285616129DFDACA004DCDB9 /* CustomAnnotationView */ = {
+			isa = PBXGroup;
+			children = (
+				4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */,
+			);
+			path = CustomAnnotationView;
 			sourceTree = "<group>";
 		};
 		429515C229C4A744006DD4B3 = {
@@ -285,6 +299,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				339A101829D3EAE500B4DD98 /* User.swift in Sources */,
+				4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */,
 				429515DF29C4A776006DD4B3 /* ProfileView.swift in Sources */,
 				33ADB13829D6610900352451 /* Meeting.swift in Sources */,
 				33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */,
@@ -301,6 +316,7 @@
 				429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */,
 				425050EA29D07096009926FF /* Location.swift in Sources */,
 				339A102329D4093800B4DD98 /* ReusableProfileContent.swift in Sources */,
+				4285616029DFDAAB004DCDB9 /* MeetingIconView.swift in Sources */,
 				429515E129C4A9AD006DD4B3 /* MeetingsView.swift in Sources */,
 				33ABB70229DD2B030049D482 /* MeetingViewModel.swift in Sources */,
 			);
