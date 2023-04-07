@@ -9,71 +9,84 @@ import SwiftUI
 import MapKit
 import CoreLocationUI
 
-import Firebase
-
 struct MapView: View {
     
-    //@StateObject var viewModel2: MapViewModel2 = .init()
-    
     @StateObject private var viewModel = MapViewModel()
-    @State private var locations = [Meeting]()
-    //@State private var locations = [Location]()
-    @State var showAnnotation = true
-    @State private var annotationLocationLatitude: CLLocationCoordinate2D?
-    @State private var annotationLocationLongitude: CLLocationCoordinate2D?
-    @State private var annotationLocation: CLLocationCoordinate2D?
+    @State private var locations = [Location]()
+    @State var showAnnotation = false
+    @State private var coordinate = CLLocationManager()
+    @State private var showMessage = false
+    @State private var showCreateMessage = false
+    @State private var showSheet = false
+    @State private var coordinateCreated = CLLocationCoordinate2D()
+    @State private var sheetDismissed = false
     
-    @StateObject var viewModel2: MapViewModel2 = .init()
+   
     
-    /// - View Properties
-    @State var isFetching: Bool = true
+    
+    
     
     
     var body: some View {
         ZStack(alignment:.bottom){
-            
-            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:viewModel2.meetingsMap){ meeting in
-                MapMarker(coordinate: CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
+            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:locations){ item in
+                MapAnnotation(coordinate: item.coordinate, content: {
+                    if(sheetDismissed==false){
+                        CustomMapAnnotationView(coordinate: item.coordinate)
+                    }
+                    else{
+                        MeetingIconView(coordinate:item.coordinate)
+                    }
+                })
             }
-            
-                .edgesIgnoringSafeArea(.top)
-                .accentColor(Color(.systemPink))
-                .onAppear{
-                    viewModel.checkIfLocationServicesIsEnabled()
-                    viewModel2.addMeetingsListner()
-                }
-                .onDisappear{
-                    viewModel2.removeListner()
-                }
-                
-                .task {
-                    /// - Fetching For One Time
-                    guard viewModel2.meetings.isEmpty else{return}
-                    await viewModel2.fetchMeetings()
-                }
-            
+            .edgesIgnoringSafeArea(.top)
+            .accentColor(Color(.systemPink))
+            .onAppear{
+                viewModel.checkIfLocationServicesIsEnabled()
+            }
+            .overlay(GeometryReader { geometry in
+                Color.clear
+                    .contentShape(Rectangle())
+                    .gesture(DragGesture(minimumDistance: 0)
+                        .onChanged { gesture in
+                                        // Calculate the translation in points
+                            self.viewModel.region.center.latitude += Double(gesture.translation.height) / Double(geometry.size.height) * self.viewModel.region.span.latitudeDelta
+                                           self.viewModel.region.center.longitude -= Double(gesture.translation.width) / Double(geometry.size.width) * self.viewModel.region.span.longitudeDelta
+                                    }
+                        .onEnded({ value in
+                            let tapLocation = value.location
+                            let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
+                            if(showAnnotation==true){
+                                locations.append(Location(coordinate: tapCoordinate))
+                                coordinateCreated=tapCoordinate
+                            }
+                        }))
+            })
             VStack{
                 HStack{
                     Spacer()
                     Button{
-                        if(showAnnotation==true){
-                            viewModel2.addMeeting(la: viewModel.region.center.latitude, lo: viewModel.region.center.longitude)
-                            print("Button Click")
-                            
+                        print(coordinateCreated)
+                        if(showAnnotation==false){
+                            showMessage = false
+                                   showPopupMessage(duration: 3)
                             withAnimation(.spring()){
                                 showAnnotation.toggle()
                             }
+                           
                         }
+        
                         else{
-                            //viewModel2.cancleMeeting()
-                            
                             withAnimation(.spring()){
-                               showAnnotation.toggle()
+                                showAnnotation.toggle()
+                                showMessage = false
+                            }
+                            if(!locations.isEmpty){
+                                    locations.removeLast()
                             }
                         }
-                        
                     }label: {
-                        Text(showAnnotation ? "모임만들기" : "취소")
+                        Text(showAnnotation ? "취소" : "모임만들기")
                     }
                     .fontWeight(.bold)
                     .font(.system(size:20))
@@ -81,21 +94,112 @@ struct MapView: View {
                     .background(Color.blue)
                     .cornerRadius(20)
                     .padding()
-                    
                 }
+              
+                
                 Spacer()
-                HStack{
+                HStack(spacing:110){
                     Spacer()
+                    if(showAnnotation==true){
+                        Button{
+                            if(locations.isEmpty){
+                               showCreatePopupMessage(duration: 3)
+                            }
+                            else{
+                                showSheet=true
+                            }
+                        }label: {
+                            Text("생성하기!")
+                        }
+                        .background(Color.white)
+                        .foregroundColor(.black)
+                        .font(.headline)
+                        .frame(width: 90, height: 35)
+                        .buttonStyle(.borderedProminent)
+                        .sheet(isPresented: $showSheet){
+                            MeetingSetSheetView(coordinateCreated: $coordinateCreated,onDismiss: {
+                                showAnnotation = false
+                                sheetDismissed = true
+                            })
+                        }
+                    }
                     LocationButton(.currentLocation){
-                          viewModel.requestAllowOnceLocationPermission()
+                        viewModel.requestAllowOnceLocationPermission()
                     }
                     .labelStyle(.iconOnly)
                 }
             }
+            if showMessage {
+                   VStack {
+                       Spacer()
+                       HStack {
+                           Spacer()
+                           PopupMessage()
+                           Spacer()
+                       }
+                       Spacer()
+                   }
+                   .transition(.scale)
+               }
+            if showCreateMessage {
+                   VStack {
+                       Spacer()
+                       HStack {
+                           Spacer()
+                           CreatePopupMessage()
+                           Spacer()
+                       }
+                       Spacer()
+                   }
+                   .transition(.scale)
+               }
+        }
+}
+   
+    
+    
+    func showPopupMessage(duration: TimeInterval) {
+        // Show the message
+        withAnimation {
+            showMessage = true
+        }
+
+        // Hide the message after the specified duration
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            withAnimation {
+                showMessage = false
+            }
         }
     }
     
+    func showCreatePopupMessage(duration: TimeInterval) {
+        // Show the message
+        withAnimation {
+            showCreateMessage = true
+        }
+
+        // Hide the message after the specified duration
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            withAnimation {
+                showCreateMessage = false
+            }
+        }
+    }
+    
+    func coordinateFromTap(_ tapLocation: CGPoint, in geometry: GeometryProxy, region: MKCoordinateRegion) -> CLLocationCoordinate2D {
+        if let lastLocation = locations.last {
+            // Remove the previous annotation from the map
+            locations.removeLast()
+            viewModel.objectWillChange.send()
+        }
+        let frame = geometry.frame(in: .local)
+        let x = Double(tapLocation.x / frame.width) * region.span.longitudeDelta + region.center.longitude - region.span.longitudeDelta / 2
+        let y = Double((frame.height - tapLocation.y) / frame.height) * region.span.latitudeDelta + region.center.latitude - region.span.latitudeDelta / 2
+        return CLLocationCoordinate2D(latitude: y, longitude: x)
+    }
 }
+  
+
 
 
 
@@ -106,6 +210,8 @@ struct MapView_Previews: PreviewProvider {
         MapView()
     }
 }
+
+
 
 
 
@@ -182,6 +288,33 @@ final class MapViewModel : NSObject, ObservableObject,CLLocationManagerDelegate{
 }
 
 
+extension MKCoordinateRegion {
+    var zoomLevel: Int {
+        let maxZoomLevel = 20
+        let zoomLevel = Int(log2(360 * Double(UIScreen.main.bounds.width) / (256 * self.span.longitudeDelta))) + 1
+        return min(maxZoomLevel, max(1, zoomLevel))
+    }
+}
+
+struct PopupMessage: View {
+    var body: some View {
+        Text("장소를 선택해주세요!")
+            .foregroundColor(.white)
+            .padding()
+            .background(Color.black.opacity(0.8))
+            .cornerRadius(10)
+    }
+}
+
+struct CreatePopupMessage: View {
+    var body: some View {
+        Text("장소를 반드시 선택해주세요!")
+            .foregroundColor(.white)
+            .padding()
+            .background(Color.black.opacity(0.8))
+            .cornerRadius(10)
+    }
+}
 
 
 
