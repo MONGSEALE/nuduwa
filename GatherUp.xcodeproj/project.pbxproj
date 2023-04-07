@@ -31,6 +31,7 @@
 		425050EA29D07096009926FF /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425050E929D07096009926FF /* Location.swift */; };
 		4285616029DFDAAB004DCDB9 /* MeetingIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */; };
 		4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */; };
+		4285616529DFDBE7004DCDB9 /* MeetingSetSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285616429DFDBE7004DCDB9 /* MeetingSetSheetView.swift */; };
 		429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515CE29C4A744006DD4B3 /* GatherUpApp.swift */; };
 		429515D129C4A744006DD4B3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515D029C4A744006DD4B3 /* ContentView.swift */; };
 		429515D329C4A746006DD4B3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 429515D229C4A746006DD4B3 /* Assets.xcassets */; };
@@ -58,6 +59,7 @@
 		425050E929D07096009926FF /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingIconView.swift; sourceTree = "<group>"; };
 		4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMapAnnotationView.swift; sourceTree = "<group>"; };
+		4285616429DFDBE7004DCDB9 /* MeetingSetSheetView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingSetSheetView.swift; sourceTree = "<group>"; };
 		429515CB29C4A744006DD4B3 /* GatherUp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GatherUp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		429515CE29C4A744006DD4B3 /* GatherUpApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherUpApp.swift; sourceTree = "<group>"; };
 		429515D029C4A744006DD4B3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 		33ADB13629D6604A00352451 /* Map */ = {
 			isa = PBXGroup;
 			children = (
+				4285616429DFDBE7004DCDB9 /* MeetingSetSheetView.swift */,
 				429515DC29C4A766006DD4B3 /* MapView.swift */,
 			);
 			path = Map;
@@ -313,6 +316,7 @@
 				339A101D29D3EBBF00B4DD98 /* LoadingView.swift in Sources */,
 				339A101C29D3EBBF00B4DD98 /* ViewExtensions.swift in Sources */,
 				33ABB70429DD421E0049D482 /* ProfileViewModel.swift in Sources */,
+				4285616529DFDBE7004DCDB9 /* MeetingSetSheetView.swift in Sources */,
 				429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */,
 				425050EA29D07096009926FF /* Location.swift in Sources */,
 				339A102329D4093800B4DD98 /* ReusableProfileContent.swift in Sources */,
