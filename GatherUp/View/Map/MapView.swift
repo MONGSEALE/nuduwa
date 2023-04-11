@@ -8,6 +8,7 @@
 import SwiftUI
 import MapKit
 import CoreLocationUI
+import Firebase
 
 struct MapView: View {
     
@@ -21,15 +22,13 @@ struct MapView: View {
     @State private var coordinateCreated = CLLocationCoordinate2D()
     @State private var sheetDismissed = false
     
-   
+    @StateObject private var viewModel2 = MapViewModel2()
     
-    
-    
-    
+    @State private var showCheckMessage = false
     
     var body: some View {
         ZStack(alignment:.bottom){
-            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:locations){ item in
+            Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: viewModel2.meetingsMap){ item in
                 MapAnnotation(coordinate: item.coordinate, content: {
                     if(sheetDismissed==false){
                         CustomMapAnnotationView(coordinate: item.coordinate)
@@ -43,30 +42,44 @@ struct MapView: View {
             .accentColor(Color(.systemPink))
             .onAppear{
                 viewModel.checkIfLocationServicesIsEnabled()
+                viewModel2.addMeetingsListner()
             }
             .overlay(GeometryReader { geometry in
-                Color.clear
-                    .contentShape(Rectangle())
-                    .gesture(DragGesture(minimumDistance: 0)
-                        .onChanged { gesture in
-                                        // Calculate the translation in points
-                            self.viewModel.region.center.latitude += Double(gesture.translation.height) / Double(geometry.size.height) * self.viewModel.region.span.latitudeDelta
-                                           self.viewModel.region.center.longitude -= Double(gesture.translation.width) / Double(geometry.size.width) * self.viewModel.region.span.longitudeDelta
-                                    }
-                        .onEnded({ value in
-                            let tapLocation = value.location
-                            let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
-                            if(showAnnotation==true){
-                                locations.append(Location(coordinate: tapCoordinate))
-                                coordinateCreated=tapCoordinate
+                //if(showAnnotation == true){
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .gesture(DragGesture(minimumDistance: 0)
+                            .onChanged { gesture in
+                                // Calculate the translation in points
+                                self.viewModel.region.center.latitude += Double(gesture.translation.height) / Double(geometry.size.height) * self.viewModel.region.span.latitudeDelta
+                                self.viewModel.region.center.longitude -= Double(gesture.translation.width) / Double(geometry.size.width) * self.viewModel.region.span.longitudeDelta
                             }
-                        }))
+                            .onEnded({ value in
+                                let tapLocation = value.location
+                                let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
+                                if(showAnnotation==true){
+                                    viewModel2.addMeeting(newLocation: Location(coordinate: tapCoordinate))
+                                    print(tapLocation)
+                                    //locations.append(Location(coordinate: tapCoordinate))
+                                    coordinateCreated = tapCoordinate
+                                }
+                            }))
+                //}
             })
+            .task {
+                guard viewModel2.meetings.isEmpty else{return}
+                await viewModel2.fetchMeetings()
+            }
+            
+            
             VStack{
                 HStack{
                     Spacer()
                     Button{
-                        print(coordinateCreated)
+                        //print(coordinateCreated)
+                        //추가
+                        viewModel2.checkedOverlap(id: Auth.auth().currentUser!.uid)
+                        print("chechedOverlap 실행")
                         if(showAnnotation==false){
                             showMessage = false
                                    showPopupMessage(duration: 3)
@@ -74,15 +87,14 @@ struct MapView: View {
                                 showAnnotation.toggle()
                             }
                            
-                        }
-        
-                        else{
+                        }else{
+                            
                             withAnimation(.spring()){
                                 showAnnotation.toggle()
                                 showMessage = false
                             }
-                            if(!locations.isEmpty){
-                                    locations.removeLast()
+                            if(!viewModel2.meetingsMap.isEmpty){
+                                viewModel2.cancleMeeting()
                             }
                         }
                     }label: {
@@ -102,12 +114,19 @@ struct MapView: View {
                     Spacer()
                     if(showAnnotation==true){
                         Button{
-                            if(locations.isEmpty){
-                               showCreatePopupMessage(duration: 3)
-                            }
-                            else{
-                                showSheet=true
-                            }
+                            
+//중복시 생성 못하는 코드
+//                            if !viewModel2.isOverlap {
+//                                showCheckPopupMessage(duration: 3)
+//                                print("isOverlap:\(viewModel2.isOverlap)")
+//                            }else{
+                                if(viewModel2.meetingsMap.isEmpty){
+                                   showCreatePopupMessage(duration: 3)
+                                }
+                                else{
+                                    showSheet=true
+                                }
+//                            }
                         }label: {
                             Text("생성하기!")
                         }
@@ -153,6 +172,18 @@ struct MapView: View {
                    }
                    .transition(.scale)
                }
+            if showCheckMessage {
+                   VStack {
+                       Spacer()
+                       HStack {
+                           Spacer()
+                           CheckPopupMessage()
+                           Spacer()
+                       }
+                       Spacer()
+                   }
+                   .transition(.scale)
+               }
         }
 }
    
@@ -185,11 +216,24 @@ struct MapView: View {
             }
         }
     }
+    func showCheckPopupMessage(duration: TimeInterval) {
+        // Show the message
+        withAnimation {
+            showCheckMessage = true
+        }
+
+        // Hide the message after the specified duration
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            withAnimation {
+                showCheckMessage = false
+            }
+        }
+    }
     
     func coordinateFromTap(_ tapLocation: CGPoint, in geometry: GeometryProxy, region: MKCoordinateRegion) -> CLLocationCoordinate2D {
-        if let lastLocation = locations.last {
+        if let lastLocation = viewModel2.meetingsMap.last {
             // Remove the previous annotation from the map
-            locations.removeLast()
+            viewModel2.cancleMeeting()
             viewModel.objectWillChange.send()
         }
         let frame = geometry.frame(in: .local)
@@ -316,5 +360,14 @@ struct CreatePopupMessage: View {
     }
 }
 
+struct CheckPopupMessage: View {
+    var body: some View {
+        Text("모임은 하나만 생성할 수 있습니다!")
+            .foregroundColor(.white)
+            .padding()
+            .background(Color.black.opacity(0.8))
+            .cornerRadius(10)
+    }
+}
 
 

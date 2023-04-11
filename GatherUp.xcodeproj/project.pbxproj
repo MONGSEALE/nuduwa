@@ -28,6 +28,7 @@
 		33ADB13829D6610900352451 /* Meeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13729D6610900352451 /* Meeting.swift */; };
 		33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13929D666A500352451 /* ReusableMeetingsView.swift */; };
 		33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13B29D667E500352451 /* MeetingCardView.swift */; };
+		33EDC97929DFF1DB0087FA29 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */; };
 		425050EA29D07096009926FF /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425050E929D07096009926FF /* Location.swift */; };
 		4285616029DFDAAB004DCDB9 /* MeetingIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */; };
 		4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */; };
@@ -56,6 +57,7 @@
 		33ADB13729D6610900352451 /* Meeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meeting.swift; sourceTree = "<group>"; };
 		33ADB13929D666A500352451 /* ReusableMeetingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableMeetingsView.swift; sourceTree = "<group>"; };
 		33ADB13B29D667E500352451 /* MeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCardView.swift; sourceTree = "<group>"; };
+		33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
 		425050E929D07096009926FF /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingIconView.swift; sourceTree = "<group>"; };
 		4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMapAnnotationView.swift; sourceTree = "<group>"; };
@@ -134,6 +136,7 @@
 			children = (
 				339A101A29D3EBBE00B4DD98 /* ViewExtensions.swift */,
 				339A101B29D3EBBE00B4DD98 /* LoadingView.swift */,
+				33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */,
 			);
 			path = SubView;
 			sourceTree = "<group>";
@@ -297,6 +300,7 @@
 				4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */,
 				429515DF29C4A776006DD4B3 /* ProfileView.swift in Sources */,
 				33ADB13829D6610900352451 /* Meeting.swift in Sources */,
+				33EDC97929DFF1DB0087FA29 /* CustomTextField.swift in Sources */,
 				33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */,
 				33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */,
 				3372C5D229DFA78A000169DD /* MapViewModel2.swift in Sources */,

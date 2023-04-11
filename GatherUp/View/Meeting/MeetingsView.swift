@@ -12,9 +12,3 @@ struct MeetingsView: View {
         ReusableMeetingsView(title: "내 모임")
     }
 }
-
-struct MeetingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        MeetingsView()
-    }
-}

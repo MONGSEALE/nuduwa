@@ -10,7 +10,7 @@ import FirebaseFirestoreSwift
 import Foundation
 import CoreLocation
 
-struct Meeting : Identifiable,Codable,Equatable{
+struct Meeting : Identifiable,Codable,Equatable, Hashable{
     @DocumentID var id: String?
     
     var title: String

@@ -10,10 +10,17 @@ import SDWebImageSwiftUI
 import Firebase
 
 struct DetailMeetingView: View {
-    var meeting: Meeting
-    @Environment(\.dismiss) private var dismiss
+    @StateObject var viewModel: MeetingViewModel = .init()
     
+    @State var meeting: Meeting
+    
+    @Environment(\.dismiss) private var dismiss
+    @State var isEdit: Bool = false
+    @State private var title: String = ""
+    @State private var description: String = ""
+
     var body: some View {
+        let meetingOwner = meeting.userUID == Auth.auth().currentUser?.uid ? true : false
         ScrollView(.vertical, showsIndicators: false){
             LazyVStack{
                 HStack(spacing: 12){
@@ -28,7 +35,7 @@ struct DetailMeetingView: View {
                     .clipShape(Circle())
                     
                     VStack(alignment: .leading, spacing: 6){
-                        Text(meeting.title)
+                        CustomText(text: meeting.title, editText: $title, item: "모임 제목",isEditable: isEdit)
                             .font(.title3)
                             .fontWeight(.semibold)
                         Text(meeting.userName)
@@ -39,41 +46,109 @@ struct DetailMeetingView: View {
                     }
                     .hAlign(.leading)
                 }
-                Text(meeting.description)
+                CustomText(text: meeting.description, editText: $description, item: "모임 내용", isEditable: isEdit)
                     .textSelection(.enabled)
                     .padding(.vertical,8)
                     .hAlign(.leading)
             }
             .padding(15)
         }
-        let meetingOwner = meeting.userUID == Auth.auth().currentUser?.uid ? true : false
-        Button(action: {
-            meetingOwner ? deleteMeeting() : cancleMeeting()
-        }){
-            Text(meetingOwner ? "모임 삭제" : "모임 나가기")
-                .font(.callout)
-                .foregroundColor(.white)
-                .padding(.horizontal,30)
-                .padding(.vertical,10)
-                .background(.red,in: Capsule())
-        }
-    }
-    
-    /// - Deleting Meeting
-    func deleteMeeting(){
-        Task{
-            do{
-                /// Delete Firestore Document
-                guard let meetingID = meeting.id else{return}
-                try await Firestore.firestore().collection("Meetings").document(meetingID).delete()
-            }catch{
-                print(error.localizedDescription)
+        
+        if meetingOwner {
+            HStack{
+                if isEdit{
+                    Button(action: {
+                        guard title != "" else {
+                            print("title없음")
+                            return
+                        }
+                        guard description != "" else {
+                            print("내용없음")
+                            return
+                        }
+                        viewModel.updateMeeting(editMeeting: meeting, title: title, description: description)
+                        meeting.title = title
+                        meeting.description = description
+                        isEdit.toggle()
+                    }){
+                        Text("수정 완료")
+                            .font(.callout)
+                            .foregroundColor(.white)
+                            .padding(.horizontal,30)
+                            .padding(.vertical,10)
+                            .background(.blue,in: Capsule())
+                    }
+                    Button(action: {
+                        title = meeting.title
+                        description = meeting.description
+                        isEdit.toggle()
+                    }){
+                        Text("수정 취소")
+                            .font(.callout)
+                            .foregroundColor(.white)
+                            .padding(.horizontal,30)
+                            .padding(.vertical,10)
+                            .background(.red,in: Capsule())
+                    }
+                } else {
+                    Button(action: {
+                        isEdit.toggle()
+                    }){
+                        Text("모임 수정")
+                            .font(.callout)
+                            .foregroundColor(.white)
+                            .padding(.horizontal,30)
+                            .padding(.vertical,10)
+                            .background(.blue,in: Capsule())
+                    }
+                    Button(action: {
+                        viewModel.deleteMeeting(deletedMeeting: meeting)
+                        dismiss()
+                    }){
+                        Text("모임 삭제")
+                            .font(.callout)
+                            .foregroundColor(.white)
+                            .padding(.horizontal,30)
+                            .padding(.vertical,10)
+                            .background(.red,in: Capsule())
+                    }
+                }
+            }
+        } else {
+            Button(action: {
+                dismiss()
+            }){
+                Text("모임 나가기")
+                    .font(.callout)
+                    .foregroundColor(.white)
+                    .padding(.horizontal,30)
+                    .padding(.vertical,10)
+                    .background(.red,in: Capsule())
             }
         }
-        dismiss()
-    }
-    
-    func cancleMeeting(){
-        dismiss()
     }
 }
+
+struct CustomText: View {
+    let text: String
+    @Binding var editText: String
+    let item: String
+    let isEditable: Bool
+    
+    var body: some View {
+      if isEditable {
+          TextField(item, text: $editText)
+              .textFieldStyle(RoundedBorderTextFieldStyle())
+              .padding()
+              .onAppear{
+                  editText = text
+              }
+      } else {
+          Text(text)
+              .font(.title)
+              .fontWeight(.bold)
+              .padding()
+      }
+    }
+}
+

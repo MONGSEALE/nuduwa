@@ -19,31 +19,32 @@ struct ReusableMeetingsView: View {
     var passMeeting: Bool = false
     
     var body: some View {
-        NavigationView{//(.vertical, showsIndicators: false) {
+        NavigationStack{
             if viewModel.isFetching{
+                /// 서버에서 데이터 가져오는 중일때
                 ProgressView()
                     .padding(.top,30)
             }else{
                 if viewModel.meetings.isEmpty{
-                    /// No Meeting's Found on Firestore
+                    /// 모임 배열이 비어있을때
                     Text("가입한 모임이 없습니다")
                         .font(.caption)
                         .foregroundColor(.gray)
                         .padding(.top,30)
                 }else{
-                    /// - Displaying Meeting's
                     List(viewModel.meetings){ meeting in
-                        NavigationLink(destination: DetailMeetingView(meeting: meeting)){
+                        NavigationLink(value: meeting){
                             MeetingCardView(meeting: meeting) { updatedMeeting in
-                                /// Updating Meeting in the Array
+                                /// 모임 내용이 업데이트 되었을때 viewModel.meetings 배열값을 수정하여 실시간 업데이트
                                 if let index = viewModel.meetings.firstIndex(where: { meeting in
                                     meeting.id == updatedMeeting.id
                                 })
                                 {
+                                    viewModel.meetings[index].title = updatedMeeting.title
                                     viewModel.meetings[index].description = updatedMeeting.description
                                 }
                             } onDelete: {
-                                /// Removing Meeting From The Array
+                                /// 모임이 삭제되었을때 실시간 삭제
                                 withAnimation(.easeInOut(duration: 0.25)){
                                     viewModel.meetings.removeAll{meeting.id == $0.id}
                                 }
@@ -55,6 +56,10 @@ struct ReusableMeetingsView: View {
                                 }
                             }
                         }
+                    }
+                    .navigationDestination(for: Meeting.self) { meeting in
+                        /// 리스트에서 모임 클릭시 이동
+                        DetailMeetingView(meeting: meeting)
                     }
                     .navigationTitle(title)
                     .navigationBarTitleDisplayMode(.inline)
@@ -72,10 +77,10 @@ struct ReusableMeetingsView: View {
             await viewModel.fetchMeetings(passMeeting: passMeeting)
         }
         .onAppear{
-            viewModel.addMeetingsListner()
+            //viewModel.addMeetingsListner()
         }
         .onDisappear{
-            viewModel.removeListner()
+            //viewModel.removeListner()
         }
         .task {
             /// - Fetching For One Time

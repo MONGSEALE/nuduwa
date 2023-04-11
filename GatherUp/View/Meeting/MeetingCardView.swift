@@ -11,6 +11,7 @@ import Firebase
 import FirebaseStorage
 
 struct MeetingCardView: View {
+    
     var meeting: Meeting
     /// - Callbacks
     var onUpdate: (Meeting)->()
@@ -50,10 +51,9 @@ struct MeetingCardView: View {
             }
         }
         .hAlign(.leading)
-        /*
+        
         .onAppear {
             /// - Adding Only Once
-            
             if docListner == nil{
                 guard let meetingID = meeting.id else{return}
                 print("doListner")
@@ -82,6 +82,6 @@ struct MeetingCardView: View {
             }
              
         }
-        */
+        
     }
 }

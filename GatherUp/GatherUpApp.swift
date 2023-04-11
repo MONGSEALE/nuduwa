@@ -4,6 +4,8 @@
 //
 //  Created by DaelimCI10001 on 2023/03/17.
 //
+// dribbble.com
+// figma.com
 
 import SwiftUI
 import Firebase

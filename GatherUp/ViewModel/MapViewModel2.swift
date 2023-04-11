@@ -13,11 +13,13 @@ import CoreLocation
 class MapViewModel2: ObservableObject {
     @Published var meetings: [Location] = []    // Firestore에 있는 모임 장소 배열
     @Published var meetingsMap: [Location] = []     // meetings + 새로 추가하는 모임(저장전) 배열
-    private var newMeeting: Meeting?       // 새로 추가하는 모임(저장전)
+    private var newMeeting: Location?       // 새로 추가하는 모임(저장전)
+    @Published var meeting: Meeting? // 보여질 미팅
     
     // MARK: Error Properties
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
+    
     //로딩
     @Published var isLoading: Bool = false
     @Published var isFetching: Bool = true
@@ -25,6 +27,8 @@ class MapViewModel2: ObservableObject {
     @Published var paginationDoc: QueryDocumentSnapshot?
     
     private var docListner: ListenerRegistration?
+    
+    @Published var isOverlap: Bool = false
     
     /// Firestore에 있는 모임 데이터 가져오기
     func fetchMeetings()async{
@@ -55,8 +59,8 @@ class MapViewModel2: ObservableObject {
                 //meetingsFirestore.append(contentsOf: fetchedMeetings)
                 paginationDoc = docs.documents.last
                 isFetching = false
-                //meetingsMap = (newMeeting != nil) ? meetings + [newMeeting!] : meetings
-                meetingsMap = meetings
+                meetingsMap = (newMeeting != nil) ? meetings + [newMeeting!] : meetings
+                //meetingsMap = meetings
                 print("fetch수: \(fetchedMeetings.count)")
                 print("모임수: \(meetings.count)")
             })
@@ -70,7 +74,9 @@ class MapViewModel2: ObservableObject {
         if docListner == nil{
             print("addListner")
             docListner =
-            Firestore.firestore().collection("Meetings").addSnapshotListener({ snapshot, error in
+            Firestore.firestore().collection("Meetings")
+                .whereField("publishedDate", isLessThan: Date())
+                .addSnapshotListener({ snapshot, error in
                 guard let snapshot = snapshot else{print("Error snapshot");return}
                 snapshot.documentChanges.forEach { meeting in
                     switch meeting.type {
@@ -83,9 +89,11 @@ class MapViewModel2: ObservableObject {
                     case .modified:
                         print("변경")
                     case .removed:
-                        print("삭제")
+                        if let removeMeeting = try? meeting.document.data(as: Meeting.self){
+                            self.meetingsMap.removeAll{removeMeeting.longitude == $0.coordinate.longitude}
+                            print("삭제")
+                        }
                     }
-                
                     
                 }
             })
@@ -104,28 +112,82 @@ class MapViewModel2: ObservableObject {
         newMeeting = nil
         meetingsMap = meetings
     }
+    
+    func addMeeting(newLocation: Location){
+        newMeeting = newLocation
+        meetingsMap = (newMeeting != nil) ? meetings + [newMeeting!] : meetings
+    }
     /// 새로운 모임 Firestore에 저장
     func createMeeting(meeting: Meeting){
-        print("firebase save")
-        //isLoading = true
-        //showKeyboard = false
-        Task{
-            do{
-                /// - Firestore에 저장
-                let doc = Firestore.firestore().collection("Meetings").document()
-                let _ = try doc.setData(from: meeting, completion: {error in
-                    if let error = error{
-                        print("Error CreateMeeting: \(error)")
+            
+            //isLoading = true
+            //showKeyboard = false
+            Task{
+                do{
+                    /// - Firestore에 저장
+                    print("firebase save")
+                    let doc = Firestore.firestore().collection("Meetings").document()
+                    let _ = try doc.setData(from: meeting, completion: {error in
+                        if let error = error{
+                            print("Error CreateMeeting: \(error)")
+                        } else {
+                            print("모임 추가 완료")
+                        }
+                    })
+                    await fetchMeetings()
+                    
+                } catch {
+                    await handleError(error: error)
+                }
+            }
+        }
+    
+    
+    
+    /// 작성자 확인
+    func checkedOverlap(id: String){
+            let doc = Firestore.firestore().collection("Meetings").whereField("userUID", isEqualTo: id)
+            doc.getDocuments(){ (query, err) in
+                if let err = err {
+                    print("checkedOverlap 에러: \(err)")
+                } else {
+                    print("중복 여부")
+                    if let query = query, !query.isEmpty {
+                        print("중복!: \(query.documents)")
+                        self.isOverlap = false
                     } else {
-                        print("모임 추가 완료")
+                        print("중복 아님!")
+                        self.isOverlap = true
                     }
-                })
-                await fetchMeetings()
-            } catch {
-                await handleError(error: error)
+                }
+            }
+    }
+    
+    func showMeeting(id: String){
+        let doc = Firestore.firestore().collection("Meetings").document(id)
+        doc.getDocument(as: Meeting.self) { result in
+            switch result {
+            case .success(let meet):
+                self.meeting = meet
+            case .failure(let err):
+                print("showMeeting 에러: \(err)")
             }
         }
     }
+    
+    func joinMeeting(id: String){
+        let doc = Firestore.firestore().collection("Meetings").document(id)
+        doc.getDocument { (document, err) in
+            if let err = err {
+                print("joinMeeting 에러: \(err)")
+            } else {
+                guard var participant = document!["participant"] as? [String] else{print("participant오류");return}
+                participant.append(Auth.auth().currentUser!.uid)
+                doc.updateData(["participant" : participant])
+            }
+        }
+    }
+
     
     /// 에러처리
     func handleError(error: Error)async{

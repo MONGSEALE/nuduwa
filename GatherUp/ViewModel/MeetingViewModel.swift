@@ -11,9 +11,12 @@ import Firebase
 class MeetingViewModel: ObservableObject {
     @Published var meetings: [Meeting] = []
     
+    @Published var meeting: Meeting?
+    
     @Published var paginationDoc: QueryDocumentSnapshot?
     
     @Published var isFetching: Bool = true
+    
     private var docListner: ListenerRegistration?
     
     /// Firestore에 있는 모임 데이터 가져오기
@@ -48,6 +51,7 @@ class MeetingViewModel: ObservableObject {
             await MainActor.run(body: {
                 //meetings = fetchedMeetings
                 meetings.append(contentsOf: fetchedMeetings)
+                print("Meeting탭 모임추가됨")
                 paginationDoc = docs.documents.last
                 isFetching = false
             })
@@ -56,6 +60,7 @@ class MeetingViewModel: ObservableObject {
         }
     }
     
+    /*
     /// 실시간 모임 추가시 meetings 배열에 데이터 추가
     func addMeetingsListner(){
         if docListner == nil{
@@ -85,6 +90,10 @@ class MeetingViewModel: ObservableObject {
         print("갯수: \(self.meetings.count)")
         }
     }
+     */
+    
+    
+    // 리스너 제거
     func removeListner(){
         if let docListner{
             docListner.remove()
@@ -92,5 +101,56 @@ class MeetingViewModel: ObservableObject {
         }
     }
     
+    /// - 모임 지우기
+    func deleteMeeting(deletedMeeting: Meeting){
+        Task{
+            do{
+                /// Delete Firestore Document
+                guard let meetingID = deletedMeeting.id else{return}
+                try await Firestore.firestore().collection("Meetings").document(meetingID).delete()
+            }catch{
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    /// - 모임 수정하기
+    func updateMeeting(editMeeting: Meeting, title: String, description: String){
+        Task{
+            do{
+                /// Delete Firestore Document
+                guard let meetingID = editMeeting.id else{return}
+                
+                if title != editMeeting.title {
+                    try await
+                    Firestore.firestore().collection("Meetings").document(meetingID).updateData(["title": title])
+                    print("title 수정")
+                }
+
+                if description != editMeeting.description {
+                    try await
+                    Firestore.firestore().collection("Meetings").document(meetingID).updateData(["description": description])
+                    print("description 수정")
+                }
+                
+//                Firestore.firestore().collection("Meetings").document(meetingID).getDocument(as: Meeting.self) { result in
+//                    switch result {
+//                    case .success(let meet):
+//                        self.meeting = meet
+//                        
+//                    case .failure(let err):
+//                        print("updateMeeting에러: \(err)")
+//                    }
+//                }
+//                
+//                print(meeting)
+//                await MainActor.run(body: {
+//                    meeting = meeting
+//                })
+            }catch{
+                print(error.localizedDescription)
+            }
+        }
+    }
 }
 

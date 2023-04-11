@@ -46,6 +46,7 @@ struct ReusableProfileContent: View {
                 ReusableMeetingsView(passMeeting: true)
             }
             .padding(15)
+            
         }
     }
 }
