@@ -51,8 +51,11 @@ struct DetailMeetingView: View {
                     .padding(.vertical,8)
                     .hAlign(.leading)
                 
-                //ChatView(meetingId: meeting.id)
-                
+                ChatView(meetingId: meeting.id!)
+                    .environmentObject(viewModel)
+//                    .navigationBarItems(trailing: Button(action: viewModel.signOut) {
+//                        Text("Sign Out")
+//                    })
             }
             .padding(15)
         }

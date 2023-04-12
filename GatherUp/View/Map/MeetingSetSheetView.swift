@@ -61,10 +61,10 @@ struct MeetingSetSheetView: View {
                         }
                         else{
                             
-                            var user = Auth.auth().currentUser
+                            let user = Auth.auth().currentUser
                             presentationMode.wrappedValue.dismiss()
                             onDismiss?()
-                            let newMeeting = Meeting(title: title, description: description, latitude:  coordinateCreated.latitude,longitude: coordinateCreated.longitude,userName: (user?.displayName!)!,userUID: user!.uid,userImage: user?.photoURL!)
+                            let newMeeting = Meeting(title: title, description: description, latitude:  coordinateCreated.latitude,longitude: coordinateCreated.longitude, members: [user!.uid], numbersOfMembers: 1, hostName: (user?.displayName!)!,hostUID: user!.uid, hostImage: user?.photoURL!)
                             viewModel.createMeeting(meeting: newMeeting)
                             print(newMeeting)
                             

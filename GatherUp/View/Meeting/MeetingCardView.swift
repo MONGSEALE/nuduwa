@@ -25,7 +25,7 @@ struct MeetingCardView: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 12){
-            WebImage(url: meeting.userImage)
+            WebImage(url: meeting.hostImage)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: 35, height: 35)
@@ -39,7 +39,7 @@ struct MeetingCardView: View {
                     Text(meeting.meetingDate.formatted(date: .abbreviated, time: .shortened))
                         .font(.callout)
                 }
-                Text(meeting.userName)
+                Text(meeting.hostName)
                     .font(.callout)
                 Text(meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))
                     .font(.caption2)
