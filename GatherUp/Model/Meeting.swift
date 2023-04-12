@@ -18,18 +18,17 @@ struct Meeting : Identifiable,Codable,Equatable, Hashable{
     let latitude : Double
     let longitude : Double
     
-    
     var publishedDate: Date = Date()
     var meetingDate: Date = Date()
+    
+    var participants: [String]
+    var maxParticipants: Int
     /*
-     모임시간
-     모임참가비
-     참가인원 []
-     최대인원수
+     참가비
      */
     // MARK: Basic User Info
-    var userName: String
-    var userUID: String
-    var userImage: URL?
+    var hostName: String
+    var hostUID: String
+    var hostImage: URL?
 
 }

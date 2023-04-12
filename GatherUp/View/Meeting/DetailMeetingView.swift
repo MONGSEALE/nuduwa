@@ -20,11 +20,11 @@ struct DetailMeetingView: View {
     @State private var description: String = ""
 
     var body: some View {
-        let meetingOwner = meeting.userUID == Auth.auth().currentUser?.uid ? true : false
+        let meetingHost = meeting.hostUID == Auth.auth().currentUser?.uid ? true : false
         ScrollView(.vertical, showsIndicators: false){
             LazyVStack{
                 HStack(spacing: 12){
-                    WebImage(url: meeting.userImage).placeholder{
+                    WebImage(url: meeting.hostImage).placeholder{
                         // MARK: Placeholder Image
                         Image("NullProfile")
                             .resizable()
@@ -38,7 +38,7 @@ struct DetailMeetingView: View {
                         CustomText(text: meeting.title, editText: $title, item: "모임 제목",isEditable: isEdit)
                             .font(.title3)
                             .fontWeight(.semibold)
-                        Text(meeting.userName)
+                        Text(meeting.hostName)
                             .font(.callout)
                         Text(meeting.publishedDate.formatted(date: .numeric, time: .shortened))
                             .font(.caption2)
@@ -50,11 +50,14 @@ struct DetailMeetingView: View {
                     .textSelection(.enabled)
                     .padding(.vertical,8)
                     .hAlign(.leading)
+                
+                //ChatView(meetingId: meeting.id)
+                
             }
             .padding(15)
         }
         
-        if meetingOwner {
+        if meetingHost {
             HStack{
                 if isEdit{
                     Button(action: {

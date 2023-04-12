@@ -43,7 +43,7 @@ struct ReusableProfileContent: View {
                     .hAlign(.leading)
                     .padding(.vertical,15)
                 
-                ReusableMeetingsView(passMeeting: true)
+                ReusableMeetingsView(passedMeeting: true)
             }
             .padding(15)
             

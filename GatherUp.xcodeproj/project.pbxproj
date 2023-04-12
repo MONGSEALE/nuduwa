@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		335DF2D629E546060051B602 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335DF2D529E546060051B602 /* ChatMessage.swift */; };
+		335DF2D829E547BA0051B602 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335DF2D729E547BA0051B602 /* ChatView.swift */; };
 		3372C5D229DFA78A000169DD /* MapViewModel2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3372C5D129DFA78A000169DD /* MapViewModel2.swift */; };
 		339A0FF129D3E5D100B4DD98 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 339A0FF029D3E5D100B4DD98 /* GoogleService-Info.plist */; };
 		339A0FF429D3E61E00B4DD98 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 339A0FF329D3E61E00B4DD98 /* GoogleSignIn */; };
@@ -43,6 +45,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		335DF2D529E546060051B602 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		335DF2D729E547BA0051B602 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		3372C5D129DFA78A000169DD /* MapViewModel2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewModel2.swift; sourceTree = "<group>"; };
 		339A0FF029D3E5D100B4DD98 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		339A101129D3E9C000B4DD98 /* LoginViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
@@ -127,6 +131,7 @@
 				339A101729D3EAE500B4DD98 /* User.swift */,
 				425050E929D07096009926FF /* Location.swift */,
 				33ADB13729D6610900352451 /* Meeting.swift */,
+				335DF2D529E546060051B602 /* ChatMessage.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -148,6 +153,7 @@
 				33ADB13929D666A500352451 /* ReusableMeetingsView.swift */,
 				33ADB13B29D667E500352451 /* MeetingCardView.swift */,
 				33A82CB829DBA57500FA2BA0 /* DetailMeetingView.swift */,
+				335DF2D729E547BA0051B602 /* ChatView.swift */,
 			);
 			path = Meeting;
 			sourceTree = "<group>";
@@ -305,6 +311,7 @@
 				33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */,
 				3372C5D229DFA78A000169DD /* MapViewModel2.swift in Sources */,
 				339A101229D3E9C100B4DD98 /* LoginViewModel.swift in Sources */,
+				335DF2D629E546060051B602 /* ChatMessage.swift in Sources */,
 				339A101529D3E9F400B4DD98 /* Login.swift in Sources */,
 				429515D129C4A744006DD4B3 /* ContentView.swift in Sources */,
 				33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */,
@@ -312,6 +319,7 @@
 				339A101D29D3EBBF00B4DD98 /* LoadingView.swift in Sources */,
 				339A101C29D3EBBF00B4DD98 /* ViewExtensions.swift in Sources */,
 				33ABB70429DD421E0049D482 /* ProfileViewModel.swift in Sources */,
+				335DF2D829E547BA0051B602 /* ChatView.swift in Sources */,
 				4285616529DFDBE7004DCDB9 /* MeetingSetSheetView.swift in Sources */,
 				429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */,
 				425050EA29D07096009926FF /* Location.swift in Sources */,

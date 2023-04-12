@@ -16,7 +16,8 @@ struct ReusableMeetingsView: View {
     //@State private var paginationDoc: QueryDocumentSnapshot?
     @StateObject var viewModel: MeetingViewModel = .init()
     var title: String = ""
-    var passMeeting: Bool = false
+    var passedMeeting: Bool = false
+    
     
     var body: some View {
         NavigationStack{
@@ -52,7 +53,7 @@ struct ReusableMeetingsView: View {
                             .onAppear {
                                 /// - When Last Post Appears, Fetching New Post (If There)
                                 if meeting.id == viewModel.meetings.last?.id && viewModel.paginationDoc != nil{
-                                    Task{await viewModel.fetchMeetings(passMeeting: passMeeting)}
+                                    Task{await viewModel.fetchMeetings(passedMeeting: passedMeeting)}
                                 }
                             }
                         }
@@ -74,18 +75,18 @@ struct ReusableMeetingsView: View {
             viewModel.meetings = []
             /// - Resetting Pagination Doc
             viewModel.paginationDoc = nil
-            await viewModel.fetchMeetings(passMeeting: passMeeting)
+            await viewModel.fetchMeetings(passedMeeting: passedMeeting)
         }
         .onAppear{
-            //viewModel.addMeetingsListner()
+            viewModel.addMeetingsListner()
         }
         .onDisappear{
-            //viewModel.removeListner()
+            viewModel.removeListner()
         }
         .task {
             /// - Fetching For One Time
             guard viewModel.meetings.isEmpty else{return}
-            await viewModel.fetchMeetings(passMeeting: passMeeting)
+            await viewModel.fetchMeetings(passedMeeting: passedMeeting)
         }
     }
 }

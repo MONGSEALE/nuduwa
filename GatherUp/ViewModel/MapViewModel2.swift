@@ -181,9 +181,9 @@ class MapViewModel2: ObservableObject {
             if let err = err {
                 print("joinMeeting 에러: \(err)")
             } else {
-                guard var participant = document!["participant"] as? [String] else{print("participant오류");return}
-                participant.append(Auth.auth().currentUser!.uid)
-                doc.updateData(["participant" : participant])
+                guard var participants = document!["participants"] as? [String] else{print("participants오류");return}
+                participants.append(Auth.auth().currentUser!.uid)
+                doc.updateData(["participants" : participants])
             }
         }
     }

@@ -56,7 +56,6 @@ struct MeetingCardView: View {
             /// - Adding Only Once
             if docListner == nil{
                 guard let meetingID = meeting.id else{return}
-                print("doListner")
                 docListner = Firestore.firestore().collection("Meetings").document(meetingID).addSnapshotListener({ snapshot, error in
                     if let snapshot{
                         if snapshot.exists{

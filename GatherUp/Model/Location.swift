@@ -10,10 +10,9 @@ import FirebaseFirestoreSwift
 import CoreLocation
 
 struct Location : Identifiable{
-    //let id = UUID()
-    @DocumentID var id: String?
+    let id = UUID()
+    //@DocumentID var id: String?
     let coordinate: CLLocationCoordinate2D
-    
     var userImage: URL?
     
 //
