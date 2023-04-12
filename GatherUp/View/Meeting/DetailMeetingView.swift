@@ -53,15 +53,14 @@ struct DetailMeetingView: View {
                 
                 ChatView(meetingId: meeting.id!)
                     .environmentObject(viewModel)
-//                    .navigationBarItems(trailing: Button(action: viewModel.signOut) {
-//                        Text("Sign Out")
-//                    })
             }
             .padding(15)
         }
+        Chatting(meetingId: meeting.id!)
+            .environmentObject(viewModel)
         
-        if meetingHost {
-            HStack{
+        HStack{
+            if meetingHost {
                 if isEdit{
                     Button(action: {
                         guard title != "" else {
@@ -119,19 +118,21 @@ struct DetailMeetingView: View {
                             .background(.red,in: Capsule())
                     }
                 }
-            }
-        } else {
-            Button(action: {
-                dismiss()
-            }){
-                Text("모임 나가기")
-                    .font(.callout)
-                    .foregroundColor(.white)
-                    .padding(.horizontal,30)
-                    .padding(.vertical,10)
-                    .background(.red,in: Capsule())
+                
+            } else {
+                Button(action: {
+                    dismiss()
+                }){
+                    Text("모임 나가기")
+                        .font(.callout)
+                        .foregroundColor(.white)
+                        .padding(.horizontal,30)
+                        .padding(.vertical,10)
+                        .background(.red,in: Capsule())
+                }
             }
         }
+        .padding(10)
     }
 }
 

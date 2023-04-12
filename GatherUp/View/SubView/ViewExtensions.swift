@@ -9,11 +9,11 @@ import SwiftUI
 
 // MARK: View Extensions For UI Building
 extension View{
-    /*
+    
     func closeKeyboard(){
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
-     */
+    
     
     // MARK: Disabling with Opacity
     func disableWithOpacity(_ condition: Bool)->some View{

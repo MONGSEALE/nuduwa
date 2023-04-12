@@ -8,7 +8,7 @@
 import SwiftUI
 import Firebase
 
-struct ChatMessage: Identifiable, Equatable {
+struct ChatMessage: Identifiable, Equatable,Codable {
     let id: String?
     let text: String
     let userId: String

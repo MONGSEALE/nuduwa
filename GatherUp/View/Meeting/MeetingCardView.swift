@@ -36,17 +36,22 @@ struct MeetingCardView: View {
                     Text(meeting.title)
                         .font(.callout)
                         .fontWeight(.semibold)
+                        .foregroundColor(.black)
                     Text(meeting.meetingDate.formatted(date: .abbreviated, time: .shortened))
                         .font(.callout)
+                        .foregroundColor(.black)
                 }
                 Text(meeting.hostName)
                     .font(.callout)
+                    .foregroundColor(.black)
                 Text(meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))
                     .font(.caption2)
                     .foregroundColor(.gray)
+                
                 Text(meeting.description)
                     .textSelection(.enabled)
                     .padding(.vertical,8)
+                    .foregroundColor(.black)
                 
             }
         }

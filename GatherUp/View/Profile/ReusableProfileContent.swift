@@ -42,12 +42,12 @@ struct ReusableProfileContent: View {
                     .foregroundColor(.black)
                     .hAlign(.leading)
                     .padding(.vertical,15)
-                
+                    
                 ReusableMeetingsView(passedMeeting: true)
             }
             .padding(15)
-            
         }
+       
     }
 }
 

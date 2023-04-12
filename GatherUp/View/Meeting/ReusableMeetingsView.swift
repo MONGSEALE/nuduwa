@@ -33,49 +33,38 @@ struct ReusableMeetingsView: View {
                         .foregroundColor(.gray)
                         .padding(.top,30)
                 }else{
-                    List(viewModel.meetings){ meeting in
-                        NavigationLink(value: meeting){
-                            MeetingCardView(meeting: meeting) { updatedMeeting in
-                                /// 모임 내용이 업데이트 되었을때 viewModel.meetings 배열값을 수정하여 실시간 업데이트
-                                if let index = viewModel.meetings.firstIndex(where: { meeting in
-                                    meeting.id == updatedMeeting.id
-                                })
-                                {
-                                    viewModel.meetings[index].title = updatedMeeting.title
-                                    viewModel.meetings[index].description = updatedMeeting.description
-                                }
-                            } onDelete: {
-                                /// 모임이 삭제되었을때 실시간 삭제
-                                withAnimation(.easeInOut(duration: 0.25)){
-                                    viewModel.meetings.removeAll{meeting.id == $0.id}
+                    ScrollView{
+                        ForEach(viewModel.meetings){ meeting in
+                            NavigationLink(value: meeting){
+                                MeetingCardView(meeting: meeting) { updatedMeeting in
+                                    /// 모임 내용이 업데이트 되었을때 viewModel.meetings 배열값을 수정하여 실시간 업데이트
+                                    if let index = viewModel.meetings.firstIndex(where: { meeting in
+                                        meeting.id == updatedMeeting.id
+                                    })
+                                    {
+                                        viewModel.meetings[index].title = updatedMeeting.title
+                                        viewModel.meetings[index].description = updatedMeeting.description
+                                    }
+                                } onDelete: {
+                                    /// 모임이 삭제되었을때 실시간 삭제
+                                    withAnimation(.easeInOut(duration: 0.25)){
+                                        viewModel.meetings.removeAll{meeting.id == $0.id}
+                                    }
                                 }
                             }
-                            .onAppear {
-                                /// - When Last Post Appears, Fetching New Post (If There)
-//                                if meeting.id == viewModel.meetings.last?.id && viewModel.paginationDoc != nil{
-//                                    Task{await viewModel.fetchMeetings(passedMeeting: passedMeeting)}
-//                                }
-                            }
+                            Divider()
                         }
+                        .navigationDestination(for: Meeting.self) { meeting in
+                            /// 리스트에서 모임 클릭시 이동
+                            DetailMeetingView(meeting: meeting)
+                        }
+                        .navigationTitle(title)
+                        .navigationBarTitleDisplayMode(.inline)
+                        .listStyle(.plain)
                     }
-                    .navigationDestination(for: Meeting.self) { meeting in
-                        /// 리스트에서 모임 클릭시 이동
-                        DetailMeetingView(meeting: meeting)
-                    }
-                    .navigationTitle(title)
-                    .navigationBarTitleDisplayMode(.inline)
-                    .listStyle(.plain)
+                    .padding(15)
                 }
             }
-            //.padding(15)
-        }
-        .refreshable {
-            /// - Scroll to Refresh
-            viewModel.isFetching = true
-            viewModel.meetings = []
-            /// - Resetting Pagination Doc
-//            viewModel.paginationDoc = nil
-            await viewModel.fetchMeetings(passedMeeting: passedMeeting)
         }
         .onAppear{
             viewModel.addMeetingsListner()

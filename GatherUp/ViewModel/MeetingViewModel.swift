@@ -21,7 +21,7 @@ class MeetingViewModel: ObservableObject {
     
     //chat기능 변수
     private let db = Firestore.firestore().collection("Meetings")
-    @Published var messages = [ChatMessage]()
+    @Published var messages: [ChatMessage] = []
     //private var cancellables = Set<AnyCancellable>()
     private var listenerRegistration: ListenerRegistration?
         
@@ -71,7 +71,7 @@ class MeetingViewModel: ObservableObject {
             print("addListner")
             guard let uid = Auth.auth().currentUser?.uid else{return}
             docListner = Firestore.firestore().collection("Meetings")
-                .whereField("members", arrayContains: uid)
+//                .whereField("members", arrayContains: uid)
                 .addSnapshotListener({ snapshot, error in
                 guard let snapshot = snapshot else{print("Error snapshot");return}
                 snapshot.documentChanges.forEach { meeting in
@@ -79,12 +79,12 @@ class MeetingViewModel: ObservableObject {
                     case .added: break
                     case .modified:
                         if let addMeeting = try? meeting.document.data(as: Meeting.self){
-                            var bool:Bool = true
+                            var boo:Bool = true
                             for meeting in self.meetings{
-                                if meeting.id == addMeeting.id {bool = false}
+                                if meeting.id == addMeeting.id {boo = false}
                             }
-                            if bool{
-                                print("추가: \(addMeeting.id)")
+                            if boo{
+                                print("추가: \(String(describing: addMeeting.id))")
                                 if addMeeting.hostUID == uid {
                                     self.meetings.insert(addMeeting, at: 0)
                                 }else{
@@ -165,6 +165,10 @@ class MeetingViewModel: ObservableObject {
     
     ///채팅구현
     func fetchData(meetingId: String) {
+        do{
+            print("fetchData 시작")
+        
+            
         listenerRegistration = db.document(meetingId).collection("messages")
                 .order(by: "timestamp", descending: true)
                 .addSnapshotListener { (querySnapshot, error) in
@@ -172,7 +176,7 @@ class MeetingViewModel: ObservableObject {
                         print("No documents")
                         return
                     }
-                    
+                    print("fetchData 시작")
                     self.messages = documents.compactMap { queryDocumentSnapshot -> ChatMessage? in
                         let data = queryDocumentSnapshot.data()
                         let id = queryDocumentSnapshot.documentID
@@ -180,10 +184,27 @@ class MeetingViewModel: ObservableObject {
                         let userId = data["userId"] as? String ?? ""
                         let userName = data["userName"] as? String ?? ""
                         let timestamp = data["timestamp"] as? Timestamp ?? Timestamp()
-                        
+
+                        print("fetchData 중간: \(text)")
+
                         return ChatMessage(id: id, text: text, userId: userId, userName: userName, timestamp: timestamp)
                     }
+                    print("fetchData 끝: \(self.messages)")
                 }
+//            let docs = try await db.document(meetingId).collection("messages").getDocuments()
+//            let fetchedMessages = docs.documents.compactMap{ doc -> ChatMessage? in
+//                try? doc.data(as: ChatMessage.self)
+//            }
+//            print("fetchData 끝: \(fetchedMessages)")
+//            await MainActor.run(body: {
+//                messages = fetchedMessages
+//                print("message 모임추가됨")
+//                isFetching = false
+//            })
+        } catch{
+            print("에러")
+        }
+        
         }
         
         func sendMessage(meetingId: String, text: String, userId: String, userName: String) {
