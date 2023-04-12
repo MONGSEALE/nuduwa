@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0FAE23A629E640F000A826C8 /* Splash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FAE23A529E640F000A826C8 /* Splash.swift */; };
 		335DF2D629E546060051B602 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335DF2D529E546060051B602 /* ChatMessage.swift */; };
 		335DF2D829E547BA0051B602 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335DF2D729E547BA0051B602 /* ChatView.swift */; };
 		3372C5D229DFA78A000169DD /* MapViewModel2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3372C5D129DFA78A000169DD /* MapViewModel2.swift */; };
@@ -45,6 +46,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0FAE23A529E640F000A826C8 /* Splash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Splash.swift; sourceTree = "<group>"; };
 		335DF2D529E546060051B602 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		335DF2D729E547BA0051B602 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		3372C5D129DFA78A000169DD /* MapViewModel2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewModel2.swift; sourceTree = "<group>"; };
@@ -94,6 +96,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0FAE23A429E640E000A826C8 /* Splash */ = {
+			isa = PBXGroup;
+			children = (
+				0FAE23A529E640F000A826C8 /* Splash.swift */,
+			);
+			path = Splash;
+			sourceTree = "<group>";
+		};
 		3372C5D329DFE090000169DD /* Login */ = {
 			isa = PBXGroup;
 			children = (
@@ -116,6 +126,7 @@
 		339A101329D3E9E900B4DD98 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				0FAE23A429E640E000A826C8 /* Splash */,
 				3372C5D329DFE090000169DD /* Login */,
 				33ADB13629D6604A00352451 /* Map */,
 				33ADB13529D6602600352451 /* Profile */,
@@ -314,6 +325,7 @@
 				335DF2D629E546060051B602 /* ChatMessage.swift in Sources */,
 				339A101529D3E9F400B4DD98 /* Login.swift in Sources */,
 				429515D129C4A744006DD4B3 /* ContentView.swift in Sources */,
+				0FAE23A629E640F000A826C8 /* Splash.swift in Sources */,
 				33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */,
 				429515DD29C4A766006DD4B3 /* MapView.swift in Sources */,
 				339A101D29D3EBBF00B4DD98 /* LoadingView.swift in Sources */,
