@@ -163,8 +163,8 @@ class MapViewModel2: ObservableObject {
             }
     }
     
-    func showMeeting(id: String){
-        let doc = Firestore.firestore().collection("Meetings").document(id)
+    func showMeeting(userId: String){
+        let doc = Firestore.firestore().collection("Meetings").document(userId)
         doc.getDocument(as: Meeting.self) { result in
             switch result {
             case .success(let meet):
@@ -175,8 +175,8 @@ class MapViewModel2: ObservableObject {
         }
     }
     
-    func joinMeeting(id: String){
-        let doc = Firestore.firestore().collection("Meetings").document(id)
+    func joinMeeting(userId: String){
+        let doc = Firestore.firestore().collection("Meetings").document(userId)
         doc.getDocument { (document, err) in
             if let err = err {
                 print("joinMeeting 에러: \(err)")

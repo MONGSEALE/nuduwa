@@ -89,6 +89,7 @@ class MeetingViewModel: ObservableObject {
                     case .added: break
                     case .modified:
                         if let addMeeting = try? meeting.document.data(as: Meeting.self){
+                            print("변경: \(String(describing: addMeeting.id))")
                             if addMeeting.hostUID == uid {
                                 self.meetings.insert(addMeeting, at: 0)
                             }else{
