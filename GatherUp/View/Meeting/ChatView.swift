@@ -17,47 +17,16 @@ struct ChatView: View {
     @State private var isShowingAlert = false
     @State private var alertMessage = ""
     
+    let hostId: String
+    
     var meetingId: String
     
     var body: some View {
         
         VStack {
-            //List{
-                ForEach(viewModel.messages) { message in
-                    ChatMessageRow(message: message, isFromCurrentUser: message.userId == Auth.auth().currentUser?.uid)
-                        //.listRowSeparator(.hidden)
-                }
-            //}
-//            .onAppear {
-//                withAnimation(.spring()) {
-//                    self.viewModel.fetchData(meetingId: meetingId)
-//                }
-//            }
-//            HStack {
-//                TextField("Message", text: $messageText) { isEditing in
-//                    withAnimation {
-//                        self.isTyping = isEditing
-//                    }
-//                }
-//                .textFieldStyle(RoundedBorderTextFieldStyle())
-//                .padding(.horizontal)
-//
-//                Button(action: {
-//                    viewModel.sendMessage(meetingId: meetingId, text: messageText, userId: Auth.auth().currentUser!.uid, userName: (Auth.auth().currentUser?.displayName)!)
-//                    closeKeyboard()
-//                    messageText = ""
-//                }) {
-//                    Text("보내기")
-//                }
-//                .disabled(messageText.isEmpty)
-//                .padding(.trailing)
-//            }
-//            .padding(.bottom, self.isTyping ? 360 : 0)
-//            .onChange(of: isTyping) { value in
-//                withAnimation(.spring()) {
-//                    self.isTyping = value
-//                }
-//            }
+            ForEach(viewModel.messages) { message in
+                ChatMessageRow(message: message, isFromCurrentUser: message.userId == Auth.auth().currentUser?.uid, isHost: message.userId == hostId)
+            }
         }
         .onAppear {
             withAnimation(.spring()) {
@@ -75,22 +44,27 @@ struct ChatMessageRow: View {
     let message: ChatMessage
     let isFromCurrentUser: Bool
     
+    let isHost: Bool
+    
     var body: some View {
         HStack {
             if !isFromCurrentUser {
                 Text(message.userName)
-                    .bold()
-                    .padding(.trailing)
             }else{
                 Spacer()
             }
             Text(message.text)
-                .padding(10)
+                .padding(isHost ? 12 : 10)
                 .foregroundColor(.white)
                 .background(isFromCurrentUser ? Color.blue : Color.gray)
-                .cornerRadius(10)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
                 //.padding(isFromCurrentUser ? .leading : .trailing, 20)
                 //.padding(isFromCurrentUser ? .trailing : .leading, 60)
+                .border(isHost ? Color.red : Color.clear, width: 5)
+                .cornerRadius(10)
+            if !isFromCurrentUser {
+                Spacer()
+            }
         }
     }
 }

@@ -24,39 +24,38 @@ class MeetingViewModel: ObservableObject {
     @Published var messages: [ChatMessage] = []
     //private var cancellables = Set<AnyCancellable>()
     private var listenerRegistration: ListenerRegistration?
-        
+    
     
     /// Firestore에 있는 모임 데이터 가져오기
     func fetchMeetings(passedMeeting: Bool)async{
         do{
             print("fetchMeetings 실행")
             guard let uid:String = Auth.auth().currentUser?.uid else{return}
-            
+
             var query: Query!
 
             query = Firestore.firestore().collection("Meetings")
-//                    .whereField("members", arrayContains: uid)
-                    .order(by: "meetingDate", descending: true)
-//            if passedMeeting {
-//                query = query.whereField("meetingDate", isLessThan: Date())
-//            } else {
-//                query = query.whereField("meetingDate", isGreaterThan: Date())
-//            }
-                
+            //                    .whereField("members", arrayContains: uid)
+                .order(by: "meetingDate", descending: true)
+            //            if passedMeeting {
+            //                query = query.whereField("meetingDate", isLessThan: Date())
+            //            } else {
+            //                query = query.whereField("meetingDate", isGreaterThan: Date())
+            //            }
+
             let docs = try await query.getDocuments()
             let fetchedMeetings = docs.documents.compactMap{ doc -> Meeting? in
                 try? doc.data(as: Meeting.self)
             }
             await MainActor.run(body: {
-                for meeting in fetchedMeetings {
-                    if meeting.hostUID == uid {
-                        meetings.insert(meeting, at: 0)
-                    }else{
-                        meetings.append(meeting)
-                    }
-                }
-                print("Meeting탭 모임추가됨")
-//                paginationDoc = docs.documents.last
+//                for meeting in fetchedMeetings {
+//                    if meeting.hostUID == uid {
+//                        fetchedMeetings.insert(meeting, at: 0)
+//                    }else{
+//                        meetings.append(meeting)
+//                    }
+//                }
+                meetings = fetchedMeetings
                 isFetching = false
             })
         }catch{
@@ -67,40 +66,21 @@ class MeetingViewModel: ObservableObject {
     
     /// 실시간 모임 추가시 meetings 배열에 데이터 추가
     func addMeetingsListner(){
-        if docListner == nil{
-            print("addListner")
-            guard let uid = Auth.auth().currentUser?.uid else{return}
-            docListner = Firestore.firestore().collection("Meetings")
-//                .whereField("members", arrayContains: uid)
-                .addSnapshotListener({ snapshot, error in
-                guard let snapshot = snapshot else{print("Error snapshot");return}
-                snapshot.documentChanges.forEach { meeting in
-                    switch meeting.type {
-                    case .added: break
-                    case .modified:
-                        if let addMeeting = try? meeting.document.data(as: Meeting.self){
-                            var boo:Bool = true
-                            for meeting in self.meetings{
-                                if meeting.id == addMeeting.id {boo = false}
-                            }
-                            if boo{
-                                print("추가: \(String(describing: addMeeting.id))")
-                                if addMeeting.hostUID == uid {
-                                    self.meetings.insert(addMeeting, at: 0)
-                                }else{
-                                    self.meetings.append(addMeeting)
-                                }
-                            }
-                            
-                        }
-                    case .removed: break
-                    }
+        print("addListner")
+        guard let uid = Auth.auth().currentUser?.uid else{return}
+        Firestore.firestore().collection("Meetings")
+        //                .whereField("members", arrayContains: uid)
+            .addSnapshotListener { (querySnapshot, error) in
+                guard let documents = querySnapshot?.documents else {
+                    print("No documents")
+                    return
                 }
-            })
-        print("갯수: \(self.meetings.count)")
-        }
+                self.meetings = documents.compactMap{ documents -> Meeting? in
+                    try? documents.data(as: Meeting.self)
+                }
+            }
     }
-     
+    
     
     
     // 리스너 제거
@@ -136,27 +116,27 @@ class MeetingViewModel: ObservableObject {
                     Firestore.firestore().collection("Meetings").document(meetingID).updateData(["title": title])
                     print("title 수정")
                 }
-
+                
                 if description != editMeeting.description {
                     try await
                     Firestore.firestore().collection("Meetings").document(meetingID).updateData(["description": description])
                     print("description 수정")
                 }
                 
-//                Firestore.firestore().collection("Meetings").document(meetingID).getDocument(as: Meeting.self) { result in
-//                    switch result {
-//                    case .success(let meet):
-//                        self.meeting = meet
-//                        
-//                    case .failure(let err):
-//                        print("updateMeeting에러: \(err)")
-//                    }
-//                }
-//                
-//                print(meeting)
-//                await MainActor.run(body: {
-//                    meeting = meeting
-//                })
+                //                Firestore.firestore().collection("Meetings").document(meetingID).getDocument(as: Meeting.self) { result in
+                //                    switch result {
+                //                    case .success(let meet):
+                //                        self.meeting = meet
+                //
+                //                    case .failure(let err):
+                //                        print("updateMeeting에러: \(err)")
+                //                    }
+                //                }
+                //
+                //                print(meeting)
+                //                await MainActor.run(body: {
+                //                    meeting = meeting
+                //                })
             }catch{
                 print(error.localizedDescription)
             }
@@ -167,16 +147,14 @@ class MeetingViewModel: ObservableObject {
     func fetchData(meetingId: String) {
         do{
             print("fetchData 시작")
-        
             
-        listenerRegistration = db.document(meetingId).collection("messages")
-                .order(by: "timestamp", descending: true)
+            db.document(meetingId).collection("messages")
+                .order(by: "timestamp", descending: false)
                 .addSnapshotListener { (querySnapshot, error) in
                     guard let documents = querySnapshot?.documents else {
                         print("No documents")
                         return
                     }
-                    print("fetchData 시작")
                     self.messages = documents.compactMap { queryDocumentSnapshot -> ChatMessage? in
                         let data = queryDocumentSnapshot.data()
                         let id = queryDocumentSnapshot.documentID
@@ -184,59 +162,24 @@ class MeetingViewModel: ObservableObject {
                         let userId = data["userId"] as? String ?? ""
                         let userName = data["userName"] as? String ?? ""
                         let timestamp = data["timestamp"] as? Timestamp ?? Timestamp()
-
-                        print("fetchData 중간: \(text)")
-
+                        
+                        
                         return ChatMessage(id: id, text: text, userId: userId, userName: userName, timestamp: timestamp)
                     }
-                    print("fetchData 끝: \(self.messages)")
                 }
-//            let docs = try await db.document(meetingId).collection("messages").getDocuments()
-//            let fetchedMessages = docs.documents.compactMap{ doc -> ChatMessage? in
-//                try? doc.data(as: ChatMessage.self)
-//            }
-//            print("fetchData 끝: \(fetchedMessages)")
-//            await MainActor.run(body: {
-//                messages = fetchedMessages
-//                print("message 모임추가됨")
-//                isFetching = false
-//            })
         } catch{
             print("에러")
         }
         
-        }
-        
-        func sendMessage(meetingId: String, text: String, userId: String, userName: String) {
-            db.document(meetingId).collection("messages").addDocument(data: [
-                "text": text,
-                "userId": userId,
-                "userName": userName,
-                "timestamp": Timestamp()
-            ])
-        }
-        /*
-        func signInAnonymously() {
-            Auth.auth().signInAnonymously()
-                .sink(receiveCompletion: { completion in
-                    switch completion {
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                    case .finished:
-                        print("Signed in anonymously")
-                    }
-                }, receiveValue: { _ in })
-                .store(in: &cancellables)
-        }
-        
-        func signOut() {
-            do {
-                try Auth.auth().signOut()
-                print("Signed out")
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
-         */
+    }
+    
+    func sendMessage(meetingId: String, text: String, userId: String, userName: String) {
+        db.document(meetingId).collection("messages").addDocument(data: [
+            "text": text,
+            "userId": userId,
+            "userName": userName,
+            "timestamp": Timestamp()
+        ])
+    }
 }
 

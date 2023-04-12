@@ -20,7 +20,7 @@ struct DetailMeetingView: View {
     @State private var description: String = ""
 
     var body: some View {
-        let meetingHost = meeting.hostUID == Auth.auth().currentUser?.uid ? true : false
+        let isHost = meeting.hostUID == Auth.auth().currentUser?.uid ? true : false
         ScrollView(.vertical, showsIndicators: false){
             LazyVStack{
                 HStack(spacing: 12){
@@ -51,7 +51,7 @@ struct DetailMeetingView: View {
                     .padding(.vertical,8)
                     .hAlign(.leading)
                 
-                ChatView(meetingId: meeting.id!)
+                ChatView(hostId: meeting.hostUID, meetingId: meeting.id!)
                     .environmentObject(viewModel)
             }
             .padding(15)
@@ -60,7 +60,7 @@ struct DetailMeetingView: View {
             .environmentObject(viewModel)
         
         HStack{
-            if meetingHost {
+            if isHost {
                 if isEdit{
                     Button(action: {
                         guard title != "" else {
