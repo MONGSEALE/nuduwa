@@ -19,7 +19,7 @@ class MeetingViewModel: ObservableObject {
     
     private var docListner: ListenerRegistration?
     
-    //chat기능 변ㅅ
+    //chat기능 변수
     private let db = Firestore.firestore().collection("Meetings")
     @Published var messages = [ChatMessage]()
     //private var cancellables = Set<AnyCancellable>()
@@ -29,21 +29,14 @@ class MeetingViewModel: ObservableObject {
     /// Firestore에 있는 모임 데이터 가져오기
     func fetchMeetings(passedMeeting: Bool)async{
         do{
+            print("fetchMeetings 실행")
             guard let uid:String = Auth.auth().currentUser?.uid else{return}
             
             var query: Query!
-            /// - 한번에 전부가 아니라 20개씩 불러오는 코드
-//            if let paginationDoc{
-//                query = Firestore.firestore().collection("Meetings")
-//                    .order(by: "meetingDate", descending: true)
-//                    .start(afterDocument: paginationDoc)
-//                    .limit(to: 20)
-//            }else{
-                query = Firestore.firestore().collection("Meetings")
+
+            query = Firestore.firestore().collection("Meetings")
 //                    .whereField("members", arrayContains: uid)
                     .order(by: "meetingDate", descending: true)
-//                    .limit(to: 20)
-//            }
 //            if passedMeeting {
 //                query = query.whereField("meetingDate", isLessThan: Date())
 //            } else {
@@ -56,7 +49,6 @@ class MeetingViewModel: ObservableObject {
             }
             await MainActor.run(body: {
                 for meeting in fetchedMeetings {
-                    print(meeting.hostUID)
                     if meeting.hostUID == uid {
                         meetings.insert(meeting, at: 0)
                     }else{
@@ -87,15 +79,19 @@ class MeetingViewModel: ObservableObject {
                     case .added: break
                     case .modified:
                         if let addMeeting = try? meeting.document.data(as: Meeting.self){
+                            var bool:Bool = true
                             for meeting in self.meetings{
-                                if meeting.id != addMeeting.id {
-                                    if addMeeting.hostUID == uid {
-                                        self.meetings.insert(addMeeting, at: 0)
-                                    }else{
-                                        self.meetings.append(addMeeting)
-                                    }
+                                if meeting.id == addMeeting.id {bool = false}
+                            }
+                            if bool{
+                                print("추가: \(addMeeting.id)")
+                                if addMeeting.hostUID == uid {
+                                    self.meetings.insert(addMeeting, at: 0)
+                                }else{
+                                    self.meetings.append(addMeeting)
                                 }
                             }
+                            
                         }
                     case .removed: break
                     }

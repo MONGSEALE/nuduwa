@@ -52,9 +52,9 @@ struct ReusableMeetingsView: View {
                             }
                             .onAppear {
                                 /// - When Last Post Appears, Fetching New Post (If There)
-                                if meeting.id == viewModel.meetings.last?.id && viewModel.paginationDoc != nil{
-                                    Task{await viewModel.fetchMeetings(passedMeeting: passedMeeting)}
-                                }
+//                                if meeting.id == viewModel.meetings.last?.id && viewModel.paginationDoc != nil{
+//                                    Task{await viewModel.fetchMeetings(passedMeeting: passedMeeting)}
+//                                }
                             }
                         }
                     }
@@ -74,7 +74,7 @@ struct ReusableMeetingsView: View {
             viewModel.isFetching = true
             viewModel.meetings = []
             /// - Resetting Pagination Doc
-            viewModel.paginationDoc = nil
+//            viewModel.paginationDoc = nil
             await viewModel.fetchMeetings(passedMeeting: passedMeeting)
         }
         .onAppear{
