@@ -71,6 +71,7 @@ struct MeetingCardView: View {
                     }
                 })
             }
+            
              
         }
         .onDisappear {

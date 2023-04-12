@@ -13,7 +13,7 @@ class MeetingViewModel: ObservableObject {
     
     @Published var meeting: Meeting?
     
-    @Published var paginationDoc: QueryDocumentSnapshot?
+    //@Published var paginationDoc: QueryDocumentSnapshot?
     
     @Published var isFetching: Bool = true
     
@@ -29,33 +29,32 @@ class MeetingViewModel: ObservableObject {
     /// Firestore에 있는 모임 데이터 가져오기
     func fetchMeetings(passedMeeting: Bool)async{
         do{
-            var query: Query!
-            /// - Implementing Pagination
-            if let paginationDoc{
-                query = Firestore.firestore().collection("Meetings")
-                    .order(by: "meetingDate", descending: true)
-                    .start(afterDocument: paginationDoc)
-                    .limit(to: 20)
-            }else{
-                query = Firestore.firestore().collection("Meetings")
-                    .order(by: "meetingDate", descending: true)
-                    .limit(to: 20)
-            }
-            
             guard let uid:String = Auth.auth().currentUser?.uid else{return}
-            //query = query.whereField("userUID", isEqualTo:uid)
-            if passedMeeting {
-                //query = query.whereField("meetingDate", isLessThan: Date())
-            } else {
-                //query = query.whereField("meetingDate", isGreaterThan: Date())
-            }
+            
+            var query: Query!
+            /// - 한번에 전부가 아니라 20개씩 불러오는 코드
+//            if let paginationDoc{
+//                query = Firestore.firestore().collection("Meetings")
+//                    .order(by: "meetingDate", descending: true)
+//                    .start(afterDocument: paginationDoc)
+//                    .limit(to: 20)
+//            }else{
+                query = Firestore.firestore().collection("Meetings")
+//                    .whereField("members", arrayContains: uid)
+                    .order(by: "meetingDate", descending: true)
+//                    .limit(to: 20)
+//            }
+//            if passedMeeting {
+//                query = query.whereField("meetingDate", isLessThan: Date())
+//            } else {
+//                query = query.whereField("meetingDate", isGreaterThan: Date())
+//            }
                 
             let docs = try await query.getDocuments()
             let fetchedMeetings = docs.documents.compactMap{ doc -> Meeting? in
                 try? doc.data(as: Meeting.self)
             }
             await MainActor.run(body: {
-                //meetings = fetchedMeetings
                 for meeting in fetchedMeetings {
                     print(meeting.hostUID)
                     if meeting.hostUID == uid {
@@ -64,13 +63,12 @@ class MeetingViewModel: ObservableObject {
                         meetings.append(meeting)
                     }
                 }
-                //meetings.append(contentsOf: fetchedMeetings)
                 print("Meeting탭 모임추가됨")
-                paginationDoc = docs.documents.last
+//                paginationDoc = docs.documents.last
                 isFetching = false
             })
         }catch{
-            print("에러: \(error.localizedDescription)")
+            print("fetchMeetings 에러!")
         }
     }
     
@@ -81,7 +79,7 @@ class MeetingViewModel: ObservableObject {
             print("addListner")
             guard let uid = Auth.auth().currentUser?.uid else{return}
             docListner = Firestore.firestore().collection("Meetings")
-                //.whereField("userUID", isEqualTo:uid)
+                .whereField("members", arrayContains: uid)
                 .addSnapshotListener({ snapshot, error in
                 guard let snapshot = snapshot else{print("Error snapshot");return}
                 snapshot.documentChanges.forEach { meeting in
@@ -89,18 +87,18 @@ class MeetingViewModel: ObservableObject {
                     case .added: break
                     case .modified:
                         if let addMeeting = try? meeting.document.data(as: Meeting.self){
-                            print("변경: \(String(describing: addMeeting.id))")
-                            if addMeeting.hostUID == uid {
-                                self.meetings.insert(addMeeting, at: 0)
-                            }else{
-                                self.meetings.append(addMeeting)
+                            for meeting in self.meetings{
+                                if meeting.id != addMeeting.id {
+                                    if addMeeting.hostUID == uid {
+                                        self.meetings.insert(addMeeting, at: 0)
+                                    }else{
+                                        self.meetings.append(addMeeting)
+                                    }
+                                }
                             }
-                            //self.meetings.append(addMeeting)
                         }
                     case .removed: break
                     }
-                
-                    
                 }
             })
         print("갯수: \(self.meetings.count)")
