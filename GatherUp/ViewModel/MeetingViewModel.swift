@@ -22,7 +22,7 @@ class MeetingViewModel: ObservableObject {
     //chat기능 변ㅅ
     private let db = Firestore.firestore().collection("Meetings")
     @Published var messages = [ChatMessage]()
-    private var cancellables = Set<AnyCancellable>()
+    //private var cancellables = Set<AnyCancellable>()
     private var listenerRegistration: ListenerRegistration?
         
     

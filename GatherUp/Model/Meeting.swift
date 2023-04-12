@@ -21,8 +21,8 @@ struct Meeting : Identifiable,Codable,Equatable, Hashable{
     var publishedDate: Date = Date()
     var meetingDate: Date = Date()
     
-    var participants: [String]
-    var maxParticipants: Int
+    var members: [String]
+    var numbersOfMembers: Int
     /*
      참가비
      */
