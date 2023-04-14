@@ -290,39 +290,4 @@ extension MKCoordinateRegion {
         return min(maxZoomLevel, max(1, zoomLevel))
     }
 }
-/*
-// ShowMessage Struct으로 통합
-struct PopupMessage: View {
-    let message:String
-    
-    var body: some View {
-        //Text("장소를 선택해주세요!")
-        Text(message)
-            .foregroundColor(.white)
-            .padding()
-            .background(Color.black.opacity(0.8))
-            .cornerRadius(10)
-    }
-}
-
-struct CreatePopupMessage: View {
-    var body: some View {
-        Text("장소를 반드시 선택해주세요!")
-            .foregroundColor(.white)
-            .padding()
-            .background(Color.black.opacity(0.8))
-            .cornerRadius(10)
-    }
-}
-
-struct createConfirmedPopupMessage: View {
-    var body: some View {
-        Text("모임은 최대 한개만 생성할 수 있습니다!")
-            .foregroundColor(.white)
-            .padding()
-            .background(Color.black.opacity(0.8))
-            .cornerRadius(10)
-    }
-}
-*/
 
