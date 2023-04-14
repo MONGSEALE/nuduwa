@@ -11,9 +11,9 @@ import FirebaseFirestore
 import CoreLocation
 
 class MapViewModel2: ObservableObject {
-    @Published var meetings: [Location] = []    // Firestore에 있는 모임 장소 배열
-    @Published var meetingsMap: [Location] = []     // meetings + 새로 추가하는 모임(저장전) 배열
-    private var newMeeting: Location?       // 새로 추가하는 모임(저장전)
+    @Published var meetings: [Meeting] = []    // Firestore에 있는 모임 장소 배열
+    @Published var meetingsMap: [Meeting] = []     // meetings + 새로 추가하는 모임(저장전) 배열
+    private var newMeeting: Meeting?       // 새로 추가하는 모임(저장전)
     @Published var meeting: Meeting? // 보여질 미팅
     
     // MARK: Error Properties
@@ -53,11 +53,12 @@ class MapViewModel2: ObservableObject {
             }
             
             await MainActor.run(body: {
-                for meeting in fetchedMeetings{
-                    meetings.append(Location(coordinate: CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude)))
-                }
+//                for meeting in fetchedMeetings{
+//                    meetings.append(Meeting(coordinate: CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude)))
+//                }
                 //meetingsFirestore.append(contentsOf: fetchedMeetings)
-                paginationDoc = docs.documents.last
+//                paginationDoc = docs.documents.last
+                meetings = fetchedMeetings
                 isFetching = false
                 meetingsMap = (newMeeting != nil) ? meetings + [newMeeting!] : meetings
                 //meetingsMap = meetings
@@ -70,35 +71,48 @@ class MapViewModel2: ObservableObject {
     }
     
     /// 실시간 모임 추가시 meetings 배열에 데이터 추가
+//    func addMeetingsListner(){
+//        if docListner == nil{
+//            print("addListner")
+//            docListner =
+//            Firestore.firestore().collection("Meetings")
+//                .whereField("publishedDate", isLessThan: Date())
+//                .addSnapshotListener({ snapshot, error in
+//                guard let snapshot = snapshot else{print("Error snapshot");return}
+//                snapshot.documentChanges.forEach { meeting in
+//                    switch meeting.type {
+//                    case .added:
+//                        print("추가 전")
+//                        if let addMeeting = try? meeting.document.data(as: Meeting.self){
+//                            self.meetingsMap.append(Meeting(coordinate: CLLocationCoordinate2D(latitude: addMeeting.latitude, longitude: addMeeting.longitude)))
+//                            print("추가 후")
+//                        }
+//                    case .modified:
+//                        print("변경")
+//                    case .removed:
+//                        if let removeMeeting = try? meeting.document.data(as: Meeting.self){
+//                            self.meetingsMap.removeAll{removeMeeting.longitude == $0.coordinate.longitude}
+//                            print("삭제")
+//                        }
+//                    }
+//
+//                }
+//            })
+//        print("갯수: \(self.meetings.count)")
+//        }
+//    }
     func addMeetingsListner(){
-        if docListner == nil{
-            print("addListner")
-            docListner =
-            Firestore.firestore().collection("Meetings")
-                .whereField("publishedDate", isLessThan: Date())
-                .addSnapshotListener({ snapshot, error in
-                guard let snapshot = snapshot else{print("Error snapshot");return}
-                snapshot.documentChanges.forEach { meeting in
-                    switch meeting.type {
-                    case .added:
-                        print("추가 전")
-                        if let addMeeting = try? meeting.document.data(as: Meeting.self){
-                            self.meetingsMap.append(Location(coordinate: CLLocationCoordinate2D(latitude: addMeeting.latitude, longitude: addMeeting.longitude)))
-                            print("추가 후")
-                        }
-                    case .modified:
-                        print("변경")
-                    case .removed:
-                        if let removeMeeting = try? meeting.document.data(as: Meeting.self){
-                            self.meetingsMap.removeAll{removeMeeting.longitude == $0.coordinate.longitude}
-                            print("삭제")
-                        }
-                    }
-                    
+        print("addListner")
+        Firestore.firestore().collection("Meetings")
+            .addSnapshotListener { (querySnapshot, error) in
+                guard let documents = querySnapshot?.documents else {
+                    print("No documents")
+                    return
                 }
-            })
-        print("갯수: \(self.meetings.count)")
-        }
+                self.meetings = documents.compactMap{ documents -> Meeting? in
+                    try? documents.data(as: Meeting.self)
+                }
+            }
     }
     /// Listner 삭제
     func removeListner(){
@@ -113,9 +127,9 @@ class MapViewModel2: ObservableObject {
         meetingsMap = meetings
     }
     
-    func addMeeting(newLocation: Location){
-        newMeeting = newLocation
-        meetingsMap = (newMeeting != nil) ? meetings + [newMeeting!] : meetings
+    func addMeeting(newMeeting: Meeting){
+        self.newMeeting = newMeeting
+        meetingsMap = (self.newMeeting != nil) ? meetings + [self.newMeeting!] : meetings
     }
     /// 새로운 모임 Firestore에 저장
     func createMeeting(meeting: Meeting){

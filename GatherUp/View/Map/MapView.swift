@@ -15,7 +15,7 @@ import Firebase
 struct MapView: View {
     
     @StateObject private var viewModel = MapViewModel()
-    @State private var locations = [Location]()
+//    @State private var locations = [Location]()
     @State var showAnnotation = false
     @State private var coordinate = CLLocationManager()
     
@@ -35,13 +35,13 @@ struct MapView: View {
 
     var body: some View {
         ZStack(alignment:.bottom){
-            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:locations){ item in
-                MapAnnotation(coordinate: item.coordinate, content: {
+            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:viewM2.meetingsMap){ item in
+                MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
                     if(viewM2.isOverlap==false){
-                        CustomMapAnnotationView(coordinate: item.coordinate)
+                        CustomMapAnnotationView(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude))
                     }
                     else{
-                        MeetingIconView(coordinate:item.coordinate)
+                        MeetingIconView(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude))
                     }
                 })
             }
@@ -65,7 +65,9 @@ struct MapView: View {
                                 let tapLocation = value.location
                                 let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
                                 if(showAnnotation==true){
-                                    locations.append(Location(coordinate: tapCoordinate))
+                                    //locations.append(Location(coordinate: tapCoordinate))
+                                    let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude, hostName: Auth.auth().currentUser?.uid, hostUID: Auth.auth().currentUser?.photoURL)
+                                    viewM2.addMeeting(newMeeting: newMeeting)
                                     coordinateCreated=tapCoordinate
                                 }
                             }))
