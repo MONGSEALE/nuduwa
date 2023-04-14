@@ -15,14 +15,15 @@ struct Meeting : Identifiable,Codable,Equatable, Hashable{
     
     var title: String
     var description: String
+    var place : String
+    var numbersOfMembers : Int
+   // var members : [String]
     let latitude : Double
     let longitude : Double
     
+    
     var publishedDate: Date = Date()
     var meetingDate: Date = Date()
-    
-    var members: [String]
-    var numbersOfMembers: Int
     /*
      참가비
      */
