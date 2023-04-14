@@ -163,12 +163,12 @@ class MapViewModel2: ObservableObject {
             }
     }
     
-    func showMeeting(userId: String){
-        let doc = Firestore.firestore().collection("Meetings").document(userId)
+    func showMeeting(meetingId: String){
+        let doc = Firestore.firestore().collection("Meetings").document(meetingId)
         doc.getDocument(as: Meeting.self) { result in
             switch result {
-            case .success(let meet):
-                self.meeting = meet
+            case .success(let meeting):
+                self.meeting = meeting
             case .failure(let err):
                 print("showMeeting 에러: \(err)")
             }
