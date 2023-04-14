@@ -23,6 +23,8 @@ class FirebaseViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isFetching: Bool = true
     
+    @Published var members: [String] = []
+    
     private var docListner: ListenerRegistration?
     
     //chat기능 변수
@@ -161,22 +163,24 @@ class FirebaseViewModel: ObservableObject {
     /// 모임 참가하기
     func joinMeeting(meetingId: String){
         guard let user = Auth.auth().currentUser else{return}
-        let doc = Firestore.firestore().collection("Meetings").document(meetingId).collection("members").addDocument(data: [
+        Firestore.firestore().collection("Meetings").document(meetingId).collection("members").addDocument(data: [
             "userId": user.uid,
             "userName": user.displayName,
             "timestamp": Timestamp()
         ])
-//        doc.getDocument { (document, err) in
-//            if let err = err {
-//                print("joinMeeting 에러: \(err)")
-//            } else {
-//                guard var participants = document!["members"] as? [String] else{print("오류!joinMeeing");return}
-//                participants.append(Auth.auth().currentUser!.uid)
-//                doc.updateData(["participants" : participants])
-//            }
-//        }
     }
-    
+    /// 모임맴버 가져오기
+    func getMembers(meetingId: String){
+        Firestore.firestore().collection("Meetings").document(meetingId).collection("members")
+            .addSnapshotListener { (querySnapshot, error) in
+                guard let documents = querySnapshot?.documents else {return}
+                documents.forEach{document in
+                    if let userName = document.data()["userName"] as? String {
+                        self.members.append(userName)
+                    }
+                }
+            }
+    }
     /// - 모임 지우기
     func deleteMeeting(deletedMeeting: Meeting){
         Task{
