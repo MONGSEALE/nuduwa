@@ -38,10 +38,12 @@ struct MapView: View {
             Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:viewM2.meetingsMap){ item in
                 MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
                     if(viewM2.isOverlap==false){
-                        CustomMapAnnotationView(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude))
+                        CustomMapAnnotationView()
+//                        CustomMapAnnotationView(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude))
                     }
                     else{
-                        MeetingIconView(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude))
+                        MeetingIconView(hostImage: item.hostImage ?? URL(fileURLWithPath: ""))
+//                        MeetingIconView(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude))
                     }
                 })
             }
@@ -50,6 +52,11 @@ struct MapView: View {
             .onAppear{
                 viewModel.checkIfLocationServicesIsEnabled()
                 viewM2.checkedOverlap(id: Auth.auth().currentUser!.uid)
+                viewM2.addMeetingsListner()
+            }
+            .task {
+                guard viewM2.meetingsMap.isEmpty else{return}
+                await viewM2.fetchMeetings()
             }
             .overlay(GeometryReader { geometry in
                 if(showAnnotation==true){
@@ -66,7 +73,7 @@ struct MapView: View {
                                 let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
                                 if(showAnnotation==true){
                                     //locations.append(Location(coordinate: tapCoordinate))
-                                    let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude, hostName: Auth.auth().currentUser?.uid, hostUID: Auth.auth().currentUser?.photoURL)
+                                    let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude, hostName: Auth.auth().currentUser!.displayName!, hostUID: Auth.auth().currentUser!.uid, hostImage: Auth.auth().currentUser!.photoURL)
                                     viewM2.addMeeting(newMeeting: newMeeting)
                                     coordinateCreated=tapCoordinate
                                 }
@@ -93,8 +100,8 @@ struct MapView: View {
                                     showAnnotation.toggle()
                                     showMessage = false
                                 }
-                                if(!locations.isEmpty){
-                                    locations.removeLast()
+                                if(viewM2.newMeeting != nil){
+                                    viewM2.cancleMeeting()
                                 }
                             }
                         }
@@ -115,7 +122,7 @@ struct MapView: View {
                     Spacer()
                     if(showAnnotation==true){
                         Button{
-                            if(locations.isEmpty){
+                            if(viewM2.meetingsMap.isEmpty){
                                showCreatePopupMessage(duration: 3)
                             }
                             else{
@@ -229,9 +236,9 @@ struct MapView: View {
     }
     
     func coordinateFromTap(_ tapLocation: CGPoint, in geometry: GeometryProxy, region: MKCoordinateRegion) -> CLLocationCoordinate2D {
-        if let lastLocation = locations.last {
+        if let lastLocation = viewM2.newMeeting {
             // Remove the previous annotation from the map
-            locations.removeLast()
+            viewM2.cancleMeeting()
             viewModel.objectWillChange.send()
         }
         let frame = geometry.frame(in: .local)

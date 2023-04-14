@@ -13,7 +13,7 @@ import CoreLocation
 class MapViewModel2: ObservableObject {
     @Published var meetings: [Meeting] = []    // Firestore에 있는 모임 장소 배열
     @Published var meetingsMap: [Meeting] = []     // meetings + 새로 추가하는 모임(저장전) 배열
-    private var newMeeting: Meeting?       // 새로 추가하는 모임(저장전)
+    @Published var newMeeting: Meeting?       // 새로 추가하는 모임(저장전)
     @Published var meeting: Meeting? // 보여질 미팅
     
     // MARK: Error Properties
