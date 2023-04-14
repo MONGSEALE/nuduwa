@@ -52,7 +52,7 @@ struct DetailMeetingView: View {
                     .hAlign(.leading)
                 
                 ForEach(viewModel.members, id: \.self){ member in
-                    Text("참여맴버: \(member)")
+                    Text("참여자: \(member)")
                 }
                 
                 ChatView(hostId: meeting.hostUID, meetingId: meeting.id!)
