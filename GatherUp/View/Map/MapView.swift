@@ -37,13 +37,11 @@ struct MapView: View {
         ZStack(alignment:.bottom){
             Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:viewM2.meetingsMap){ item in
                 MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
-                    if(viewM2.isOverlap==false){
+                    if(Auth.auth().currentUser?.uid == item.hostUID){
                         CustomMapAnnotationView()
-//                        CustomMapAnnotationView(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude))
                     }
                     else{
                         MeetingIconView(hostImage: item.hostImage ?? URL(fileURLWithPath: ""))
-//                        MeetingIconView(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude))
                     }
                 })
             }
