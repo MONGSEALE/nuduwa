@@ -146,7 +146,7 @@ class MapViewModel2: ObservableObject {
     
     /// 작성자 확인
     func checkedOverlap(id: String){
-            let doc = Firestore.firestore().collection("Meetings").whereField("userUID", isEqualTo: id)
+            let doc = Firestore.firestore().collection("Meetings").whereField("hostUID", isEqualTo: id)
             doc.getDocuments(){ (query, err) in
                 if let err = err {
                     print("checkedOverlap 에러: \(err)")
@@ -154,10 +154,10 @@ class MapViewModel2: ObservableObject {
                     print("중복 여부")
                     if let query = query, !query.isEmpty {
                         print("중복!: \(query.documents)")
-                        self.isOverlap = false
+                        self.isOverlap = true
                     } else {
                         print("중복 아님!")
-                        self.isOverlap = true
+                        self.isOverlap = false
                     }
                 }
             }

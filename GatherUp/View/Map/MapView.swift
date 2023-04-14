@@ -10,6 +10,7 @@
 import SwiftUI
 import MapKit
 import CoreLocationUI
+import Firebase
 
 struct MapView: View {
     
@@ -24,8 +25,9 @@ struct MapView: View {
     @State private var showCreateConfirmedMessage = false
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
-    @AppStorage("createConfirmed") var createConfirmed: Bool = false
-   
+//    @AppStorage("createConfirmed") var createConfirmed: Bool = false
+    
+    @StateObject private var viewM2: MapViewModel2 = .init()
     
     
     
@@ -35,7 +37,7 @@ struct MapView: View {
         ZStack(alignment:.bottom){
             Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:locations){ item in
                 MapAnnotation(coordinate: item.coordinate, content: {
-                    if(createConfirmed==false){
+                    if(viewM2.isOverlap==false){
                         CustomMapAnnotationView(coordinate: item.coordinate)
                     }
                     else{
@@ -47,6 +49,7 @@ struct MapView: View {
             .accentColor(Color(.systemPink))
             .onAppear{
                 viewModel.checkIfLocationServicesIsEnabled()
+                viewM2.checkedOverlap(id: Auth.auth().currentUser!.uid)
             }
             .overlay(GeometryReader { geometry in
                 if(showAnnotation==true){
@@ -72,7 +75,7 @@ struct MapView: View {
                 HStack{
                     Spacer()
                     Button{
-                        if (createConfirmed==true){
+                        if (viewM2.isOverlap==true){
                             showCreateConfirmedPopUpMessage(duration: 2)
                         }
                         else{
@@ -127,7 +130,7 @@ struct MapView: View {
                         .sheet(isPresented: $showSheet){
                             MeetingSetSheetView(coordinateCreated: $coordinateCreated,onDismiss: {
                                 showAnnotation = false
-                                createConfirmed = true
+                                viewM2.isOverlap = true
                             })
                         }
                     }

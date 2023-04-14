@@ -25,6 +25,13 @@ class MeetingViewModel: ObservableObject {
     //private var cancellables = Set<AnyCancellable>()
     private var listenerRegistration: ListenerRegistration?
     
+//    func arrayMeetings(){
+//        guard let uid = Auth.auth().currentUser?.uid else{return}
+//        ForEach(meetings){ meeting in
+//            meeting
+//        }
+//        meetings.lastIndex(of: )
+//    }
     
     /// Firestore에 있는 모임 데이터 가져오기
     func fetchMeetings(passedMeeting: Bool)async{
@@ -47,6 +54,7 @@ class MeetingViewModel: ObservableObject {
             let fetchedMeetings = docs.documents.compactMap{ doc -> Meeting? in
                 try? doc.data(as: Meeting.self)
             }
+            print(fetchedMeetings)
             await MainActor.run(body: {
 //                for meeting in fetchedMeetings {
 //                    if meeting.hostUID == uid {
