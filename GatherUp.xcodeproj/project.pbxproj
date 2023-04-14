@@ -26,7 +26,7 @@
 		339A102329D4093800B4DD98 /* ReusableProfileContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A102229D4093800B4DD98 /* ReusableProfileContent.swift */; };
 		339A102629D4098400B4DD98 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 339A102529D4098400B4DD98 /* SDWebImageSwiftUI */; };
 		33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A82CB829DBA57500FA2BA0 /* DetailMeetingView.swift */; };
-		33ABB70229DD2B030049D482 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ABB70129DD2B030049D482 /* MeetingViewModel.swift */; };
+		33ABB70229DD2B030049D482 /* FirebaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ABB70129DD2B030049D482 /* FirebaseViewModel.swift */; };
 		33ABB70429DD421E0049D482 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ABB70329DD421E0049D482 /* ProfileViewModel.swift */; };
 		33ADB13829D6610900352451 /* Meeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13729D6610900352451 /* Meeting.swift */; };
 		33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13929D666A500352451 /* ReusableMeetingsView.swift */; };
@@ -59,7 +59,7 @@
 		339A101B29D3EBBE00B4DD98 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		339A102229D4093800B4DD98 /* ReusableProfileContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReusableProfileContent.swift; sourceTree = "<group>"; };
 		33A82CB829DBA57500FA2BA0 /* DetailMeetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailMeetingView.swift; sourceTree = "<group>"; };
-		33ABB70129DD2B030049D482 /* MeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingViewModel.swift; sourceTree = "<group>"; };
+		33ABB70129DD2B030049D482 /* FirebaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseViewModel.swift; sourceTree = "<group>"; };
 		33ABB70329DD421E0049D482 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		33ADB13729D6610900352451 /* Meeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meeting.swift; sourceTree = "<group>"; };
 		33ADB13929D666A500352451 /* ReusableMeetingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableMeetingsView.swift; sourceTree = "<group>"; };
@@ -119,7 +119,7 @@
 			children = (
 				339A101129D3E9C000B4DD98 /* LoginViewModel.swift */,
 				3372C5D129DFA78A000169DD /* MapViewModel2.swift */,
-				33ABB70129DD2B030049D482 /* MeetingViewModel.swift */,
+				33ABB70129DD2B030049D482 /* FirebaseViewModel.swift */,
 				33ABB70329DD421E0049D482 /* ProfileViewModel.swift */,
 			);
 			path = ViewModel;
@@ -342,7 +342,7 @@
 				339A102329D4093800B4DD98 /* ReusableProfileContent.swift in Sources */,
 				4285616029DFDAAB004DCDB9 /* MeetingIconView.swift in Sources */,
 				429515E129C4A9AD006DD4B3 /* MeetingsView.swift in Sources */,
-				33ABB70229DD2B030049D482 /* MeetingViewModel.swift in Sources */,
+				33ABB70229DD2B030049D482 /* FirebaseViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

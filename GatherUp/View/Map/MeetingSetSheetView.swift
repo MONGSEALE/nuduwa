@@ -22,11 +22,11 @@ struct MeetingSetSheetView: View {
     @State private var showPlacePopUp = false
     @State private var noMorePlacePopUp = false
     @Binding var coordinateCreated: CLLocationCoordinate2D
-    @StateObject private var viewModel:MapViewModel2 = .init()
+    
     @State private var meetingTime = Date()
     @State private var selection : Int
     
-    
+    @EnvironmentObject var viewModel: FirebaseViewModel
    
 
     

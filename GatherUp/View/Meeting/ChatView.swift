@@ -10,7 +10,7 @@ import Firebase
 
 
 struct ChatView: View {
-    @EnvironmentObject var viewModel: MeetingViewModel
+    @EnvironmentObject var viewModel: FirebaseViewModel
     //@StateObject var viewModel: MeetingViewModel = .init()
     
     
@@ -70,7 +70,7 @@ struct ChatMessageRow: View {
 }
 
 struct Chatting: View {
-    @EnvironmentObject var viewModel: MeetingViewModel
+    @EnvironmentObject var viewModel: FirebaseViewModel
     @State private var messageText = ""
     //@State private var isTyping = false
     var meetingId: String

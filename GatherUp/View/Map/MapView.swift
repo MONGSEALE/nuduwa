@@ -25,19 +25,17 @@ struct MapView: View {
     @State private var showCreateConfirmedMessage = false
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
-//    @AppStorage("createConfirmed") var createConfirmed: Bool = false
     
-    @StateObject private var viewM2: MapViewModel2 = .init()
+    @StateObject private var viewM3: FirebaseViewModel = .init()
     
-    
-    
+    let user = Auth.auth().currentUser
     
 
     var body: some View {
         ZStack(alignment:.bottom){
-            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:viewM2.meetingsMap){ item in
+            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:viewM3.meetings){ item in
                 MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
-                    if(Auth.auth().currentUser?.uid == item.hostUID){
+                    if(viewM3.isOverlap==false && Auth.auth().currentUser?.uid == item.hostUID){
                         CustomMapAnnotationView()
                     }
                     else{
@@ -48,13 +46,12 @@ struct MapView: View {
             .edgesIgnoringSafeArea(.top)
             .accentColor(Color(.systemPink))
             .onAppear{
+                viewM3.meetingsListner()
                 viewModel.checkIfLocationServicesIsEnabled()
-                viewM2.checkedOverlap(id: Auth.auth().currentUser!.uid)
-                viewM2.addMeetingsListner()
+                viewM3.checkedOverlap(id: Auth.auth().currentUser!.uid)
             }
-            .task {
-                guard viewM2.meetingsMap.isEmpty else{return}
-                await viewM2.fetchMeetings()
+            .onDisappear{
+                viewM3.removeListner()
             }
             .overlay(GeometryReader { geometry in
                 if(showAnnotation==true){
@@ -72,7 +69,7 @@ struct MapView: View {
                                 if(showAnnotation==true){
                                     //locations.append(Location(coordinate: tapCoordinate))
                                     let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude, hostName: Auth.auth().currentUser!.displayName!, hostUID: Auth.auth().currentUser!.uid, hostImage: Auth.auth().currentUser!.photoURL)
-                                    viewM2.addMeeting(newMeeting: newMeeting)
+                                    viewM3.addMeeting(newMeeting: newMeeting)
                                     coordinateCreated=tapCoordinate
                                 }
                             }))
@@ -82,7 +79,7 @@ struct MapView: View {
                 HStack{
                     Spacer()
                     Button{
-                        if (viewM2.isOverlap==true){
+                        if (viewM3.isOverlap==true){
                             showCreateConfirmedPopUpMessage(duration: 2)
                         }
                         else{
@@ -98,8 +95,8 @@ struct MapView: View {
                                     showAnnotation.toggle()
                                     showMessage = false
                                 }
-                                if(viewM2.newMeeting != nil){
-                                    viewM2.cancleMeeting()
+                                if(viewM3.newMeeting != nil){
+                                    viewM3.cancleMeeting()
                                 }
                             }
                         }
@@ -120,7 +117,7 @@ struct MapView: View {
                     Spacer()
                     if(showAnnotation==true){
                         Button{
-                            if(viewM2.meetingsMap.isEmpty){
+                            if(viewM3.newMeeting == nil){
                                showCreatePopupMessage(duration: 3)
                             }
                             else{
@@ -137,8 +134,9 @@ struct MapView: View {
                         .sheet(isPresented: $showSheet){
                             MeetingSetSheetView(coordinateCreated: $coordinateCreated,onDismiss: {
                                 showAnnotation = false
-                                viewM2.isOverlap = true
+                                viewM3.isOverlap = true
                             })
+                            .environmentObject(viewModel)
                         }
                     }
                     LocationButton(.currentLocation){
@@ -234,9 +232,9 @@ struct MapView: View {
     }
     
     func coordinateFromTap(_ tapLocation: CGPoint, in geometry: GeometryProxy, region: MKCoordinateRegion) -> CLLocationCoordinate2D {
-        if let lastLocation = viewM2.newMeeting {
+        if let lastLocation = viewM3.newMeeting {
             // Remove the previous annotation from the map
-            viewM2.cancleMeeting()
+            viewM3.cancleMeeting()
             viewModel.objectWillChange.send()
         }
         let frame = geometry.frame(in: .local)

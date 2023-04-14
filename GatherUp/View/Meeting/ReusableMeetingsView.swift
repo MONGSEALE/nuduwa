@@ -14,14 +14,15 @@ struct ReusableMeetingsView: View {
     //@State var isFetching: Bool = true
     /// - Pagination
     //@State private var paginationDoc: QueryDocumentSnapshot?
-    @StateObject var viewModel: MeetingViewModel = .init()
+    @StateObject var viewModel: FirebaseViewModel = .init()
     var title: String = ""
     var passedMeeting: Bool = false
     
     
     var body: some View {
         NavigationStack{
-            if viewModel.isFetching{
+//            if viewModel.isFetching{
+            if false{
                 /// 서버에서 데이터 가져오는 중일때
                 ProgressView()
                     .padding(.top,30)
@@ -67,16 +68,17 @@ struct ReusableMeetingsView: View {
             }
         }
         .onAppear{
-            viewModel.addMeetingsListner()
+            viewModel.meetingsListner()
         }
         .onDisappear{
             viewModel.removeListner()
         }
-        .task {
-            /// - Fetching For One Time
-            guard viewModel.meetings.isEmpty else{return}
-            await viewModel.fetchMeetings(passedMeeting: passedMeeting)
-        }
+//        .task {
+//            /// - Fetching For One Time
+//            print(viewModel.meetings.count)
+//            guard viewModel.meetings.isEmpty else{return}
+//            await viewModel.fetchMeetings(passedMeeting: passedMeeting)
+//        }
     }
 }
 
