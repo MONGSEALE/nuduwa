@@ -13,9 +13,7 @@ import CoreLocationUI
 import Firebase
 
 struct MapView: View {
-    
     @StateObject private var viewModel = MapViewModel()
-//    @State private var locations = [Location]()
     @State var showAnnotation = false
     @State private var coordinate = CLLocationManager()
     
@@ -26,32 +24,33 @@ struct MapView: View {
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
     
-    @StateObject private var viewM3: FirebaseViewModel = .init()
+    @StateObject private var serverViewModel: FirebaseViewModel = .init()   /// Firebase 연결 viewmodel
+    let user = Auth.auth().currentUser                                      /// 현재 로그인 중인 유저정보 변수
     
-    let user = Auth.auth().currentUser
     
-
     var body: some View {
         ZStack(alignment:.bottom){
-            Map(coordinateRegion: $viewModel.region,showsUserLocation: true,annotationItems:viewM3.meetings){ item in
+            /// serverViewModel의 meetings 배열에서 item(meeting) 하나씩 가져와서 지도에 Pin 표시
+            Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
                 MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
-                    if(viewM3.isOverlap==false && Auth.auth().currentUser?.uid == item.hostUID){
+                    /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
+                    if(serverViewModel.isOverlap==false && user?.uid == item.hostUID){
                         CustomMapAnnotationView()
-                    }
-                    else{
-                        MeetingIconView(hostImage: item.hostImage ?? URL(fileURLWithPath: ""))
+                    }else{
+                        MeetingIconView(hostImage: item.hostImage)
                     }
                 })
             }
             .edgesIgnoringSafeArea(.top)
             .accentColor(Color(.systemPink))
             .onAppear{
-                viewM3.meetingsListner()
+                guard let user = user else{return}             /// 혹시라도 로그인한 유저 정보 없으면 return
+                serverViewModel.meetingsListner()              /// Map이 보여지는동안 Firebase와 실시간 연동
+                serverViewModel.checkedOverlap(id: user.uid)   /// Map이 보여지는동안 실시간 중복확인
                 viewModel.checkIfLocationServicesIsEnabled()
-                viewM3.checkedOverlap(id: Auth.auth().currentUser!.uid)
             }
             .onDisappear{
-                viewM3.removeListner()
+                serverViewModel.removeListner()                /// Map을 안보면 실시간 연동 중단
             }
             .overlay(GeometryReader { geometry in
                 if(showAnnotation==true){
@@ -66,38 +65,35 @@ struct MapView: View {
                             .onEnded({ value in
                                 let tapLocation = value.location
                                 let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
-                                if(showAnnotation==true){
-                                    //locations.append(Location(coordinate: tapCoordinate))
-                                    let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude, hostName: Auth.auth().currentUser!.displayName!, hostUID: Auth.auth().currentUser!.uid, hostImage: Auth.auth().currentUser!.photoURL)
-                                    viewM3.addMeeting(newMeeting: newMeeting)
-                                    coordinateCreated=tapCoordinate
-                                }
-                            }))
+                                /// 지도에 위치표시하기 위한 임시 Meeting데이터
+                                let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude, hostName: user!.displayName!, hostUID: user!.uid, hostImage: user!.photoURL)
+                                
+                                serverViewModel.addMeeting(newMeeting: newMeeting)
+                                coordinateCreated=tapCoordinate
+                            })
+                        )
                 }
             })
             VStack{
                 HStack{
                     Spacer()
                     Button{
-                        if (viewM3.isOverlap==true){
+                        /// 모임 중복 생성이면 if문 실행
+                        if (serverViewModel.isOverlap==true){
                             showCreateConfirmedPopUpMessage(duration: 2)
-                        }
-                        else{
+                        }else{
+                            /// 모임만들기 버튼 클릭할때마다 if문과 else문 번갈아 실행
                             if(showAnnotation==false){
-                                showMessage = false
+                                /// 모임만들기 버튼 클릭하면 "장소를 선택해주세요!" 메시지 출력
                                 showPopupMessage(duration: 3)
                                 withAnimation(.spring()){
                                     showAnnotation.toggle()
                                 }
-                            }
-                            else{
+                            }else{
                                 withAnimation(.spring()){
                                     showAnnotation.toggle()
-                                    showMessage = false
                                 }
-                                if(viewM3.newMeeting != nil){
-                                    viewM3.cancleMeeting()
-                                }
+                                serverViewModel.cancleMeeting()     /// 취소 버튼 누르면 MapPin 삭제
                             }
                         }
                     }label: {
@@ -110,15 +106,15 @@ struct MapView: View {
                     .cornerRadius(20)
                     .padding()
                 }
-              
                 
                 Spacer()
                 HStack(spacing:110){
                     Spacer()
                     if(showAnnotation==true){
                         Button{
-                            if(viewM3.newMeeting == nil){
-                               showCreatePopupMessage(duration: 3)
+                            /// 새로 생성할 모임 위치를 클릭 안하면 if문 실행해서 메시지 띄우
+                            if(serverViewModel.newMeeting == nil){
+                                showCreatePopupMessage(duration: 3)
                             }
                             else{
                                 showSheet=true
@@ -134,7 +130,8 @@ struct MapView: View {
                         .sheet(isPresented: $showSheet){
                             MeetingSetSheetView(coordinateCreated: $coordinateCreated,onDismiss: {
                                 showAnnotation = false
-                                viewM3.isOverlap = true
+                                serverViewModel.newMeeting = nil
+                                serverViewModel.isOverlap = true
                             })
                             .environmentObject(viewModel)
                         }
@@ -146,122 +143,103 @@ struct MapView: View {
                 }
             }
             if showMessage {
-                   VStack {
-                       Spacer()
-                       HStack {
-                           Spacer()
-                           PopupMessage()
-                           Spacer()
-                       }
-                       Spacer()
-                   }
-                   .transition(.scale)
-               }
+                ShowMessage(message: "장소를 선택해주세요!")
+            }
             if showCreateMessage {
-                   VStack {
-                       Spacer()
-                       HStack {
-                           Spacer()
-                           CreatePopupMessage()
-                           Spacer()
-                       }
-                       Spacer()
-                   }
-                   .transition(.scale)
-               }
+                ShowMessage(message: "장소를 반드시 선택해주세요!")
+            }
             if showCreateConfirmedMessage {
-                   VStack {
-                       Spacer()
-                       HStack {
-                           Spacer()
-                           createConfirmedPopupMessage()
-                           Spacer()
-                       }
-                       Spacer()
-                   }
-                   .transition(.scale)
-               }
-
-           
-            }
-        }
-
-   
-    
-    
-    func showPopupMessage(duration: TimeInterval) {
-        // Show the message
-        withAnimation {
-            showMessage = true
-        }
-
-        // Hide the message after the specified duration
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            withAnimation {
-                showMessage = false
+                ShowMessage(message: "모임은 최대 한개만 생성할 수 있습니다!")
             }
         }
     }
-    
-    func showCreatePopupMessage(duration: TimeInterval) {
-        // Show the message
-        withAnimation {
-            showCreateMessage = true
-        }
-
-        // Hide the message after the specified duration
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            withAnimation {
-                showCreateMessage = false
+                
+                
+                func showPopupMessage(duration: TimeInterval) {
+                    // Show the message
+                    withAnimation {
+                        showMessage = true
+                    }
+                    
+                    // Hide the message after the specified duration
+                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+                        withAnimation {
+                            showMessage = false
+                        }
+                    }
+                }
+                
+                func showCreatePopupMessage(duration: TimeInterval) {
+                    // Show the message
+                    withAnimation {
+                        showCreateMessage = true
+                    }
+                    
+                    // Hide the message after the specified duration
+                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+                        withAnimation {
+                            showCreateMessage = false
+                        }
+                    }
+                }
+                
+                func showCreateConfirmedPopUpMessage(duration: TimeInterval) {
+                    // Show the message
+                    withAnimation {
+                        showCreateConfirmedMessage = true
+                    }
+                    
+                    // Hide the message after the specified duration
+                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+                        withAnimation {
+                            showCreateConfirmedMessage = false
+                        }
+                    }
+                }
+                
+                func coordinateFromTap(_ tapLocation: CGPoint, in geometry: GeometryProxy, region: MKCoordinateRegion) -> CLLocationCoordinate2D {
+                    if let lastLocation = serverViewModel.newMeeting {
+                        // Remove the previous annotation from the map
+                        serverViewModel.cancleMeeting()
+                        viewModel.objectWillChange.send()
+                    }
+                    let frame = geometry.frame(in: .local)
+                    let x = Double(tapLocation.x / frame.width) * region.span.longitudeDelta + region.center.longitude - region.span.longitudeDelta / 2
+                    let y = Double((frame.height - tapLocation.y) / frame.height) * region.span.latitudeDelta + region.center.latitude - region.span.latitudeDelta / 2
+                    return CLLocationCoordinate2D(latitude: y, longitude: x)
+                }
             }
-        }
-    }
+        
     
-    func showCreateConfirmedPopUpMessage(duration: TimeInterval) {
-        // Show the message
-        withAnimation {
-            showCreateConfirmedMessage = true
-        }
 
-        // Hide the message after the specified duration
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            withAnimation {
-                showCreateConfirmedMessage = false
-            }
-        }
-    }
-    
-    func coordinateFromTap(_ tapLocation: CGPoint, in geometry: GeometryProxy, region: MKCoordinateRegion) -> CLLocationCoordinate2D {
-        if let lastLocation = viewM3.newMeeting {
-            // Remove the previous annotation from the map
-            viewM3.cancleMeeting()
-            viewModel.objectWillChange.send()
-        }
-        let frame = geometry.frame(in: .local)
-        let x = Double(tapLocation.x / frame.width) * region.span.longitudeDelta + region.center.longitude - region.span.longitudeDelta / 2
-        let y = Double((frame.height - tapLocation.y) / frame.height) * region.span.latitudeDelta + region.center.latitude - region.span.latitudeDelta / 2
-        return CLLocationCoordinate2D(latitude: y, longitude: x)
-    }
-}
   
-
-
-
-
-
-
 struct MapView_Previews: PreviewProvider {
     static var previews: some View {
         MapView()
     }
 }
 
+struct ShowMessage: View {
+    let message: String
+    var body: some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                Text(message)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.black.opacity(0.8))
+                    .cornerRadius(10)
+                Spacer()
+            }
+            Spacer()
+        }
+        .transition(.scale)
+    }
+}
 
-
-
-
-
-final class MapViewModel : NSObject, ObservableObject,CLLocationManagerDelegate{
+class MapViewModel : NSObject, ObservableObject,CLLocationManagerDelegate{
 
     
     @Published var region = MKCoordinateRegion(center:CLLocationCoordinate2D(latitude: 37.5665, longitude:126.9780 ),
@@ -342,8 +320,11 @@ extension MKCoordinateRegion {
 }
 
 struct PopupMessage: View {
+    let message:String
+    
     var body: some View {
-        Text("장소를 선택해주세요!")
+        //Text("장소를 선택해주세요!")
+        Text(message)
             .foregroundColor(.white)
             .padding()
             .background(Color.black.opacity(0.8))

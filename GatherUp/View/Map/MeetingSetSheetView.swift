@@ -26,7 +26,7 @@ struct MeetingSetSheetView: View {
     @State private var meetingTime = Date()
     @State private var selection : Int
     
-    @EnvironmentObject var viewModel: FirebaseViewModel
+    @StateObject var viewModel: FirebaseViewModel = .init()
    
 
     
@@ -124,7 +124,7 @@ struct MeetingSetSheetView: View {
                             showErrorMessage(duration: 2)
                         }
                         else{
-                            var user = Auth.auth().currentUser
+                            let user = Auth.auth().currentUser
                             presentationMode.wrappedValue.dismiss()
                             onDismiss?()
                             

@@ -13,8 +13,7 @@ import SDWebImageSwiftUI
 
 struct MeetingIconView: View {
     
-    //var coordinate: CLLocationCoordinate2D?
-    var hostImage: URL
+    var hostImage: URL?
     
     var body: some View {
         Button{

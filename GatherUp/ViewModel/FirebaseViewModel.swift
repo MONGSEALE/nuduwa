@@ -129,13 +129,19 @@ class FirebaseViewModel: ObservableObject {
                 //await fetchMeetings()
                 
             } catch {
-                //await handleError(error: error)
+                await handleError(error: error)
+                //isLoading = false
             }
         }
     }
     /// 작성자 중복 확인
-    func checkedOverlap(id: String){
-            let doc = Firestore.firestore().collection("Meetings").whereField("hostUID", isEqualTo: id)
+    func checkedOverlap(id: String?){
+        if id==nil {
+            print("아이디가 NULL임")
+            self.isOverlap = true
+            return
+        }else{
+            let doc = Firestore.firestore().collection("Meetings").whereField("hostUID", isEqualTo: id!)
             doc.getDocuments(){ (query, err) in
                 if let err = err {
                     print("checkedOverlap 에러: \(err)")
@@ -150,6 +156,7 @@ class FirebaseViewModel: ObservableObject {
                     }
                 }
             }
+        }
     }
     /// 모임 참가하기
     func joinMeeting(userId: String){
