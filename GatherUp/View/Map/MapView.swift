@@ -80,12 +80,13 @@ struct MapView: View {
                     Button{
                         /// 모임 중복 생성이면 if문 실행
                         if (serverViewModel.isOverlap==true){
-                            showCreateConfirmedPopUpMessage(duration: 2)
+                            showPopupMessage(show: $showCreateConfirmedMessage, duration: 2)
                         }else{
                             /// 모임만들기 버튼 클릭할때마다 if문과 else문 번갈아 실행
                             if(showAnnotation==false){
                                 /// 모임만들기 버튼 클릭하면 "장소를 선택해주세요!" 메시지 출력
-                                showPopupMessage(duration: 3)
+//                                showPopupMessage(duration: 3)
+                                showPopupMessage(show: $showMessage, duration: 2)
                                 withAnimation(.spring()){
                                     showAnnotation.toggle()
                                 }
@@ -114,7 +115,7 @@ struct MapView: View {
                         Button{
                             /// 새로 생성할 모임 위치를 클릭 안하면 if문 실행해서 메시지 띄우
                             if(serverViewModel.newMeeting == nil){
-                                showCreatePopupMessage(duration: 3)
+                                showPopupMessage(show: $showCreateMessage, duration: 3)
                             }
                             else{
                                 showSheet=true
@@ -128,7 +129,8 @@ struct MapView: View {
                         .frame(width: 90, height: 35)
                         .buttonStyle(.borderedProminent)
                         .sheet(isPresented: $showSheet){
-                            MeetingSetSheetView(coordinateCreated: $coordinateCreated,onDismiss: {
+                            MeetingSetSheetView(coordinateCreated: $coordinateCreated, onDismiss: {
+                                /// 모임 생성 완료되면 실행
                                 showAnnotation = false
                                 serverViewModel.newMeeting = nil
                                 serverViewModel.isOverlap = true
@@ -153,62 +155,33 @@ struct MapView: View {
             }
         }
     }
-                
-                
-                func showPopupMessage(duration: TimeInterval) {
-                    // Show the message
-                    withAnimation {
-                        showMessage = true
-                    }
-                    
-                    // Hide the message after the specified duration
-                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                        withAnimation {
-                            showMessage = false
-                        }
-                    }
-                }
-                
-                func showCreatePopupMessage(duration: TimeInterval) {
-                    // Show the message
-                    withAnimation {
-                        showCreateMessage = true
-                    }
-                    
-                    // Hide the message after the specified duration
-                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                        withAnimation {
-                            showCreateMessage = false
-                        }
-                    }
-                }
-                
-                func showCreateConfirmedPopUpMessage(duration: TimeInterval) {
-                    // Show the message
-                    withAnimation {
-                        showCreateConfirmedMessage = true
-                    }
-                    
-                    // Hide the message after the specified duration
-                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                        withAnimation {
-                            showCreateConfirmedMessage = false
-                        }
-                    }
-                }
-                
-                func coordinateFromTap(_ tapLocation: CGPoint, in geometry: GeometryProxy, region: MKCoordinateRegion) -> CLLocationCoordinate2D {
-                    if let lastLocation = serverViewModel.newMeeting {
-                        // Remove the previous annotation from the map
-                        serverViewModel.cancleMeeting()
-                        viewModel.objectWillChange.send()
-                    }
-                    let frame = geometry.frame(in: .local)
-                    let x = Double(tapLocation.x / frame.width) * region.span.longitudeDelta + region.center.longitude - region.span.longitudeDelta / 2
-                    let y = Double((frame.height - tapLocation.y) / frame.height) * region.span.latitudeDelta + region.center.latitude - region.span.latitudeDelta / 2
-                    return CLLocationCoordinate2D(latitude: y, longitude: x)
-                }
+       
+    
+    func showPopupMessage(show: Binding<Bool>, duration: TimeInterval) {
+        // Show the message
+        withAnimation {
+            show.wrappedValue = true
+        }
+        // Hide the message after the specified duration
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            withAnimation {
+                show.wrappedValue = false
             }
+        }
+    }
+    
+    func coordinateFromTap(_ tapLocation: CGPoint, in geometry: GeometryProxy, region: MKCoordinateRegion) -> CLLocationCoordinate2D {
+        if serverViewModel.newMeeting != nil {
+            // Remove the previous annotation from the map
+            serverViewModel.cancleMeeting()
+            viewModel.objectWillChange.send()
+        }
+        let frame = geometry.frame(in: .local)
+        let x = Double(tapLocation.x / frame.width) * region.span.longitudeDelta + region.center.longitude - region.span.longitudeDelta / 2
+        let y = Double((frame.height - tapLocation.y) / frame.height) * region.span.latitudeDelta + region.center.latitude - region.span.latitudeDelta / 2
+        return CLLocationCoordinate2D(latitude: y, longitude: x)
+    }
+}
         
     
 
@@ -318,7 +291,8 @@ extension MKCoordinateRegion {
         return min(maxZoomLevel, max(1, zoomLevel))
     }
 }
-
+/*
+// ShowMessage Struct으로 통합
 struct PopupMessage: View {
     let message:String
     
@@ -351,5 +325,5 @@ struct createConfirmedPopupMessage: View {
             .cornerRadius(10)
     }
 }
-
+*/
 
