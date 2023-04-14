@@ -44,35 +44,35 @@ class FirebaseViewModel: ObservableObject {
         meetings = (newMeeting != nil) ? fetchedMeetings + [newMeeting!] : fetchedMeetings
     }
     /// Firestore에 있는 모임 데이터 가져오기
-    func fetchMeetings(passedMeeting: Bool = false)async{
-        do{
-            print("fetchMeetings 실행")
-            guard let uid:String = Auth.auth().currentUser?.uid else{return}
-
-            var query: Query!
-
-            query = Firestore.firestore().collection("Meetings")
-            //                    .whereField("members", arrayContains: uid)
-                .order(by: "meetingDate", descending: true)
-            //            if passedMeeting {
-            //                query = query.whereField("meetingDate", isLessThan: Date())
-            //            } else {
-            //                query = query.whereField("meetingDate", isGreaterThan: Date())
-            //            }
-
-            let docs = try await query.getDocuments()
-            let fetchedMeetings = docs.documents.compactMap{ doc -> Meeting? in
-                try? doc.data(as: Meeting.self)
-            }
-            print("fetchedMeetings")
-            await MainActor.run(body: {
-                meetings = fetchedMeetings
-                isFetching = false
-            })
-        }catch{
-            print("fetchMeetings 에러!")
-        }
-    }
+//    func fetchMeetings(passedMeeting: Bool = false)async{
+//        do{
+//            print("fetchMeetings 실행")
+//            guard let uid:String = Auth.auth().currentUser?.uid else{return}
+//
+//            var query: Query!
+//
+//            query = Firestore.firestore().collection("Meetings")
+//            //                    .whereField("members", arrayContains: uid)
+//                .order(by: "meetingDate", descending: true)
+//            //            if passedMeeting {
+//            //                query = query.whereField("meetingDate", isLessThan: Date())
+//            //            } else {
+//            //                query = query.whereField("meetingDate", isGreaterThan: Date())
+//            //            }
+//
+//            let docs = try await query.getDocuments()
+//            let fetchedMeetings = docs.documents.compactMap{ doc -> Meeting? in
+//                try? doc.data(as: Meeting.self)
+//            }
+//            print("fetchedMeetings")
+//            await MainActor.run(body: {
+//                meetings = fetchedMeetings
+//                isFetching = false
+//            })
+//        }catch{
+//            print("fetchMeetings 에러!")
+//        }
+//    }
     
     
     /// 실시간 모임 추가시 meetings 배열에 데이터 추가
@@ -159,17 +159,22 @@ class FirebaseViewModel: ObservableObject {
         }
     }
     /// 모임 참가하기
-    func joinMeeting(userId: String){
-        let doc = Firestore.firestore().collection("Meetings").document(userId)
-        doc.getDocument { (document, err) in
-            if let err = err {
-                print("joinMeeting 에러: \(err)")
-            } else {
-                guard var participants = document!["participants"] as? [String] else{print("participants오류");return}
-                participants.append(Auth.auth().currentUser!.uid)
-                doc.updateData(["participants" : participants])
-            }
-        }
+    func joinMeeting(meetingId: String){
+        guard let user = Auth.auth().currentUser else{return}
+        let doc = Firestore.firestore().collection("Meetings").document(meetingId).collection("members").addDocument(data: [
+            "userId": user.uid,
+            "userName": user.displayName,
+            "timestamp": Timestamp()
+        ])
+//        doc.getDocument { (document, err) in
+//            if let err = err {
+//                print("joinMeeting 에러: \(err)")
+//            } else {
+//                guard var participants = document!["members"] as? [String] else{print("오류!joinMeeing");return}
+//                participants.append(Auth.auth().currentUser!.uid)
+//                doc.updateData(["participants" : participants])
+//            }
+//        }
     }
     
     /// - 모임 지우기

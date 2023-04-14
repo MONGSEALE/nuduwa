@@ -13,14 +13,15 @@ import SDWebImageSwiftUI
 
 struct MeetingIconView: View {
     
-    var hostImage: URL?
+    @State private var showSheet = false
+    var meeting: Meeting
     
     var body: some View {
         Button{
-            MeetingInfoSheetView()
+            showSheet = true
         } label: {
             VStack(spacing:0){
-                WebImage(url: hostImage)
+                WebImage(url: meeting.hostImage)
                     .resizable()
                     .scaledToFit()
                     .frame(width:30,height: 30)
@@ -40,6 +41,9 @@ struct MeetingIconView: View {
                     .offset( y : -3)
                     .padding(.bottom , 40)
             }
+        }
+        .sheet(isPresented: $showSheet){
+            MeetingInfoSheetView(meeting: meeting)
         }
     }
 }

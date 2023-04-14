@@ -37,7 +37,7 @@ struct MapView: View {
                     if(serverViewModel.isOverlap==false && user?.uid == item.hostUID){
                         CustomMapAnnotationView()
                     }else{
-                        MeetingIconView(hostImage: item.hostImage)
+                        MeetingIconView(meeting: item)
                     }
                 })
             }
@@ -113,7 +113,7 @@ struct MapView: View {
                     Spacer()
                     if(showAnnotation==true){
                         Button{
-                            /// 새로 생성할 모임 위치를 클릭 안하면 if문 실행해서 메시지 띄우
+                            /// 새로 생성할 모임 위치를 클릭 안하면 if문 실행해서 메시지 띄우기
                             if(serverViewModel.newMeeting == nil){
                                 showPopupMessage(show: $showCreateMessage, duration: 3)
                             }
@@ -156,7 +156,6 @@ struct MapView: View {
         }
     }
        
-    
     func showPopupMessage(show: Binding<Bool>, duration: TimeInterval) {
         // Show the message
         withAnimation {

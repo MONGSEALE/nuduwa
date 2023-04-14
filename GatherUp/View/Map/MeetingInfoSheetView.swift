@@ -12,13 +12,13 @@ import SDWebImageSwiftUI
 
 struct MeetingInfoSheetView: View {
     
-   
-    
+    @StateObject var servermodel: FirebaseViewModel = .init()
+    var meeting: Meeting
     
     var body: some View {
         VStack{
               HStack{
-                  WebImage(url: Auth.auth().currentUser?.photoURL)
+                  WebImage(url: meeting.hostImage)
                       .resizable()
                       .scaledToFit()
                       .frame(width:30,height: 30)
@@ -34,22 +34,22 @@ struct MeetingInfoSheetView: View {
               .frame(maxWidth: .infinity, alignment: .leading)
               .padding()
               Spacer()
-            Text("모임 제목")
-            Text("모임 내용")
-            Text("모임시간")
-            Text("참여 인원")
+            Text(meeting.title)
+            Text(meeting.description)
+            Text(meeting.meetingDate.formatted(date: .abbreviated, time: .shortened))
+            Text("\(meeting.numbersOfMembers)")
             Button{
-                
+                servermodel.joinMeeting(meetingId: meeting.id!)
             } label: {
                 Text("참여하기")
             }
           }
     }
 }
-
-struct MeetingInfoSheetView_Previews: PreviewProvider {
-    static var previews: some View {
-        MeetingInfoSheetView()
-    }
-}
+//
+//struct MeetingInfoSheetView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        MeetingInfoSheetView()
+//    }
+//}
 
