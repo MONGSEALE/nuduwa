@@ -27,7 +27,7 @@ struct MeetingInfoSheetView: View {
                       .padding(6)
                       .background(.blue)
                       .clipShape(Circle())
-                      Text("생성시간")
+                  Text(meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))
                       .font(.caption2)
                       .padding(.leading)
               }
