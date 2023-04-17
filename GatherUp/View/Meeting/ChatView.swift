@@ -30,7 +30,7 @@ struct ChatView: View {
         }
         .onAppear {
             withAnimation(.spring()) {
-                self.viewModel.fetchData(meetingId: meetingId)
+                self.viewModel.messagesListner(meetingId: meetingId)
             }
         }
         .alert(isPresented: $isShowingAlert) {

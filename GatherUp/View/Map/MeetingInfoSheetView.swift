@@ -12,13 +12,9 @@ import SDWebImageSwiftUI
 
 struct MeetingInfoSheetView: View {
     
- //   @ObservedObject var servermodel: FirebaseViewModel = .init()
-    @EnvironmentObject var servermodel: FirebaseViewModel
+    @StateObject var servermodel: FirebaseViewModel = .init()
     var meeting: Meeting
     
-   
-   
-
     var body: some View {
         GeometryReader { geometry in
             VStack {
@@ -106,7 +102,10 @@ struct MeetingInfoSheetView: View {
                 }
             }
             .onAppear {
-                servermodel.getMembers(meetingId: meeting.id!)
+                servermodel.membersListener(meetingId: meeting.id!)
+            }
+            .onDisappear{
+                servermodel.removeListner()
             }
             .onChange(of: servermodel.members) { _ in
                     //멤버 나갈시 뷰 재생성

@@ -51,15 +51,15 @@ struct DetailMeetingView: View {
                     .padding(.vertical,8)
                     .hAlign(.leading)
                 
-                ForEach(viewModel.members, id: \.self){ member in
-                    Text("참여자: \(member)")
+                ForEach(viewModel.members){ member in
+                    Text("참여자: \(member.memberName)")
                 }
                 
                 ChatView(hostId: meeting.hostUID, meetingId: meeting.id!)
                     .environmentObject(viewModel)
             }
             .onAppear{
-                viewModel.getMembers(meetingId: meeting.id!)
+                viewModel.membersListener(meetingId: meeting.id!)
                 print("맴버수:\(viewModel.members.count)")
             }
             .padding(15)
