@@ -93,10 +93,14 @@ struct MeetingInfoSheetView: View {
                     
                     Spacer()
                     if (Auth.auth().currentUser?.uid != meeting.hostUID){
-                        Button {
-                            servermodel.joinMeeting(meetingId: meeting.id!)
-                        } label: {
-                            Text("참여하기")
+                        if servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) == nil {
+                            Button {
+                                servermodel.joinMeeting(meetingId: meeting.id!)
+                            } label: {
+                                Text("참여하기")
+                            }
+                        } else {
+                            Text("참여중")
                         }
                     }
                 }
