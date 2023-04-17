@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Firebase
+import FirebaseFirestore
 
 class FirebaseViewModel: ObservableObject {
     @Published var meetings: [Meeting] = []     // 모임 배열
@@ -169,6 +170,24 @@ class FirebaseViewModel: ObservableObject {
             "timestamp": Timestamp()
         ])
     }
+    
+    ///모임 나가기
+    func leaveMeeting(meetingId: String) {
+        guard let currentUser = Auth.auth().currentUser else { return }
+        let meetingMembersRef = Firestore.firestore().collection("meetings").document(meetingId).collection("members")
+
+        meetingMembersRef.whereField("uid", isEqualTo: currentUser.uid).getDocuments { (snapshot, error) in
+            if let error = error {
+                print("Error getting user document: \(error)")
+            } else {
+                guard let documents = snapshot?.documents else { return }
+                for document in documents {
+                    meetingMembersRef.document(document.documentID).delete()
+                }
+            }
+        }
+    }
+
     /// 모임맴버 가져오기
     func getMembers(meetingId: String){
         Firestore.firestore().collection("Meetings").document(meetingId).collection("members")
@@ -181,6 +200,8 @@ class FirebaseViewModel: ObservableObject {
                 }
             }
     }
+    
+
     /// - 모임 지우기
     func deleteMeeting(deletedMeeting: Meeting){
         Task{

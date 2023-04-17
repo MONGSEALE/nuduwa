@@ -36,14 +36,14 @@ struct ReusableProfileContent: View {
                     }
                     .hAlign(.leading)
                 }
-                Text("지난 모임")
+              /*  Text("지난 모임")
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundColor(.black)
                     .hAlign(.leading)
                     .padding(.vertical,15)
                     
-                ReusableMeetingsView(passedMeeting: true)
+                ReusableMeetingsView(passedMeeting: true)  */
             }
             .padding(15)
         }

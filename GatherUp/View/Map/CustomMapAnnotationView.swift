@@ -10,9 +10,9 @@ import MapKit
 
 struct CustomMapAnnotationView: View {
     
-    //var coordinate: CLLocationCoordinate2D?
+    
     let accentColor = Color(.red)
-    //let meeting: Meeting
+    
     
     var body: some View {
         VStack(spacing:0){
@@ -38,14 +38,14 @@ struct CustomMapAnnotationView: View {
     }
 }
 
-//struct CustomMapAnnotationView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ZStack{
-//            Color.black.ignoresSafeArea()
-//            CustomMapAnnotationView()
-//        }
-//    }
-//}
+struct CustomMapAnnotationView_Previews: PreviewProvider {
+    static var previews: some View {
+       ZStack{
+            Color.black.ignoresSafeArea()
+            CustomMapAnnotationView()
+        }
+    }
+}
 
 
 

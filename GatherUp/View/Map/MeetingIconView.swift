@@ -16,6 +16,9 @@ struct MeetingIconView: View {
     @State private var showSheet = false
     var meeting: Meeting
     
+    @StateObject var viewModel: FirebaseViewModel = .init()
+    
+    
     var body: some View {
         Button{
             showSheet = true
@@ -43,7 +46,9 @@ struct MeetingIconView: View {
             }
         }
         .sheet(isPresented: $showSheet){
-            MeetingInfoSheetView(meeting: meeting)
+            MeetingInfoSheetView(meeting:meeting)
+                .environmentObject(viewModel)
+                .presentationDetents([.fraction(0.3),.height(700)])
         }
     }
 }

@@ -129,6 +129,7 @@ struct DetailMeetingView: View {
                 
             } else {
                 Button(action: {
+                    viewModel.leaveMeeting(meetingId: meeting.id!)
                     dismiss()
                 }){
                     Text("모임 나가기")

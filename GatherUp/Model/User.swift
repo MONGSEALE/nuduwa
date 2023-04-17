@@ -12,7 +12,7 @@ struct User: Identifiable, Codable {
     @DocumentID var id: String?
     var username: String
     var userUID: String
-    var userSnsID: String?
+    var userSNSID: String?
     var userEmail: String?
     var userImage: URL?
     

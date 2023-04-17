@@ -27,7 +27,8 @@ struct MeetingSetSheetView: View {
     @State private var selection : Int
     
     @StateObject var viewModel: FirebaseViewModel = .init()
-   
+    
+    
 
     
     
@@ -94,7 +95,7 @@ struct MeetingSetSheetView: View {
                             DatePicker("모임 시간을 정해주세요:",selection: $meetingTime,displayedComponents: .hourAndMinute)
                         }
                         
-                        Section(header:Text("인원수")){
+                        Section(header:Text("최대 인원수")){
                             Picker(
                                 selection: $selection,
                                 label:HStack{
