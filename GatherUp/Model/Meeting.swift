@@ -17,7 +17,7 @@ struct Meeting : Identifiable,Codable,Equatable, Hashable{
     var description: String
     var place : String
     var numbersOfMembers : Int
-   // var members : [String]
+  
     let latitude : Double
     let longitude : Double
     

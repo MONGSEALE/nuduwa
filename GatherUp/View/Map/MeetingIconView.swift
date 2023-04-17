@@ -26,13 +26,13 @@ struct MeetingIconView: View {
             VStack(spacing:0){
                 WebImage(url: meeting.hostImage)
                     .resizable()
+                    .frame(width: 30, height: 30) // Adjust these values to resize the WebImage
                     .scaledToFit()
-                    .frame(width:30,height: 30)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding(6)
-                    .background(.blue)
+                    .cornerRadius(60)
                     .clipShape(Circle())
+                    .padding(4) // Adjust the padding value to increase or decrease the size of the blue circle
+                    .background(Circle().fill(Color.blue))
+                    
                 
                 
                 Image(systemName: "triangle.fill")

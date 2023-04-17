@@ -4,16 +4,24 @@
 //
 //  Created by DaelimCI00007 on 2023/04/05.
 //
-
+import Foundation
 import SwiftUI
 import Firebase
 import FirebaseFirestore
+import CoreLocation
+import MapKit
+
+
+
 
 class FirebaseViewModel: ObservableObject {
     @Published var meetings: [Meeting] = []     // 모임 배열
     var fetchedMeetings: [Meeting] = []         // 서버에서 가져오는 모임 배열
     @Published var newMeeting: Meeting?         // 새로 추가하는 모임(저장전)
     @Published var meeting: Meeting?            // 모임
+    
+   
+
     
     @Published var isOverlap: Bool = false
     
@@ -34,6 +42,8 @@ class FirebaseViewModel: ObservableObject {
     //private var cancellables = Set<AnyCancellable>()
     private var listenerRegistration: ListenerRegistration?
     
+    
+   
 //    func arrayMeetings(){
 //        guard let uid = Auth.auth().currentUser?.uid else{return}
 //        ForEach(meetings){ meeting in
@@ -253,6 +263,11 @@ class FirebaseViewModel: ObservableObject {
             }
         }
     }
+    
+    
+   
+   
+  
     
     ///채팅구현
     func fetchData(meetingId: String) {

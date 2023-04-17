@@ -24,6 +24,7 @@ struct MapView: View {
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
     
+    
     @StateObject private var serverViewModel: FirebaseViewModel = .init()   /// Firebase 연결 viewmodel
     let user = Auth.auth().currentUser                                      /// 현재 로그인 중인 유저정보 변수
     
@@ -34,10 +35,17 @@ struct MapView: View {
             Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
                 MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
                     /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
+                    
                     if(serverViewModel.isOverlap==false && user?.uid == item.hostUID){
                         CustomMapAnnotationView()
+                          
                     }else{
                         MeetingIconView(meeting: item)
+                            .onTapGesture {
+                                withAnimation(.easeInOut){
+                                                viewModel.region.center = CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)
+                                               }
+                            }
                     }
                 })
             }
@@ -277,8 +285,12 @@ class MapViewModel : NSObject, ObservableObject,CLLocationManagerDelegate{
         checkLocationAuthorization()
     }
     
-    func clearMapView(){
-        
+   
+    
+    func centerMapOn(_ coordinate: CLLocationCoordinate2D) {
+        DispatchQueue.main.async {
+            self.region = MKCoordinateRegion(center: coordinate, span: self.region.span)
+        }
     }
 }
 
