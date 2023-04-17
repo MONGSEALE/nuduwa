@@ -12,10 +12,14 @@ import Firebase
 struct ChatView: View {
     @EnvironmentObject var viewModel: FirebaseViewModel
     //@StateObject var viewModel: MeetingViewModel = .init()
+
     
     
     @State private var isShowingAlert = false
     @State private var alertMessage = ""
+    
+  
+   
     
     let hostId: String
     
@@ -24,10 +28,21 @@ struct ChatView: View {
     var body: some View {
         
         VStack {
-            ForEach(viewModel.messages) { message in
-                ChatMessageRow(message: message, isFromCurrentUser: message.userId == Auth.auth().currentUser?.uid, isHost: message.userId == hostId)
+            ScrollViewReader { proxy in
+                ScrollView{
+                    ForEach(viewModel.messages) { message in
+                        ChatMessageRow(message: message, isFromCurrentUser: message.userId == Auth.auth().currentUser?.uid, isHost: message.userId == hostId)
+                    }
+                }
+                .onChange(of: viewModel.lastMessageId) { id in
+                    // When the lastMessageId changes, scroll to the bottom of the conversation
+                    withAnimation {
+                        proxy.scrollTo(id, anchor: .bottom)
+                    }
+                }
             }
         }
+        
         .onAppear {
             withAnimation(.spring()) {
                 self.viewModel.messagesListner(meetingId: meetingId)

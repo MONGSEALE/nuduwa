@@ -34,6 +34,7 @@ class FirebaseViewModel: ObservableObject {
     private let strMembers = "Members"          // Firestore에 저장된 콜렉션 이름
     private let strMessage = "Message"          // Firestore에 저장된 콜렉션 이름
     @Published var messages: [ChatMessage] = []
+    @Published  var lastMessageId: String = ""
     //private var cancellables = Set<AnyCancellable>()
     private var listenerRegistration: ListenerRegistration?
     
@@ -44,7 +45,12 @@ class FirebaseViewModel: ObservableObject {
 //        }
 //        meetings.lastIndex(of: )
 //    }
-    
+     
+    func getMessage(){
+        if let id = self.messages.last?.id {
+                     self.lastMessageId = id
+                 }
+    }
     /// 서버 모임과 새로 추가하는 모임(서버 저장전) 배열 합치기
     func combineMeetings(){
         meetings = (newMeeting != nil) ? fetchedMeetings + [newMeeting!] : fetchedMeetings

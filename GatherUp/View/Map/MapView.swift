@@ -93,7 +93,7 @@ struct MapView: View {
                             /// 모임만들기 버튼 클릭할때마다 if문과 else문 번갈아 실행
                             if(showAnnotation==false){
                                 /// 모임만들기 버튼 클릭하면 "장소를 선택해주세요!" 메시지 출력
-//                                showPopupMessage(duration: 3)
+//
                                 showPopupMessage(show: $showMessage, duration: 2)
                                 withAnimation(.spring()){
                                     showAnnotation.toggle()

@@ -14,6 +14,7 @@ struct MeetingInfoSheetView: View {
     
     @StateObject var servermodel: FirebaseViewModel = .init()
     var meeting: Meeting
+    @State var showMessage = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -93,13 +94,25 @@ struct MeetingInfoSheetView: View {
                     
                     Spacer()
                     if (Auth.auth().currentUser?.uid != meeting.hostUID){
-                        if servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) == nil {
+                        if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) == nil &&
+                            servermodel.members.count<meeting.numbersOfMembers+1){
                             Button {
+                        
                                 servermodel.joinMeeting(meetingId: meeting.id!)
+                                
                             } label: {
                                 Text("참여하기")
                             }
-                        } else {
+                        }
+                        else if (servermodel.members.count==meeting.numbersOfMembers+1 && servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) == nil){
+                             Text("참여불가")
+                        }
+                        else if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) != nil)
+                        {
+                            Text("참여중")
+                        }
+                        else if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) != nil && servermodel.members.count==meeting.numbersOfMembers+1)
+                        {
                             Text("참여중")
                         }
                     }
@@ -115,7 +128,9 @@ struct MeetingInfoSheetView: View {
                     //멤버 나갈시 뷰 재생성
             }
         }
+
     }
+    
 }
 
 
