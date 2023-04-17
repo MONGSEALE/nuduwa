@@ -83,35 +83,31 @@ struct MeetingInfoSheetView: View {
                    
                     Spacer()
                     HStack{
-                      //  servermodel.getMembers(meetingId: meeting.id!)
-                       // print("맴버수:\(servermodel.members.count)")
-
                         Image(systemName: "person.2")
                             .padding(.leading,30)
-                        Text("참여인원  \(servermodel.members.count)/\(meeting.numbersOfMembers+1)")
+                        Text("참여인원  \(servermodel.members.count+1)/\(meeting.numbersOfMembers+1)")
                         Spacer()
                     }
                     
                     Spacer()
                     if (Auth.auth().currentUser?.uid != meeting.hostUID){
                         if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) == nil &&
-                            servermodel.members.count<meeting.numbersOfMembers+1){
+                            servermodel.members.count+1<meeting.numbersOfMembers+1){
                             Button {
-                        
                                 servermodel.joinMeeting(meetingId: meeting.id!)
                                 
                             } label: {
                                 Text("참여하기")
                             }
                         }
-                        else if (servermodel.members.count==meeting.numbersOfMembers+1 && servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) == nil){
+                        else if (servermodel.members.count+1==meeting.numbersOfMembers+1 && servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) == nil){
                              Text("참여불가")
                         }
                         else if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) != nil)
                         {
                             Text("참여중")
                         }
-                        else if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) != nil && servermodel.members.count==meeting.numbersOfMembers+1)
+                        else if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) != nil && servermodel.members.count+1==meeting.numbersOfMembers+1)
                         {
                             Text("참여중")
                         }
