@@ -84,8 +84,6 @@ class LoginViewModel: ObservableObject {
                 
                 registerUser()
                 
-                // --1--
-                
                 print("Success Google")
                 await MainActor.run(body: {
                     withAnimation(.easeInOut){logStatus = true}
@@ -96,7 +94,6 @@ class LoginViewModel: ObservableObject {
             }
         }
     }
-    // --2--
     
     
     // MARK: Handling Error
@@ -109,14 +106,11 @@ class LoginViewModel: ObservableObject {
     }
 
     func registerUser() {
-        
         Task{
             do{
                 let userData = Auth.auth().currentUser?.providerData[0]
                 // Uploading Profile Photo Into Firebase Storage
                 guard let userUID = Auth.auth().currentUser?.uid else{return}
-                
-                // --3--
                 
                 // Creating a User Firestore Object
                 let user = User(username: (userData?.displayName)!, userUID: userUID, userSNSID: userData?.uid, userEmail: userData?.email, userImage: userData?.photoURL)
@@ -132,21 +126,6 @@ class LoginViewModel: ObservableObject {
             }
         }
     }
-    
-    //추가
-    /*
-    func connectFirestore() {
-        db.collection("Users").document("ExampleDocument1").setData([:]) { err in
-            if let err = err {
-                print("error : \(err)")
-            } else {
-                let path = self.db.collection("Test2").document("ExampleDocument1")
-                path.updateData(["Array": FieldValue.arrayUnion(["Data1", "Data2"])])
-                print("Firestore Success")
-            }
-        }
-    }
-     */
 }
 
 
@@ -167,7 +146,7 @@ extension UIApplication{
 
 // MARK: Apple Sign in Helpers
 // Adapted from https://auth0.com/docs/api-auth/tutorials/nonce#generate-a-cryptographically-random-nonce
-// 애플에서 제공하는 코드(sha256, randomNonceString)
+// 아래는 애플에서 제공하는 코드
 func sha256(_ input: String) -> String {
     let inputData = Data(input.utf8)
     let hashedData = SHA256.hash(data: inputData)
@@ -208,95 +187,3 @@ func randomNonceString(length: Int = 32) -> String {
     print("randomNonceString: $result")
     return result
 }
-
-// --1--
-/*
-let userData = Auth.auth().currentUser
-
-// 사용자 정보 가져오기
-let userLogin = User(username: user.profile?.name ?? "no name" ,
-                     userID: userData?.uid ?? "no id",
-                     userSnsID: user.userID ?? "no uid",
-                     userEmail: user.profile?.email ?? "no email",
-                     userImage: user.profile?.imageURL(withDimension: 100) ?? URL(string: "")!)
-
- 
-print("User ID : \(userLogin.userID)")
-print("User SnsID : \(userLogin.userSnsID)")
-print("User Email : \(userLogin.userEmail)")
-print("User Name : \((userLogin.username))")
-print("User Image : \((userLogin.userImage))")
-
- */
-/*
-let db = Firestore.firestore()
-try await db.collection("Users").document(userLogin.userUID).setData(["uid" : userLogin.userUID, "email" : userLogin.userEmail, "name" : userLogin.username])
- */
-/*
-let _ = try Firestore.firestore().collection("Users").document(userLogin.userID).setData(from: userLogin, completion: {
-    error in
-    if error == nil {
-        print("Saved FireStore")
-    }
-})
- */
-
-// --2--
-/*
-// MARK: Loggin Google User into Firebase
-func logGoogleUser(user: GIDGoogleUser) {
-    Task{
-        do{
-            guard let idToken = user.authentication.idToken else{return}
-            let accesToken = user.authentication.accessToken
-            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accesToken)
-            
-            try await Auth.auth().signIn(with: credential)
-            //추가
-            /*
-            Auth.auth().signIn(with: credential) { (user, error) in
-                
-                if error == nil {
-                    //파이어스토어에 데이터 추가
-                    let db = Firestore.firestore()
-                    let userInfo = Auth.auth().currentUser?.providerData[inde]
-                    
-                    db.collection("Users").document(idToken).setData(["uid" : userInfo?.uid, "providerID" : userInfo?.providerID])
-                    
-                    
-                }
-            }*/
-            
-            print("Success Google")
-            await MainActor.run(body: {
-                withAnimation(.easeInOut){logStatus = true}
-            })
-            
-            connectFirestore()
-            
-            //추가
-            
-        }catch{
-            await handleError(error: error)
-        }
-    }
-}
- */
-
-// --3--
-/*
-var image: UIImage?
-let imageURL = user?.photoURL ?? URL(string: "")!
-DispatchQueue.global().async {
-    let data = try? Data(contentsOf: imageURL){
-        DispatchQueue.main.async {
-            image = UIImage(data: data!)
-        }
-    }
-}
-let imageData = image?.jpegData(compressionQuality: 0.4)
-let storageRef = Storage.storage().reference().child("Profile_Images").child(userUID)
-let _ = try await storageRef.putDataAsync(imageData)
-// Downloading Photo URL
-let downloadURL = try await storageRef.downloadURL()
- */

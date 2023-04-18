@@ -40,6 +40,7 @@ class FirebaseViewModel: ObservableObject {
     
     func arrayMeetings(){
         guard let uid = Auth.auth().currentUser?.uid else{return}
+        meetings = fetchedMeetings
         meetings.sort { (meeting1, meeting2) -> Bool in
             if meeting1.hostUID == uid && meeting2.hostUID != uid {
                 return true
@@ -96,21 +97,18 @@ class FirebaseViewModel: ObservableObject {
                 .addSnapshotListener { (querySnapshot, error) in
                     if let error = error {print("에러!meetingsListner:\(error)");return}
                     
-                    self.meetings.removeAll()
-                    
+                    self.fetchedMeetings.removeAll()
                     querySnapshot?.documents.forEach { document in
-                        
                         document.reference.parent.parent?.getDocument { (meetingDocument, meetingError) in
+                            defer{self.arrayMeetings()}
                             
                             if let meetingError = meetingError {print("에러!meetingsListner2:\(meetingError)");return}
-                            
-                            if let meetingDocument = meetingDocument,
-                               let meeting = try? meetingDocument.data(as: Meeting.self) {
-                                self.meetings.append(meeting)
+
+                            if let meetingDocument = meetingDocument, let meeting = try? meetingDocument.data(as: Meeting.self) {
+                                self.fetchedMeetings.append(meeting)
                             }
                         }
                     }
-                    self.arrayMeetings()
                 }
         } else {
             let doc = db.collection(strMeetings)

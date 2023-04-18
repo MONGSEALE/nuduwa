@@ -9,11 +9,6 @@ import SwiftUI
 import Firebase
 
 struct ReusableMeetingsView: View {
-    //@State var meetings: [Meeting] = []
-    /// - View Properties
-    //@State var isFetching: Bool = true
-    /// - Pagination
-    //@State private var paginationDoc: QueryDocumentSnapshot?
     @StateObject var viewModel: FirebaseViewModel = .init()
     var title: String = ""
     var passedMeeting: Bool = false

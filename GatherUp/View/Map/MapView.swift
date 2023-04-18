@@ -27,6 +27,7 @@ struct MapView: View {
     
     @StateObject private var serverViewModel: FirebaseViewModel = .init()   /// Firebase 연결 viewmodel
     let user = Auth.auth().currentUser                                      /// 현재 로그인 중인 유저정보 변수
+    @State var message: String = ""
     
     
     var body: some View {
@@ -88,13 +89,12 @@ struct MapView: View {
                     Button{
                         /// 모임 중복 생성이면 if문 실행
                         if (serverViewModel.isOverlap==true){
-                            showPopupMessage(show: $showCreateConfirmedMessage, duration: 2)
+                            showPopupMessage(message: "모임은 최대 한개만 생성할 수 있습니다!", duration: 2)
                         }else{
                             /// 모임만들기 버튼 클릭할때마다 if문과 else문 번갈아 실행
                             if(showAnnotation==false){
                                 /// 모임만들기 버튼 클릭하면 "장소를 선택해주세요!" 메시지 출력
-//
-                                showPopupMessage(show: $showMessage, duration: 2)
+                                showPopupMessage(message: "장소를 선택해주세요!", duration: 2)
                                 withAnimation(.spring()){
                                     showAnnotation.toggle()
                                 }
@@ -123,7 +123,7 @@ struct MapView: View {
                         Button{
                             /// 새로 생성할 모임 위치를 클릭 안하면 if문 실행해서 메시지 띄우기
                             if(serverViewModel.newMeeting == nil){
-                                showPopupMessage(show: $showCreateMessage, duration: 3)
+                                showPopupMessage(message: "장소를 반드시 선택해주세요!", duration: 3)
                             }
                             else{
                                 showSheet=true
@@ -152,27 +152,23 @@ struct MapView: View {
                     .labelStyle(.iconOnly)
                 }
             }
-            if showMessage {
-                ShowMessage(message: "장소를 선택해주세요!")
-            }
-            if showCreateMessage {
-                ShowMessage(message: "장소를 반드시 선택해주세요!")
-            }
-            if showCreateConfirmedMessage {
-                ShowMessage(message: "모임은 최대 한개만 생성할 수 있습니다!")
+            if showMessage{
+                ShowMessage(message: message)
             }
         }
     }
-       
-    func showPopupMessage(show: Binding<Bool>, duration: TimeInterval) {
+    
+    func showPopupMessage(message: String, duration: TimeInterval) {
         // Show the message
         withAnimation {
-            show.wrappedValue = true
+            self.message = message
+            showMessage = true
         }
         // Hide the message after the specified duration
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             withAnimation {
-                show.wrappedValue = false
+                showMessage = false
+                self.message = ""
             }
         }
     }

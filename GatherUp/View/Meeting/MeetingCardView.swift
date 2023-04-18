@@ -21,9 +21,6 @@ struct MeetingCardView: View {
     /// - View
     @State private var docListner: ListenerRegistration?
     
-    //@State private var fetchedPosts: [Meeting] = []
-    
-    
     var body: some View {
         HStack(alignment: .top, spacing: 12){
             WebImage(url: meeting.hostImage)
