@@ -97,7 +97,6 @@ struct MeetingInfoSheetView: View {
                             servermodel.members.count+1<meeting.numbersOfMembers+1){
                             Button {
                                 servermodel.joinMeeting(meetingId: meeting.id!)
-                                
                             } label: {
                                 Text("참여하기")
                             }
