@@ -113,7 +113,7 @@ class LoginViewModel: ObservableObject {
                 guard let userUID = Auth.auth().currentUser?.uid else{return}
                 
                 // Creating a User Firestore Object
-                let user = User(username: (userData?.displayName)!, userUID: userUID, userSNSID: userData?.uid, userEmail: userData?.email, userImage: userData?.photoURL)
+                let user = User(userName: (userData?.displayName)!, userUID: userUID, userSNSID: userData?.uid, userEmail: userData?.email, userImage: userData?.photoURL)
                 // Saving User Doc into Firestore Database
                 let _ = try Firestore.firestore().collection("Users").document(userUID).setData(from: user, completion: {
                     error in

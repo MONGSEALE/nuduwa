@@ -13,6 +13,7 @@ import SDWebImageSwiftUI
 
 struct MeetingIconView: View {
     
+    @StateObject var userViewModel: UserViewModel = .init()
     @State private var showSheet = false
     var meeting: Meeting
     
@@ -23,7 +24,7 @@ struct MeetingIconView: View {
             showSheet = true
         } label: {
             VStack(spacing:0){
-                WebImage(url: meeting.hostImage)
+                WebImage(url: userViewModel.user?.userImage)
                     .resizable()
                     .frame(width: 30, height: 30) // Adjust these values to resize the WebImage
                     .scaledToFit()
@@ -45,8 +46,11 @@ struct MeetingIconView: View {
             }
         }
         .sheet(isPresented: $showSheet){
-            MeetingInfoSheetView(meeting:meeting)
+            MeetingInfoSheetView(meeting:meeting, hostUser: userViewModel.user!)
                 .presentationDetents([.fraction(0.3),.height(700)])
+        }
+        .onAppear{
+            userViewModel.userListner(userUID: meeting.hostUID)
         }
     }
 }

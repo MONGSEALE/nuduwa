@@ -13,6 +13,8 @@ import FirebaseFirestore
 
 struct MeetingCardView: View {
     
+    @StateObject var userViewModel: UserViewModel = .init()
+    
     var meeting: Meeting
     /// - Callbacks
     var onUpdate: (Meeting)->()
@@ -23,7 +25,7 @@ struct MeetingCardView: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 12){
-            WebImage(url: meeting.hostImage)
+            WebImage(url: userViewModel.user?.userImage)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: 35, height: 35)
@@ -39,7 +41,7 @@ struct MeetingCardView: View {
                         .font(.callout)
                         .foregroundColor(.black)
                 }
-                Text(meeting.hostName)
+                Text(userViewModel.user?.userName ?? "")
                     .font(.callout)
                     .foregroundColor(.black)
                 Text(meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))
@@ -56,6 +58,7 @@ struct MeetingCardView: View {
         .hAlign(.leading)
         
         .onAppear {
+            userViewModel.userListner(userUID: meeting.hostUID)
             /// - Adding Only Once
             if docListner == nil{
                 guard let meetingID = meeting.id else{return}

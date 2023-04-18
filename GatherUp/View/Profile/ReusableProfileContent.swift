@@ -25,7 +25,7 @@ struct ReusableProfileContent: View {
                     .clipShape(Circle())
                     
                     VStack(alignment: .leading, spacing: 6){
-                        Text(user.username)
+                        Text(user.userName)
                             .font(.title3)
                             .fontWeight(.semibold)
                         

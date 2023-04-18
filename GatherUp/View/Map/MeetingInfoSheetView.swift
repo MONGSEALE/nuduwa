@@ -13,7 +13,9 @@ import SDWebImageSwiftUI
 struct MeetingInfoSheetView: View {
     
     @StateObject var servermodel: FirebaseViewModel = .init()
-    var meeting: Meeting
+    
+    let meeting: Meeting
+    let hostUser: User
     @State var showMessage = false
     
     var body: some View {

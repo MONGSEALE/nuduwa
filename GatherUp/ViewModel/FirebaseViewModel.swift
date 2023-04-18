@@ -38,27 +38,12 @@ class FirebaseViewModel: ObservableObject {
     //private var cancellables = Set<AnyCancellable>()
     private var listenerRegistration: ListenerRegistration?
     
-//    func arrayMeetings(){
-//        guard let uid = Auth.auth().currentUser?.uid else{return}
-//        meetings = fetchedMeetings
-//        meetings.sort { (meeting1, meeting2) -> Bool in
-//            if meeting1.hostUID == uid && meeting2.hostUID != uid {
-//                return true
-//            } else if meeting1.hostUID != uid && meeting2.hostUID == uid {
-//                return false
-//            } else {
-//                return meeting1.meetingDate < meeting2.meetingDate
-//            }
-//        }
-//        print("arrayMeetings: \(meetings.count)")
-//    }
-    
     /// 서버 모임과 새로 추가하는 모임(서버 저장전) 배열 합치기
     func combineMeetings(){
         meetings = (newMeeting != nil) ? fetchedMeetings + [newMeeting!] : fetchedMeetings
     }
     /// Firestore에 있는 모임 데이터 가져오기
-    func fetchMeetings(passedMeeting: Bool = false)async{
+//    func fetchMeetings(passedMeeting: Bool = false)async{
 //        do{
 //            guard let uid = Auth.auth().currentUser?.uid else{return}
 //            let doc = try await db.collectionGroup(strMembers).whereField("memberId", isEqualTo: uid)
@@ -83,7 +68,7 @@ class FirebaseViewModel: ObservableObject {
 //        }catch{
 //            print("fetchMeetings 에러!")
 //        }
-    }
+//    }
 
     /// FireStore와 meetings 배열 실시간 연동
     func meetingsListner(isJoin: Bool = false, isPassed: Bool = false){
@@ -121,6 +106,7 @@ class FirebaseViewModel: ObservableObject {
                                 return meeting1.meetingDate < meeting2.meetingDate
                             }
                         }
+                        self.isFetching = false
                         self.meetings = meetings
                     }
                 }
@@ -288,45 +274,6 @@ class FirebaseViewModel: ObservableObject {
             }
         }
     }
-    
-    ///채팅구현
-/*
-    func messagesListner(meetingId: String) {
-        docListner = db.collection(strMeetings).document(meetingId).collection(strMessage)
-            .order(by: "timestamp", descending: false)
-            .addSnapshotListener { (querySnapshot, error) in
-                guard let documents = querySnapshot?.documents else {
-                    print("No documents")
-                    return
-                }
-                self.messages = documents.compactMap { queryDocumentSnapshot -> ChatMessage? in
-                    let data = queryDocumentSnapshot.data()
-                    let id = queryDocumentSnapshot.documentID
-                    let text = data["text"] as? String ?? ""
-                    let userId = data["userId"] as? String ?? ""
-                    let userName = data["userName"] as? String ?? ""
-                    let timestamp = data["timestamp"] as? Timestamp ?? Timestamp()
-                    
-                    return ChatMessage(id: id, text: text, userId: userId, userName: userName, timestamp: timestamp)
-                }
-            }
-    }
-    
-    func sendMessage(meetingId: String, text: String, userId: String, userName: String) {
-        db.collection(strMeetings).document(meetingId).collection(strMessage).addDocument(data: [
-            "text": text,
-            "userId": userId,
-            "userName": userName,
-            "timestamp": Timestamp()
-        ])
-    }
-    
-    func getMessage(){
-        if let id = self.messages.last?.id {
-                     self.lastMessageId = id
-                 }
-    }
-*/
     
     /// 에러처리
     func handleError(error: Error)async{
