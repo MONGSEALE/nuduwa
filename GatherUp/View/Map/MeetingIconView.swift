@@ -17,11 +17,12 @@ struct MeetingIconView: View {
     @State private var showSheet = false
     var meeting: Meeting
     
-    
+    var onLocate: (CLLocationCoordinate2D)->()
     
     var body: some View {
         Button{
             showSheet = true
+            onLocate(CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
         } label: {
             VStack(spacing:0){
                 WebImage(url: userViewModel.user?.userImage)

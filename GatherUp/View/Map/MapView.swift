@@ -41,7 +41,9 @@ struct MapView: View {
                         CustomMapAnnotationView()
                           
                     }else{
-                        MeetingIconView(meeting: item)
+                        MeetingIconView(meeting: item) { locate in
+                            print("locate: \(locate)")
+                        }
                             .onTapGesture {
                                 withAnimation(.easeInOut){
                                                 viewModel.region.center = CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)
