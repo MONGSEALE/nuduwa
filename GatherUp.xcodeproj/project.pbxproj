@@ -25,6 +25,8 @@
 		339A101D29D3EBBF00B4DD98 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101B29D3EBBE00B4DD98 /* LoadingView.swift */; };
 		339A102329D4093800B4DD98 /* ReusableProfileContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A102229D4093800B4DD98 /* ReusableProfileContent.swift */; };
 		339A102629D4098400B4DD98 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 339A102529D4098400B4DD98 /* SDWebImageSwiftUI */; };
+		33A6B84029EE45460030E85B /* UserViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A6B83F29EE45450030E85B /* UserViewModel.swift */; };
+		33A6B84229EE460A0030E85B /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A6B84129EE460A0030E85B /* ChatViewModel.swift */; };
 		33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A82CB829DBA57500FA2BA0 /* DetailMeetingView.swift */; };
 		33A9112029ED0B0000C36FA2 /* Members.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A9111F29ED0AFF00C36FA2 /* Members.swift */; };
 		33ABB70229DD2B030049D482 /* FirebaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ABB70129DD2B030049D482 /* FirebaseViewModel.swift */; };
@@ -59,6 +61,8 @@
 		339A101A29D3EBBE00B4DD98 /* ViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		339A101B29D3EBBE00B4DD98 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		339A102229D4093800B4DD98 /* ReusableProfileContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReusableProfileContent.swift; sourceTree = "<group>"; };
+		33A6B83F29EE45450030E85B /* UserViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserViewModel.swift; sourceTree = "<group>"; };
+		33A6B84129EE460A0030E85B /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		33A82CB829DBA57500FA2BA0 /* DetailMeetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailMeetingView.swift; sourceTree = "<group>"; };
 		33A9111F29ED0AFF00C36FA2 /* Members.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Members.swift; sourceTree = "<group>"; };
 		33ABB70129DD2B030049D482 /* FirebaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseViewModel.swift; sourceTree = "<group>"; };
@@ -119,10 +123,12 @@
 		339A101029D3E9C000B4DD98 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
+				33A6B83F29EE45450030E85B /* UserViewModel.swift */,
 				339A101129D3E9C000B4DD98 /* LoginViewModel.swift */,
 				3372C5D129DFA78A000169DD /* MapViewModel2.swift */,
 				33ABB70129DD2B030049D482 /* FirebaseViewModel.swift */,
 				33ABB70329DD421E0049D482 /* ProfileViewModel.swift */,
+				33A6B84129EE460A0030E85B /* ChatViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -320,6 +326,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				339A101829D3EAE500B4DD98 /* User.swift in Sources */,
+				33A6B84029EE45460030E85B /* UserViewModel.swift in Sources */,
 				4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */,
 				429515DF29C4A776006DD4B3 /* ProfileView.swift in Sources */,
 				33ADB13829D6610900352451 /* Meeting.swift in Sources */,
@@ -346,6 +353,7 @@
 				339A102329D4093800B4DD98 /* ReusableProfileContent.swift in Sources */,
 				4285616029DFDAAB004DCDB9 /* MeetingIconView.swift in Sources */,
 				429515E129C4A9AD006DD4B3 /* MeetingsView.swift in Sources */,
+				33A6B84229EE460A0030E85B /* ChatViewModel.swift in Sources */,
 				33ABB70229DD2B030049D482 /* FirebaseViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Firebase
+import FirebaseFirestore
 
 class ProfileViewModel: ObservableObject {
     @Published var myProfile: User?

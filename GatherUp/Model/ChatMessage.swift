@@ -7,9 +7,11 @@
 
 import SwiftUI
 import Firebase
+import FirebaseFirestoreSwift
 
-struct ChatMessage: Identifiable, Equatable,Codable {
-    let id: String?
+struct ChatMessage: Identifiable, Equatable, Hashable{
+    @DocumentID var id: String?
+    
     let text: String
     let userId: String
     let userName: String

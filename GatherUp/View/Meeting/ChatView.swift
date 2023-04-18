@@ -10,23 +10,17 @@ import Firebase
 
 
 struct ChatView: View {
-    @EnvironmentObject var viewModel: FirebaseViewModel
-    //@StateObject var viewModel: MeetingViewModel = .init()
-
-    
+    @StateObject var viewModel: ChatViewModel = .init()
+//    @StateObject var viewModel: FirebaseViewModel = .init()
     
     @State private var isShowingAlert = false
     @State private var alertMessage = ""
-    
-  
-   
     
     let hostId: String
     
     var meetingId: String
     
     var body: some View {
-        
         VStack {
             ScrollViewReader { proxy in
                 ScrollView{
@@ -45,7 +39,7 @@ struct ChatView: View {
         
         .onAppear {
             withAnimation(.spring()) {
-                self.viewModel.messagesListner(meetingId: meetingId)
+                viewModel.messagesListner(meetingId: meetingId)
             }
         }
         .alert(isPresented: $isShowingAlert) {
@@ -85,7 +79,7 @@ struct ChatMessageRow: View {
 }
 
 struct Chatting: View {
-    @EnvironmentObject var viewModel: FirebaseViewModel
+    @StateObject var viewModel: ChatViewModel = .init()
     @State private var messageText = ""
     //@State private var isTyping = false
     var meetingId: String
@@ -101,7 +95,7 @@ struct Chatting: View {
             .padding(.horizontal)
             
             Button(action: {
-                viewModel.sendMessage(meetingId: meetingId, text: messageText, userId: Auth.auth().currentUser!.uid, userName: (Auth.auth().currentUser?.displayName)!)
+                viewModel.sendMessage(meetingId: meetingId, text: messageText)
                 closeKeyboard()
                 messageText = ""
             }) {

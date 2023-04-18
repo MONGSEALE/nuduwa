@@ -38,19 +38,20 @@ class FirebaseViewModel: ObservableObject {
     //private var cancellables = Set<AnyCancellable>()
     private var listenerRegistration: ListenerRegistration?
     
-//    func arrayMeetings(){
-//        guard let uid = Auth.auth().currentUser?.uid else{return}
-//        ForEach(meetings){ meeting in
-//            meeting
-//        }
-//        meetings.lastIndex(of: )
-//    }
-     
-    func getMessage(){
-        if let id = self.messages.last?.id {
-                     self.lastMessageId = id
-                 }
+    func arrayMeetings(){
+        guard let uid = Auth.auth().currentUser?.uid else{return}
+        meetings.sort { (meeting1, meeting2) -> Bool in
+            if meeting1.hostUID == uid && meeting2.hostUID != uid {
+                return true
+            } else if meeting1.hostUID != uid && meeting2.hostUID == uid {
+                return false
+            } else {
+                return meeting1.meetingDate < meeting2.meetingDate
+            }
+        }
+
     }
+    
     /// 서버 모임과 새로 추가하는 모임(서버 저장전) 배열 합치기
     func combineMeetings(){
         meetings = (newMeeting != nil) ? fetchedMeetings + [newMeeting!] : fetchedMeetings
@@ -86,13 +87,34 @@ class FirebaseViewModel: ObservableObject {
 //        }
 //    }
 
-    /// 실시간 모임 추가시 meetings 배열에 데이터 추가
-    func meetingsListner(isJoin: Bool = false){
+    /// FireStore와 meetings 배열 실시간 연동
+    func meetingsListner(isJoin: Bool = false, isPassed: Bool = false){
         print("addListner")
         guard let uid = Auth.auth().currentUser?.uid else{return}
-        let doc = isJoin ? db.collectionGroup(strMembers).whereField("memberId", isEqualTo: uid) : db.collection("Meetings")
-        print("doc: \(doc)")
-        docListner = doc.addSnapshotListener { (snapshot, error) in
+        if isJoin {
+            let doc = db.collectionGroup(strMembers).whereField("memberId", isEqualTo: uid)
+                .addSnapshotListener { (querySnapshot, error) in
+                    if let error = error {print("에러!meetingsListner:\(error)");return}
+                    
+                    self.meetings.removeAll()
+                    
+                    querySnapshot?.documents.forEach { document in
+                        
+                        document.reference.parent.parent?.getDocument { (meetingDocument, meetingError) in
+                            
+                            if let meetingError = meetingError {print("에러!meetingsListner2:\(meetingError)");return}
+                            
+                            if let meetingDocument = meetingDocument,
+                               let meeting = try? meetingDocument.data(as: Meeting.self) {
+                                self.meetings.append(meeting)
+                            }
+                        }
+                    }
+                    self.arrayMeetings()
+                }
+        } else {
+            let doc = db.collection(strMeetings)
+            docListner = doc.addSnapshotListener { (snapshot, error) in
                 guard let documents = snapshot?.documents else {
                     print("No documents")
                     return
@@ -100,8 +122,10 @@ class FirebaseViewModel: ObservableObject {
                 self.fetchedMeetings = documents.compactMap{ documents -> Meeting? in
                     try? documents.data(as: Meeting.self)
                 }
+                print("fetchedMeetings: \(self.fetchedMeetings)")
                 self.combineMeetings()
             }
+        }
     }
     
     /// 리스너 제거(리소스 확보)
@@ -123,38 +147,17 @@ class FirebaseViewModel: ObservableObject {
     }
     /// 새로운 모임 Firestore에 저장
     func createMeeting(meeting: Meeting){
-        //isLoading = true
         //showKeyboard = false
         Task{
             do{
                 /// - Firestore에 저장
                 print("firebase save")
-//                let document = try await db.collection(strMeetings).addDocument(from: meeting)
-//                let meetingId = document.documentID
-//                print("Meeting ID: \(meetingId)")
-//                try await joinMeeting(meetingId: meetingId)
-                guard let uid = Auth.auth().currentUser?.uid else{return}
-                let _ = try db.collection(strMeetings).document().setData(from: meeting, completion: {error in
-                    if let error = error{
-                        print("Error CreateMeeting: \(error)")
-                    } else {
-                        print("모임 추가 완료")
-                    }
-                })
-
-//                let meetingId = try await db.collection(strMeetings).whereField("hostId", isEqualTo: uid).getDocuments().documents.compactMap { doc -> String? in
-//                    let id = doc.documentID
-//                    print("id: \(id)")
-//
-//                    self.joinMeeting(meetingId: id)
-//                    return id
-//                }
-//                try await print(meetingId)
-//                await joinMeeting(meetingId: meetingId[0])
-//
+                let document = try db.collection(strMeetings).addDocument(from: meeting)
+                let meetingId = document.documentID
+                print("Meeting ID: \(meetingId)")
+                joinMeeting(meetingId: meetingId)
             } catch {
                 await handleError(error: error)
-                //isLoading = false
             }
         }
     }
@@ -213,7 +216,7 @@ class FirebaseViewModel: ObservableObject {
 
         doc.whereField("memberId", isEqualTo: currentUser.uid).getDocuments { (snapshot, error) in
             if let error = error {
-                print("Error getting user document: \(error)")
+                print("에러: \(error)")
             } else {
                 guard let documents = snapshot?.documents else { return }
                 for document in documents {
@@ -268,21 +271,6 @@ class FirebaseViewModel: ObservableObject {
                     db.collection(strMeetings).document(meetingID).updateData(["description": description])
                     print("description 수정")
                 }
-                
-                //                Firestore.firestore().collection("Meetings").document(meetingID).getDocument(as: Meeting.self) { result in
-                //                    switch result {
-                //                    case .success(let meet):
-                //                        self.meeting = meet
-                //
-                //                    case .failure(let err):
-                //                        print("updateMeeting에러: \(err)")
-                //                    }
-                //                }
-                //
-                //                print(meeting)
-                //                await MainActor.run(body: {
-                //                    meeting = meeting
-                //                })
             }catch{
                 print(error.localizedDescription)
             }
@@ -290,6 +278,7 @@ class FirebaseViewModel: ObservableObject {
     }
     
     ///채팅구현
+/*
     func messagesListner(meetingId: String) {
         docListner = db.collection(strMeetings).document(meetingId).collection(strMessage)
             .order(by: "timestamp", descending: false)
@@ -319,6 +308,13 @@ class FirebaseViewModel: ObservableObject {
             "timestamp": Timestamp()
         ])
     }
+    
+    func getMessage(){
+        if let id = self.messages.last?.id {
+                     self.lastMessageId = id
+                 }
+    }
+*/
     
     /// 에러처리
     func handleError(error: Error)async{

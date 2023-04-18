@@ -56,7 +56,6 @@ struct DetailMeetingView: View {
                 }
                 
                 ChatView(hostId: meeting.hostUID, meetingId: meeting.id!)
-                    .environmentObject(viewModel)
             }
             .onAppear{
                 viewModel.membersListener(meetingId: meeting.id!)
@@ -65,7 +64,6 @@ struct DetailMeetingView: View {
             .padding(15)
         }
         Chatting(meetingId: meeting.id!)
-            .environmentObject(viewModel)
         
         HStack{
             if isHost {
