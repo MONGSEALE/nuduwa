@@ -30,7 +30,7 @@ struct MeetingInfoSheetView: View {
                 .background(Color.white.opacity(0.00001))
                 
                 HStack {
-                    WebImage(url: meeting.hostImage)
+                    WebImage(url: hostUser.userImage)
                            .cornerRadius(60)
                     //    .resizable()
                         .scaledToFit()
@@ -43,7 +43,7 @@ struct MeetingInfoSheetView: View {
                         
                         .padding(.leading,40)
                     VStack(alignment: .leading) {
-                        Text(meeting.hostName)
+                        Text(hostUser.userName)
                             .font(.system(size:20))
                         Text("\(meeting.publishedDate.formatted(.dateTime.hour().minute()))에 생성됨")
                             .font(.caption2)
