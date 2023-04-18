@@ -51,8 +51,11 @@ struct DetailMeetingView: View {
                     .padding(.vertical,8)
                     .hAlign(.leading)
                 
-                ForEach(viewModel.members){ member in
-                    Text("참여자: \(member.memberName)")
+                HStack{
+                    Text("참여자:")
+                    ForEach(viewModel.members){ member in
+                        Text(" \(member.memberName),")
+                    }
                 }
                 
                 ChatView(hostId: meeting.hostUID, meetingId: meeting.id!)

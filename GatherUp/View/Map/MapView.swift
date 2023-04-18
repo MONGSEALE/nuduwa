@@ -42,13 +42,13 @@ struct MapView: View {
                           
                     }else{
                         MeetingIconView(meeting: item) { locate in
-                            print("locate: \(locate)")
+                            viewModel.region.center = locate
                         }
-                            .onTapGesture {
-                                withAnimation(.easeInOut){
-                                                viewModel.region.center = CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)
-                                               }
-                            }
+//                        .onTapGesture {
+//                            withAnimation(.easeInOut){
+//                                viewModel.region.center = CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)
+//                           }
+//                        }
                     }
                 })
             }
