@@ -38,76 +38,90 @@ class FirebaseViewModel: ObservableObject {
     //private var cancellables = Set<AnyCancellable>()
     private var listenerRegistration: ListenerRegistration?
     
-    func arrayMeetings(){
-        guard let uid = Auth.auth().currentUser?.uid else{return}
-        meetings = fetchedMeetings
-        meetings.sort { (meeting1, meeting2) -> Bool in
-            if meeting1.hostUID == uid && meeting2.hostUID != uid {
-                return true
-            } else if meeting1.hostUID != uid && meeting2.hostUID == uid {
-                return false
-            } else {
-                return meeting1.meetingDate < meeting2.meetingDate
-            }
-        }
-
-    }
+//    func arrayMeetings(){
+//        guard let uid = Auth.auth().currentUser?.uid else{return}
+//        meetings = fetchedMeetings
+//        meetings.sort { (meeting1, meeting2) -> Bool in
+//            if meeting1.hostUID == uid && meeting2.hostUID != uid {
+//                return true
+//            } else if meeting1.hostUID != uid && meeting2.hostUID == uid {
+//                return false
+//            } else {
+//                return meeting1.meetingDate < meeting2.meetingDate
+//            }
+//        }
+//        print("arrayMeetings: \(meetings.count)")
+//    }
     
     /// 서버 모임과 새로 추가하는 모임(서버 저장전) 배열 합치기
     func combineMeetings(){
         meetings = (newMeeting != nil) ? fetchedMeetings + [newMeeting!] : fetchedMeetings
     }
     /// Firestore에 있는 모임 데이터 가져오기
-//    func fetchMeetings(passedMeeting: Bool = false)async{
+    func fetchMeetings(passedMeeting: Bool = false)async{
 //        do{
-//            print("fetchMeetings 실행")
-//            guard let uid:String = Auth.auth().currentUser?.uid else{return}
+//            guard let uid = Auth.auth().currentUser?.uid else{return}
+//            let doc = try await db.collectionGroup(strMembers).whereField("memberId", isEqualTo: uid)
+//                    .getDocuments()
+//            var meetings: [Meeting] = []
 //
-//            var query: Query!
+//            doc.documents.forEach { document in
+//                document.reference.parent.parent?.getDocument { (meetingDocument, meetingError) in
+//                    if let meetingError = meetingError {print("에러!fetchMeetings:\(meetingError)");return}
 //
-//            query = Firestore.firestore().collection("Meetings")
-//            //                    .whereField("members", arrayContains: uid)
-//                .order(by: "meetingDate", descending: true)
-//            //            if passedMeeting {
-//            //                query = query.whereField("meetingDate", isLessThan: Date())
-//            //            } else {
-//            //                query = query.whereField("meetingDate", isGreaterThan: Date())
-//            //            }
+//                    defer{self.fetchedMeetings = meetings;print("defer")}
 //
-//            let docs = try await query.getDocuments()
-//            let fetchedMeetings = docs.documents.compactMap{ doc -> Meeting? in
-//                try? doc.data(as: Meeting.self)
+//                    if let meetingDocument = meetingDocument, let meeting = try? meetingDocument.data(as: Meeting.self) {
+//                        meetings.append(meeting)
+//                    }
+//                }
 //            }
-//            print("fetchedMeetings")
 //            await MainActor.run(body: {
-//                meetings = fetchedMeetings
-//                isFetching = false
+//                arrayMeetings()
+//                print("fetch")
 //            })
 //        }catch{
 //            print("fetchMeetings 에러!")
 //        }
-//    }
+    }
 
     /// FireStore와 meetings 배열 실시간 연동
     func meetingsListner(isJoin: Bool = false, isPassed: Bool = false){
         print("addListner")
         guard let uid = Auth.auth().currentUser?.uid else{return}
         if isJoin {
-            let doc = db.collectionGroup(strMembers).whereField("memberId", isEqualTo: uid)
+            docListner = db.collectionGroup(strMembers).whereField("memberId", isEqualTo: uid)
                 .addSnapshotListener { (querySnapshot, error) in
                     if let error = error {print("에러!meetingsListner:\(error)");return}
                     
-                    self.fetchedMeetings.removeAll()
+                    var meetings: [Meeting] = []
+                    let dispatchGroup = DispatchGroup()         // 비동기 작업 객체
+                    
                     querySnapshot?.documents.forEach { document in
+                        dispatchGroup.enter()                   // 비동기 시작
                         document.reference.parent.parent?.getDocument { (meetingDocument, meetingError) in
-                            defer{self.arrayMeetings()}
+                            defer { dispatchGroup.leave();}     // 이 블록이 끝나면 비동기 끝
                             
                             if let meetingError = meetingError {print("에러!meetingsListner2:\(meetingError)");return}
-
+                            
                             if let meetingDocument = meetingDocument, let meeting = try? meetingDocument.data(as: Meeting.self) {
-                                self.fetchedMeetings.append(meeting)
+                                meetings.append(meeting)
                             }
                         }
+                    }
+                    dispatchGroup.notify(queue: .main) {        // 비동기 끝나면 실행
+                        guard let uid = Auth.auth().currentUser?.uid else{return}
+                        // 배열 정렬 host가 본인인경우 맨앞으로 그 다음에 meetingDate 날짜 순을 정렬
+                        meetings.sort { (meeting1, meeting2) -> Bool in
+                            if meeting1.hostUID == uid && meeting2.hostUID != uid {
+                                return true
+                            } else if meeting1.hostUID != uid && meeting2.hostUID == uid {
+                                return false
+                            } else {
+                                return meeting1.meetingDate < meeting2.meetingDate
+                            }
+                        }
+                        self.meetings = meetings
                     }
                 }
         } else {

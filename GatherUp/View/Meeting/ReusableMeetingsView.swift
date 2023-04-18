@@ -62,6 +62,9 @@ struct ReusableMeetingsView: View {
         .onDisappear{
             viewModel.removeListner()
         }
+        .task {
+            await viewModel.fetchMeetings()
+        }
     }
 }
 
