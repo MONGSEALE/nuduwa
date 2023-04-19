@@ -20,13 +20,13 @@ struct Login: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 15) {
-                Image(systemName: "triangle")
+                Image(systemName: "person.2")
                     .font(.system(size: 38))
                     .foregroundColor(.indigo)
                 
-                (Text("Welcome,")
+                (Text("너두와에 어서와!")
                     .foregroundColor(.black) +
-                 Text("\nLogin to continue")
+                 Text("\n계속하려면 로그인")
                     .foregroundColor(.gray)
                 )
                 .font(.title)
@@ -61,17 +61,17 @@ struct Login: View {
                             }
                         }
                         .signInWithAppleButtonStyle(.white)
-                        .frame(height: 55)
+                        .frame(height: 30)
                         .blendMode(.overlay)
                     }
                     
                     .clipped()
                     
-                    Text("(OR)")
+                    Text("또는")
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 30)
-                        .padding(.bottom, 30)
+                        .padding(.top, 10)
+                        .padding(.bottom, 10)
                         .padding(.horizontal)
                     
                     // MARK: Custom Google Sign in Button
@@ -129,7 +129,7 @@ struct Login: View {
             .frame(width: 40, height: 40)
             .frame(height: 80)
             
-            Text("\(isGooGle ? "Google" : " Apple") Sign in")
+            Text("\(isGooGle ? "Google" : " Apple") 간편로그인")
                 .font(.callout)
                 .lineLimit(1)
         }
