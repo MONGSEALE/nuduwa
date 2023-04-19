@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct ContentView: View {
-    @AppStorage("log_status") var logStatus: Bool = false
+    @StateObject var loginViewModel: LoginViewModel = .init()
     @State var isLoading: Bool = true
    
     var body: some View {
         ZStack{
             // 로그인변수가 false면 Login뷰로 이동
-            if logStatus {
+            if loginViewModel.isLogin {
                 TabView{
                     MapView()
                         .tabItem{

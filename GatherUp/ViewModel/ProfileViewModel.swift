@@ -13,8 +13,6 @@ import GoogleSignIn
 class ProfileViewModel: ObservableObject {
     @Published var myProfile: User?
     
-    @AppStorage("log_status") var logStatus: Bool = false
-    
     @Published var errorMessage: String = ""
     @Published var showError: Bool = false
     @Published var isLoading: Bool = false
@@ -32,9 +30,6 @@ class ProfileViewModel: ObservableObject {
     func logOutUser() {
         try? Auth.auth().signOut()
         GIDSignIn.sharedInstance.signOut()
-        withAnimation(.easeInOut) {
-            logStatus = false
-        }
     }
     
     // MARK: Deleting User Entire Account
@@ -51,7 +46,6 @@ class ProfileViewModel: ObservableObject {
                 try await Firestore.firestore().collection("Users").document(userUID).delete()
                 // Final Step: Deleting Auth Account and Setting Log Status to False
                 try await Auth.auth().currentUser?.delete()
-                logStatus = false
                 isLoading = false
             } catch {
                 // await setError(error)

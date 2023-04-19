@@ -26,17 +26,38 @@ class LoginViewModel: ObservableObject {
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
     
-    // MARK: App Log Status
-    @AppStorage("log_status") var logStatus: Bool = false
-    
     // MARK: Apple Sign in Properies
     @Published var nonce: String = ""
     
     //로딩
     @Published var isLoading: Bool = false
     
+    @Published var isLogin: Bool = false
+    
     // Firestore
     //let db = Firestore.firestore()
+    
+    init() {
+        if Auth.auth().currentUser != nil {
+            isLogin = true
+        }
+        listenForAuthChanges()
+        
+    }
+    
+    private func listenForAuthChanges() {
+        Auth.auth().addStateDidChangeListener { _, user in
+            if user != nil {
+                self.isLogin = true
+            } else {
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut) {
+                        self.isLogin = false
+                    }
+                }
+            }
+        }
+    }
     
     // MARK: Apple Sign in API
     func appleAuthenticate(credential: ASAuthorizationAppleIDCredential) {
@@ -65,8 +86,6 @@ class LoginViewModel: ObservableObject {
             
             // User Successfully Logged Into Firebase...
             print("Success Apple")
-            withAnimation(.easeInOut) {self.logStatus = true}
-            
         }
     }
     
@@ -86,7 +105,6 @@ class LoginViewModel: ObservableObject {
                 
                 print("Success Google")
                 await MainActor.run(body: {
-                    withAnimation(.easeInOut){logStatus = true}
                     isLoading = false
                 })
             } catch {
