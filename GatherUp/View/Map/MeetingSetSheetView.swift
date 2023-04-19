@@ -30,7 +30,7 @@ struct MeetingSetSheetView: View {
     
     /// 시간 설정 제한 범위
     var dateRange: ClosedRange<Date>{
-        let min = Calendar.current.date(byAdding: .day, value: 0, to: currentdate)!
+        let min = Calendar.current.date(byAdding: .minute, value: 0, to: currentdate)!
         let max = Calendar.current.date(byAdding: .day, value: 6, to: currentdate)!
         
         return min...max
