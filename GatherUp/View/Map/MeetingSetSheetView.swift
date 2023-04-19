@@ -23,19 +23,22 @@ struct MeetingSetSheetView: View {
     @State private var noMorePlacePopUp = false
     @Binding var coordinateCreated: CLLocationCoordinate2D
     
-    @State private var meetingTime = Date()
+    @State private var meetingDate = Date()
     @State private var selection : Int
-    
+    let currentdate = Date()
     @StateObject var viewModel: FirebaseViewModel = .init()
     
-    
+    /// 시간 설정 제한 범위
+    var dateRange: ClosedRange<Date>{
+        let min = Calendar.current.date(byAdding: .day, value: 0, to: currentdate)!
+        let max = Calendar.current.date(byAdding: .day, value: 6, to: currentdate)!
+        
+        return min...max
+    }
 
     
     
     var closedRange = Calendar.current.date(byAdding: .year, value: -1,to:Date())
-    
-    
-    
     
     init(coordinateCreated: Binding<CLLocationCoordinate2D>,onDismiss: (() -> Void)? = nil) {
         _title = State(initialValue: "")
@@ -92,7 +95,9 @@ struct MeetingSetSheetView: View {
                                 }
                         }
                         Section(header:Text("시간 설정")){
-                            DatePicker("모임 시간을 정해주세요:",selection: $meetingTime,displayedComponents: .hourAndMinute)
+                            DatePicker("",selection: $meetingDate, in:dateRange)
+                                .datePickerStyle(GraphicalDatePickerStyle())
+                                
                         }
                         
                         Section(header:Text("최대 인원수")){
@@ -131,7 +136,7 @@ struct MeetingSetSheetView: View {
                             
                             let currentDate = Date()
                            
-                            let newMeeting = Meeting(title: title, description: description, place:place,numbersOfMembers:selection+1,latitude:  coordinateCreated.latitude,longitude: coordinateCreated.longitude,publishedDate:currentDate, meetingDate:meetingTime, hostName: (user?.displayName!)!,hostUID: user!.uid,hostImage: user?.photoURL!)
+                            let newMeeting = Meeting(title: title, description: description, place:place,numbersOfMembers:selection+1,latitude:  coordinateCreated.latitude,longitude: coordinateCreated.longitude,publishedDate:currentDate, meetingDate:meetingDate, hostName: (user?.displayName!)!,hostUID: user!.uid,hostImage: user?.photoURL!)
                             viewModel.createMeeting(meeting: newMeeting)
                             print(newMeeting)
                             

@@ -79,7 +79,7 @@ struct MeetingInfoSheetView: View {
                     HStack{
                         Image(systemName: "calendar")
                             .padding(.leading,30)
-                        Text("\(meeting.meetingDate.formatted(.dateTime.hour().minute()))에 만날꺼에요!")
+                        Text("\(meeting.meetingDate.formatted(.dateTime.month().day().hour().minute()))에 만날꺼에요!")
                         Spacer()
                     }
                    
