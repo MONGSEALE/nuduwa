@@ -19,6 +19,8 @@ struct MeetingIconView: View {
     
     var onLocate: (CLLocationCoordinate2D)->()
     
+    @State private var isClicked: Bool = false
+    
     var body: some View {
         Button{
             showSheet = true
@@ -49,7 +51,14 @@ struct MeetingIconView: View {
         .sheet(isPresented: $showSheet){
             MeetingInfoSheetView(meeting:meeting, hostUser: userViewModel.user!)
                 .presentationDetents([.fraction(0.3),.height(700)])
+                .onAppear{
+                    isClicked = true
+                }
+                .onDisappear{
+                    isClicked = false
+                }
         }
+        .scaleEffect(isClicked ? 1.7: 1.0)
         .onAppear{
             userViewModel.userListner(userUID: meeting.hostUID)
         }

@@ -29,6 +29,7 @@ struct MapView: View {
     let user = Auth.auth().currentUser                                      /// 현재 로그인 중인 유저정보 변수
     @State var message: String = ""
     
+    @State var locate: CLLocationCoordinate2D?
     
     var body: some View {
         ZStack(alignment:.bottom){
@@ -42,13 +43,11 @@ struct MapView: View {
                           
                     }else{
                         MeetingIconView(meeting: item) { locate in
-                            viewModel.region.center = locate
+                            withAnimation(.easeInOut(duration: 0.25)){
+                                viewModel.region.center = locate
+                                self.locate = locate
+                            }
                         }
-//                        .onTapGesture {
-//                            withAnimation(.easeInOut){
-//                                viewModel.region.center = CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)
-//                           }
-//                        }
                     }
                 })
             }

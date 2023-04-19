@@ -8,6 +8,7 @@
 import SwiftUI
 import Firebase
 import FirebaseFirestore
+import GoogleSignIn
 
 class ProfileViewModel: ObservableObject {
     @Published var myProfile: User?
@@ -30,7 +31,7 @@ class ProfileViewModel: ObservableObject {
     // MARK: Logging User Out
     func logOutUser() {
         try? Auth.auth().signOut()
-        //GIDSignIn.sharedInstance.signOut()
+        GIDSignIn.sharedInstance.signOut()
         withAnimation(.easeInOut) {
             logStatus = false
         }
@@ -56,6 +57,10 @@ class ProfileViewModel: ObservableObject {
                 // await setError(error)
             }
         }
+    }
+    
+    func registerUser(){
+        
     }
     
     // MARK: Setting Error
