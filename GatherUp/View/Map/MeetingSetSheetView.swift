@@ -22,7 +22,6 @@ struct MeetingSetSheetView: View {
     @State private var showPlacePopUp = false
     @State private var noMorePlacePopUp = false
     @Binding var coordinateCreated: CLLocationCoordinate2D
-    
     @State private var meetingDate = Date()
     @State private var selection : Int
     let currentdate = Date()

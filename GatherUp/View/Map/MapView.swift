@@ -115,10 +115,26 @@ struct MapView: View {
                     .cornerRadius(20)
                     .padding()
                 }
-                
                 Spacer()
-                HStack(spacing:110){
+               
+                HStack{
                     Spacer()
+                    Button {
+                        viewModel.requestAllowOnceLocationPermission()
+                    } label:{
+                        Image(systemName:"location.north.fill")
+                            .resizable()
+                            .frame(width: 30,height: 30)
+                            .foregroundColor(.white)
+                            .padding(15)
+                            .background(.blue)
+                            .clipShape(Circle())
+                    }
+                    Spacer().frame(width: 20)
+                }
+                Spacer().frame(height: showAnnotation ? 0 : 35 )
+                
+                
                     if(showAnnotation==true){
                         Button{
                             /// 새로 생성할 모임 위치를 클릭 안하면 if문 실행해서 메시지 띄우기
@@ -147,22 +163,9 @@ struct MapView: View {
                         }
                     }
                     
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            viewModel.requestAllowOnceLocationPermission()
-                        }) {
-                            Label("", systemImage: "location.circle.fill")
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.blue)
-                                .clipShape(Circle())
-                        }
-                        Spacer().frame(width: 10) // Adjust this value to control the distance from the right edge
-                    }
-                    
-                }
-                .padding(15)
+                
+                
+                
             }
             if showMessage{
                 ShowMessage(message: message)
