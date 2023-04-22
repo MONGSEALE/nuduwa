@@ -35,21 +35,20 @@ struct MapView: View {
         ZStack(alignment:.bottom){
             /// serverViewModel의 meetings 배열에서 item(meeting) 하나씩 가져와서 지도에 Pin 표시
             Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
-                MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
-                    /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
-                    
-                    if(serverViewModel.isOverlap==false && user?.uid == item.hostUID){
-                        CustomMapAnnotationView()
-                          
-                    }else{
-                        MeetingIconView(meeting: item) { locate in
-                            withAnimation(.easeInOut(duration: 0.25)){
-                                viewModel.region.center = locate
-                                self.locate = locate
+                        MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
+                            /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
+                            if(serverViewModel.isOverlap==false && user?.uid == item.hostUID){
+                                CustomMapAnnotationView()
+                                
+                            }else{
+                                MeetingIconView(meeting: item) { locate in
+                                    withAnimation(.easeInOut(duration: 0.25)){
+                                        viewModel.region.center = locate
+                                        self.locate = locate
+                                    }
+                                }
                             }
-                        }
-                    }
-                })
+                        })
             }
             .edgesIgnoringSafeArea(.top)
             .accentColor(Color(.systemPink))
@@ -147,11 +146,23 @@ struct MapView: View {
                             .environmentObject(viewModel)
                         }
                     }
-                    LocationButton(.currentLocation){
-                        viewModel.requestAllowOnceLocationPermission()
+                    
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            viewModel.requestAllowOnceLocationPermission()
+                        }) {
+                            Label("", systemImage: "location.circle.fill")
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.blue)
+                                .clipShape(Circle())
+                        }
+                        Spacer().frame(width: 10) // Adjust this value to control the distance from the right edge
                     }
-                    .labelStyle(.iconOnly)
+                    
                 }
+                .padding(15)
             }
             if showMessage{
                 ShowMessage(message: message)
@@ -189,12 +200,7 @@ struct MapView: View {
         
     
 
-/*
-struct MapView_Previews: PreviewProvider {
-    static var previews: some View {
-        MapView()
-    }
-}*/
+
 
 struct ShowMessage: View {
     let message: String
@@ -221,8 +227,8 @@ class MapViewModel : NSObject, ObservableObject,CLLocationManagerDelegate{
     
     @Published var region = MKCoordinateRegion(center:CLLocationCoordinate2D(latitude: 37.5665, longitude:126.9780 ),
                                                    span:MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1))
-        
     
+
     var locationManager : CLLocationManager?
     
     override init() {
