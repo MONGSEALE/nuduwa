@@ -64,13 +64,21 @@ struct MapView: View {
                 }
                 .onTapGesture { tapLocation in
                     if(showAnnotation==true){
-                        let frame = geometry.frame(in: .local)
-                        let x = Double(tapLocation.x / frame.width) * viewModel.region.span.longitudeDelta + viewModel.region.center.longitude - viewModel.region.span.longitudeDelta / 2
-                        let y = Double((frame.height - tapLocation.y) / frame.height) * viewModel.region.span.latitudeDelta + viewModel.region.center.latitude - viewModel.region.span.latitudeDelta / 2
-                        let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: y, longitude: x, hostName: user!.displayName!, hostUID: user!.uid, hostImage: user!.photoURL)
                         
-                        serverViewModel.addMeeting(newMeeting: newMeeting)
-                        coordinateCreated = CLLocationCoordinate2D(latitude: y, longitude: x)
+                        let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
+                               let userLocation = CLLocation(latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.longitude)
+                               let tappedLocation = CLLocation(latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude)
+                               let distanceInMeters = userLocation.distance(from: tappedLocation)
+
+                               if distanceInMeters <= 3000 {
+                                   let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude, hostName: user!.displayName!, hostUID: user!.uid, hostImage: user!.photoURL)
+                                   
+                                   serverViewModel.addMeeting(newMeeting: newMeeting)
+                                   coordinateCreated = CLLocationCoordinate2D(latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude)
+                               } else {
+                                   showPopupMessage(message: "모임의 거리가 너무 멀어요!", duration: 3)
+                               }
+                
                     }
                 }
                 /*
