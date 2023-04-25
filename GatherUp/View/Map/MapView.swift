@@ -67,7 +67,9 @@ struct MapView: View {
                         let frame = geometry.frame(in: .local)
                         let x = Double(tapLocation.x / frame.width) * viewModel.region.span.longitudeDelta + viewModel.region.center.longitude - viewModel.region.span.longitudeDelta / 2
                         let y = Double((frame.height - tapLocation.y) / frame.height) * viewModel.region.span.latitudeDelta + viewModel.region.center.latitude - viewModel.region.span.latitudeDelta / 2
-                        serverViewModel.addMeeting(latitude: y, longitude: x)
+                        let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: y, longitude: x, hostName: user!.displayName!, hostUID: user!.uid, hostImage: user!.photoURL)
+                        
+                        serverViewModel.addMeeting(newMeeting: newMeeting)
                         coordinateCreated = CLLocationCoordinate2D(latitude: y, longitude: x)
                     }
                 }
