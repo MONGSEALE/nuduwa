@@ -121,14 +121,23 @@ struct MapView: View {
                             }
                         }
                     }label: {
-                        Text(showAnnotation ? "취소" : "모임만들기")
+                        Group {
+                            if showAnnotation {
+                                CustomCancleView()
+                            } else {
+                                Text("모임만들기")
+                                    .fontWeight(.bold)
+                                    .font(.system(size: 20))
+                                    .foregroundColor(Color.white)
+                                    .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
+                                    .background(Color.blue) // Moved the background modifier inside the else block
+                                    .cornerRadius(20)
+                            }
+                        }
                     }
-                    .fontWeight(.bold)
-                    .font(.system(size:20))
-                    .foregroundColor(Color.white)
-                    .background(Color.blue)
-                    .cornerRadius(20)
-                    .padding()
+                    .padding(15)
+                    
+                   
                 }
                 Spacer()
                
@@ -163,7 +172,7 @@ struct MapView: View {
                             Text("생성하기!")
                         }
                         .background(Color.white)
-                        .foregroundColor(.black)
+                        .foregroundColor(.white)
                         .font(.headline)
                         .frame(width: 90, height: 35)
                         .buttonStyle(.borderedProminent)
