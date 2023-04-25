@@ -33,56 +33,69 @@ struct MapView: View {
     
     var body: some View {
         ZStack(alignment:.bottom){
-            /// serverViewModel의 meetings 배열에서 item(meeting) 하나씩 가져와서 지도에 Pin 표시
-            Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
-                        MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
-                            /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
-                            if(serverViewModel.isOverlap==false && user?.uid == item.hostUID){
-                                CustomMapAnnotationView()
-                                
-                            }else{
-                                MeetingIconView(meeting: item) { locate in
-                                    withAnimation(.easeInOut(duration: 0.25)){
-                                        viewModel.region.center = locate
-                                        self.locate = locate
-                                    }
+            GeometryReader { geometry in
+                /// serverViewModel의 meetings 배열에서 item(meeting) 하나씩 가져와서 지도에 Pin 표시
+                Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
+                    MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
+                        /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
+                        if(serverViewModel.isOverlap==false && user?.uid == item.hostUID){
+                            CustomMapAnnotationView()
+                            
+                        }else{
+                            MeetingIconView(meeting: item) { locate in
+                                withAnimation(.easeInOut(duration: 0.25)){
+                                    viewModel.region.center = locate
+                                    self.locate = locate
                                 }
                             }
-                        })
-            }
-            .edgesIgnoringSafeArea(.top)
-            .accentColor(Color(.systemPink))
-            .onAppear{
-                guard let user = user else{return}             /// 혹시라도 로그인한 유저 정보 없으면 return
-                serverViewModel.meetingsListner()              /// Map이 보여지는동안 Firebase와 실시간 연동
-                serverViewModel.checkedOverlap(id: user.uid)   /// Map이 보여지는동안 실시간 중복확인
-                viewModel.checkIfLocationServicesIsEnabled()
-            }
-            .onDisappear{
-                serverViewModel.removeListner()                /// Map을 안보면 실시간 연동 중단
-            }
-            .overlay(GeometryReader { geometry in
-                if(showAnnotation==true){
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .gesture(DragGesture(minimumDistance: 0)
-                            .onChanged { gesture in
-                                // Calculate the translation in points
-                                self.viewModel.region.center.latitude += Double(gesture.translation.height) / Double(geometry.size.height) * self.viewModel.region.span.latitudeDelta
-                                self.viewModel.region.center.longitude -= Double(gesture.translation.width) / Double(geometry.size.width) * self.viewModel.region.span.longitudeDelta
-                            }
-                            .onEnded({ value in
-                                let tapLocation = value.location
-                                let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
-                                /// 지도에 위치표시하기 위한 임시 Meeting데이터
-                                let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude, hostName: user!.displayName!, hostUID: user!.uid, hostImage: user!.photoURL)
-                                
-                                serverViewModel.addMeeting(newMeeting: newMeeting)
-                                coordinateCreated=tapCoordinate
-                            })
-                        )
+                        }
+                    })
                 }
-            })
+                .edgesIgnoringSafeArea(.top)
+                .accentColor(Color(.systemPink))
+                .onAppear{
+                    guard let user = user else{return}             /// 혹시라도 로그인한 유저 정보 없으면 return
+                    serverViewModel.meetingsListner()              /// Map이 보여지는동안 Firebase와 실시간 연동
+                    serverViewModel.checkedOverlap(id: user.uid)   /// Map이 보여지는동안 실시간 중복확인
+                    viewModel.checkIfLocationServicesIsEnabled()
+                }
+                .onDisappear{
+                    serverViewModel.removeListner()                /// Map을 안보면 실시간 연동 중단
+                }
+                .onTapGesture { tapLocation in
+                    if(showAnnotation==true){
+                        let frame = geometry.frame(in: .local)
+                        let x = Double(tapLocation.x / frame.width) * viewModel.region.span.longitudeDelta + viewModel.region.center.longitude - viewModel.region.span.longitudeDelta / 2
+                        let y = Double((frame.height - tapLocation.y) / frame.height) * viewModel.region.span.latitudeDelta + viewModel.region.center.latitude - viewModel.region.span.latitudeDelta / 2
+                        serverViewModel.addMeeting(latitude: y, longitude: x)
+                        coordinateCreated = CLLocationCoordinate2D(latitude: y, longitude: x)
+                    }
+                }
+                /*
+                 .overlay(GeometryReader { geometry in
+                 if(showAnnotation==true){
+                 Color.clear
+                 .contentShape(Rectangle())
+                 .gesture(DragGesture(minimumDistance: 0)
+                 .onChanged { gesture in
+                 // Calculate the translation in points
+                 self.viewModel.region.center.latitude += Double(gesture.translation.height) / Double(geometry.size.height) * self.viewModel.region.span.latitudeDelta
+                 self.viewModel.region.center.longitude -= Double(gesture.translation.width) / Double(geometry.size.width) * self.viewModel.region.span.longitudeDelta
+                 }
+                 .onEnded({ value in
+                 let tapLocation = value.location
+                 let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
+                 /// 지도에 위치표시하기 위한 임시 Meeting데이터
+                 let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude, hostName: user!.displayName!, hostUID: user!.uid, hostImage: user!.photoURL)
+                 
+                 serverViewModel.addMeeting(newMeeting: newMeeting)
+                 coordinateCreated=tapCoordinate
+                 })
+                 )
+                 }
+                 })
+                 */
+            }
             VStack{
                 HStack{
                     Spacer()
