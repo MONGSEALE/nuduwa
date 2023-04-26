@@ -131,7 +131,7 @@ struct MapView: View {
                     }label: {
                         Group {
                             if showAnnotation {
-                                //CustomCancleView()
+                                CustomCancleView()
                             } else {
                                 Text("모임만들기")
                                     .fontWeight(.bold)
@@ -340,4 +340,5 @@ extension MKCoordinateRegion {
         return min(maxZoomLevel, max(1, zoomLevel))
     }
 }
+
 
