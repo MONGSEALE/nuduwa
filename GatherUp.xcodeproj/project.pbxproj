@@ -197,9 +197,9 @@
 				4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */,
 				4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */,
 				4285616429DFDBE7004DCDB9 /* MeetingSetSheetView.swift */,
+				422C679E29F8063200F0CAB7 /* CustomCancleView.swift */,
 				429515DC29C4A766006DD4B3 /* MapView.swift */,
 				428C040229E8E6F3003443BA /* MeetingInfoSheetView.swift */,
-				422C679E29F8063200F0CAB7 /* CustomCancleView.swift */,
 			);
 			path = Map;
 			sourceTree = "<group>";
