@@ -60,13 +60,9 @@ struct MeetingIconView: View {
         }
         .scaleEffect(isClicked ? 1.7: 1.0)
         .onAppear{
-            userViewModel.userListner(userUID: meeting.hostUID)
+            userViewModel.userListener(userUID: meeting.hostUID)
         }
     }
 }
 
-//struct MeetingIconView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        MeetingIconView()
-//    }
-//}
+
