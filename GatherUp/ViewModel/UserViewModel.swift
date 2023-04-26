@@ -16,7 +16,7 @@ class UserViewModel: ObservableObject {
     
     private let db = Firestore.firestore().collection("Users")
     
-    func userListner(userUID:String) {
+    func userListener(userUID:String) {
         let doc = db.document(userUID)
         docListner = doc.addSnapshotListener { (snapshot, error) in
             if let error = error {print("에러!userListner:\(error)");return}

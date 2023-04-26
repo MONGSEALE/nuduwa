@@ -78,6 +78,7 @@ class FirebaseViewModel: ObservableObject {
             docListner = db.collectionGroup(strMembers).whereField("memberId", isEqualTo: uid)
                 .addSnapshotListener { (querySnapshot, error) in
                     if let error = error {print("에러!meetingsListner:\(error)");return}
+                    print("listen")
                     
                     var meetings: [Meeting] = []
                     let dispatchGroup = DispatchGroup()         // 비동기 작업 객체
