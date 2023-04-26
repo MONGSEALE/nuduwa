@@ -87,7 +87,7 @@ struct MeetingInfoSheetView: View {
                     HStack{
                         Image(systemName: "person.2")
                             .padding(.leading,30)
-                        Text("참여인원  \(servermodel.members.count+1)/\(meeting.numbersOfMembers+1)")
+                        Text("참여인원  \(servermodel.members.count)/\(meeting.numbersOfMembers+1)")
                         Spacer()
                     }
                     

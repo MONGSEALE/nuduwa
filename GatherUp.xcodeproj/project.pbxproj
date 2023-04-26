@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		0FAE23A629E640F000A826C8 /* Splash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FAE23A529E640F000A826C8 /* Splash.swift */; };
 		335DF2D629E546060051B602 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335DF2D529E546060051B602 /* ChatMessage.swift */; };
-		335DF2D829E547BA0051B602 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335DF2D729E547BA0051B602 /* ChatView.swift */; };
 		3372C5D229DFA78A000169DD /* MapViewModel2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3372C5D129DFA78A000169DD /* MapViewModel2.swift */; };
 		339A0FF129D3E5D100B4DD98 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 339A0FF029D3E5D100B4DD98 /* GoogleService-Info.plist */; };
 		339A0FF429D3E61E00B4DD98 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 339A0FF329D3E61E00B4DD98 /* GoogleSignIn */; };
@@ -35,6 +34,7 @@
 		33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13929D666A500352451 /* ReusableMeetingsView.swift */; };
 		33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13B29D667E500352451 /* MeetingCardView.swift */; };
 		33EDC97929DFF1DB0087FA29 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */; };
+		422C679F29F8063200F0CAB7 /* CustomCancleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 422C679E29F8063200F0CAB7 /* CustomCancleView.swift */; };
 		425050EA29D07096009926FF /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 425050E929D07096009926FF /* Location.swift */; };
 		4285616029DFDAAB004DCDB9 /* MeetingIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */; };
 		4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */; };
@@ -47,12 +47,12 @@
 		429515DD29C4A766006DD4B3 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515DC29C4A766006DD4B3 /* MapView.swift */; };
 		429515DF29C4A776006DD4B3 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515DE29C4A776006DD4B3 /* ProfileView.swift */; };
 		429515E129C4A9AD006DD4B3 /* MeetingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 429515E029C4A9AD006DD4B3 /* MeetingsView.swift */; };
+		42B2DEAE29F7B30E00558EA1 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42B2DEAD29F7B30E00558EA1 /* ChatView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0FAE23A529E640F000A826C8 /* Splash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Splash.swift; sourceTree = "<group>"; };
 		335DF2D529E546060051B602 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
-		335DF2D729E547BA0051B602 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		3372C5D129DFA78A000169DD /* MapViewModel2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewModel2.swift; sourceTree = "<group>"; };
 		339A0FF029D3E5D100B4DD98 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		339A101129D3E9C000B4DD98 /* LoginViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
@@ -71,6 +71,7 @@
 		33ADB13929D666A500352451 /* ReusableMeetingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableMeetingsView.swift; sourceTree = "<group>"; };
 		33ADB13B29D667E500352451 /* MeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCardView.swift; sourceTree = "<group>"; };
 		33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
+		422C679E29F8063200F0CAB7 /* CustomCancleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCancleView.swift; sourceTree = "<group>"; };
 		425050E929D07096009926FF /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingIconView.swift; sourceTree = "<group>"; };
 		4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMapAnnotationView.swift; sourceTree = "<group>"; };
@@ -84,6 +85,7 @@
 		429515DC29C4A766006DD4B3 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		429515DE29C4A776006DD4B3 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		429515E029C4A9AD006DD4B3 /* MeetingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingsView.swift; sourceTree = "<group>"; };
+		42B2DEAD29F7B30E00558EA1 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -175,7 +177,7 @@
 				33ADB13929D666A500352451 /* ReusableMeetingsView.swift */,
 				33ADB13B29D667E500352451 /* MeetingCardView.swift */,
 				33A82CB829DBA57500FA2BA0 /* DetailMeetingView.swift */,
-				335DF2D729E547BA0051B602 /* ChatView.swift */,
+				42B2DEAD29F7B30E00558EA1 /* ChatView.swift */,
 			);
 			path = Meeting;
 			sourceTree = "<group>";
@@ -197,6 +199,7 @@
 				4285616429DFDBE7004DCDB9 /* MeetingSetSheetView.swift */,
 				429515DC29C4A766006DD4B3 /* MapView.swift */,
 				428C040229E8E6F3003443BA /* MeetingInfoSheetView.swift */,
+				422C679E29F8063200F0CAB7 /* CustomCancleView.swift */,
 			);
 			path = Map;
 			sourceTree = "<group>";
@@ -346,8 +349,9 @@
 				339A101C29D3EBBF00B4DD98 /* ViewExtensions.swift in Sources */,
 				428C040329E8E6F3003443BA /* MeetingInfoSheetView.swift in Sources */,
 				33ABB70429DD421E0049D482 /* ProfileViewModel.swift in Sources */,
-				335DF2D829E547BA0051B602 /* ChatView.swift in Sources */,
 				4285616529DFDBE7004DCDB9 /* MeetingSetSheetView.swift in Sources */,
+				42B2DEAE29F7B30E00558EA1 /* ChatView.swift in Sources */,
+				422C679F29F8063200F0CAB7 /* CustomCancleView.swift in Sources */,
 				429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */,
 				425050EA29D07096009926FF /* Location.swift in Sources */,
 				339A102329D4093800B4DD98 /* ReusableProfileContent.swift in Sources */,

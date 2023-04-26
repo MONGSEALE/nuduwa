@@ -58,7 +58,7 @@ struct MeetingCardView: View {
         .hAlign(.leading)
         
         .onAppear {
-            userViewModel.userListner(userUID: meeting.hostUID)
+            userViewModel.userListener(userUID: meeting.hostUID)
             /// - Adding Only Once
             if docListner == nil{
                 guard let meetingID = meeting.id else{return}

@@ -18,6 +18,8 @@ struct DetailMeetingView: View {
     @State var isEdit: Bool = false
     @State private var title: String = ""
     @State private var description: String = ""
+    
+    @State private var toChatView: Bool = false
 
     var body: some View {
         let isHost = meeting.hostUID == Auth.auth().currentUser?.uid ? true : false
@@ -58,7 +60,7 @@ struct DetailMeetingView: View {
                     }
                 }
                 
-                ChatView(hostId: meeting.hostUID, meetingId: meeting.id!)
+             //
             }
             .onAppear{
                 viewModel.membersListener(meetingId: meeting.id!)
@@ -66,7 +68,21 @@ struct DetailMeetingView: View {
             }
             .padding(15)
         }
-        Chatting(meetingId: meeting.id!)
+        
+        
+        Button{
+            toChatView = true
+        } label: {
+            Text("채팅 참가")
+                .font(.callout)
+                .foregroundColor(.white)
+                .padding(.horizontal,30)
+                .padding(.vertical,10)
+                .background(.blue,in: Capsule())
+        }
+        .sheet(isPresented: $toChatView){
+            ChatView(meeting:meeting)
+        }
         
         HStack{
             if isHost {
