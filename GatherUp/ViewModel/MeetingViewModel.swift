@@ -46,7 +46,7 @@ class MeetingViewModel: ObservableObject {
     /// FireStore와 meetings 배열 실시간 연동
     func meetingsListner(isPassed: Bool = false){
         guard let uid = Auth.auth().currentUser?.uid else{return}
-        docListner = db.collectionGroup(strMembers).whereField("memberId", isEqualTo: uid)
+        docListner = db.collectionGroup(strMembers).whereField("memberUID", isEqualTo: uid)
             .addSnapshotListener { (querySnapshot, error) in
                 if let error = error {print("에러!meetingsListner:\(error)");return}
                 print("listen")
@@ -171,7 +171,7 @@ class MeetingViewModel: ObservableObject {
         guard let currentUser = Auth.auth().currentUser else { return }
         let doc = db.collection(strMeetings).document(meetingId).collection(strMembers)
 
-        doc.whereField("memberId", isEqualTo: currentUser.uid).getDocuments { (snapshot, error) in
+        doc.whereField("memberUID", isEqualTo: currentUser.uid).getDocuments { (snapshot, error) in
             if let error = error {
                 print("에러: \(error)")
             } else {

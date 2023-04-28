@@ -24,6 +24,7 @@ struct MapView: View {
     @State private var showSheet = false    /// 모임 제목, 내용 등 입력할 시트 띄우기
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
+    @State var center: CLLocationCoordinate2D?
     
     @State var locate: CLLocationCoordinate2D?
     
@@ -49,9 +50,10 @@ struct MapView: View {
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))
                 .onAppear{
-                    serverViewModel.mapMeetingsListner(center: viewModel.region.center)              /// Map이 보여지는동안 Firebase와 실시간 연동
+                    serverViewModel.mapMeetingsListner(center: viewModel.region.center, latitudeDelta: viewModel.region.span.latitudeDelta)              /// Map이 보여지는동안 Firebase와 실시간 연동
                     serverViewModel.checkedOverlap()    /// Map이 보여지는동안 실시간 중복확인
                     viewModel.checkIfLocationServicesIsEnabled()
+                    center = viewModel.region.center
                 }
                 .onDisappear{
                     serverViewModel.removeListner()                /// Map을 안보면 실시간 연동 중단

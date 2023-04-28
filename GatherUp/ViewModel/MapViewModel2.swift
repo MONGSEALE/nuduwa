@@ -40,55 +40,53 @@ class MapViewModel2: ObservableObject {
     
     /// 서버 모임과 새로 추가하는 모임(서버 저장전) 배열 합치기
     func combineMeetings(){
+        print("combineMeetings")
         meetings = (newMeeting != nil) ? fetchedMeetings + [newMeeting!] : fetchedMeetings
     }
 
     /// FireStore와 meetings 배열 실시간 연동
-    func mapMeetingsListner(center: CLLocationCoordinate2D){
+    func mapMeetingsListner(center: CLLocationCoordinate2D, latitudeDelta: Double){
         print("mapMeetingsListner")
-        let radiusInM: Double = 50 * 1000
+        let metersPerDegree: Double = 111_319.9 // 지구의 반지름 (m) * 2 * pi / 360
+
+        let latitudeDeltaInMeters = latitudeDelta * metersPerDegree * 10
+        print("델타: \(latitudeDelta)")
+        print("거리: \(latitudeDeltaInMeters)")
         let queryBounds = GFUtils.queryBounds(forLocation: center,
-                                              withRadius: radiusInM)
+                                              withRadius: latitudeDeltaInMeters)
         let queries = queryBounds.map { bound -> Query in
             return db.collection(strMeetings)
                 .order(by: "geoHash")
                 .start(at: [bound.startValue])
                 .end(at: [bound.endValue])
         }
-        var meetings: [Meeting] = []
+        var queryMeetings: [Int : [Meeting]] = [:]
+
         let dispatchGroup = DispatchGroup()
-        for query in queries {
+        
+        for (index, query) in queries.enumerated() {
             dispatchGroup.enter()
-            query.addSnapshotListener { (snapshot, error) in
-                defer { dispatchGroup.leave() } 
-                guard let documents = snapshot?.documents else {
-                    print("No documents")
-                    return
+            queryMeetings[index] = [Meeting]()
+                query.addSnapshotListener { (snapshot, error) in
+                    defer { dispatchGroup.leave();}
+                    guard let documents = snapshot?.documents else {
+                        print("mapMeetingsListner 에러1: \(String(describing: error))")
+                        return
+                    }
+                    print("documents: \(documents)")
+                    queryMeetings[index]!.append(contentsOf: documents.compactMap{ documents -> Meeting? in
+                        try? documents.data(as: Meeting.self)
+                    })
                 }
-                
-                meetings.append(contentsOf: documents.compactMap{ documents -> Meeting? in
-                    try? documents.data(as: Meeting.self)
-                })
-            }
+
         }
-        dispatchGroup.notify(queue: .main) {        // 비동기 끝나면 실행
-            self.fetchedMeetings = meetings
+        print("fetchedMeetings")
+        dispatchGroup.notify(queue: .main) {
+            for (_,value) in queryMeetings{
+                self.fetchedMeetings.append(contentsOf: value)
+            }
             self.combineMeetings()
         }
-        
-        
-//        let doc = db.collection(strMeetings)
-//        docListner = doc.addSnapshotListener { (snapshot, error) in
-//            guard let documents = snapshot?.documents else {
-//                print("No documents")
-//                return
-//            }
-//            self.fetchedMeetings = documents.compactMap{ documents -> Meeting? in
-//                try? documents.data(as: Meeting.self)
-//            }
-//            self.combineMeetings()
-//        }
-        
     }
     
     /// 리스너 제거(리소스 확보)
@@ -188,7 +186,7 @@ class MapViewModel2: ObservableObject {
                 /// 만약 오류로 최대인원을 넘겼을 경우 삭제
                 if members.count > numbersOfMembers {
                     print("최대인원초과로 삭제")
-                    doc.whereField("memberId", isEqualTo: user.uid).getDocuments { (snapshot, error) in
+                    doc.whereField("memberUID", isEqualTo: user.uid).getDocuments { (snapshot, error) in
                         if let error = error {
                             print("에러: \(error)")
                         } else {

@@ -60,7 +60,7 @@ struct ReusableMeetingsView: View {
             }
         }
         .onAppear{
-            viewModel.meetingsListner(isJoin: true)
+            viewModel.meetingsListner()
         }
         .onDisappear{
             viewModel.removeListner()
