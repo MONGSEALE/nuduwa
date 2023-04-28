@@ -94,7 +94,7 @@ struct MeetingInfoSheetView: View {
                     Spacer()
                     if let uid = Auth.auth().currentUser?.uid {
                         if uid != meeting.hostUID {
-                            if (viewModel.members.first(where: { $0.memberId == uid}) == nil &&
+                            if (viewModel.members.first(where: { $0.memberUID == uid}) == nil &&
                                 viewModel.members.count < meeting.numbersOfMembers) {
                                 Button {
                                     viewModel.joinMeeting(meetingId: meeting.id!, numbersOfMembers: meeting.numbersOfMembers)
@@ -102,10 +102,10 @@ struct MeetingInfoSheetView: View {
                                     Text("참여하기")
                                 }
                             }
-                            else if (viewModel.members.count==meeting.numbersOfMembers && viewModel.members.first(where: { $0.memberId == uid}) == nil){
+                            else if (viewModel.members.count==meeting.numbersOfMembers && viewModel.members.first(where: { $0.memberUID == uid}) == nil){
                                  Text("참여불가")
                             }
-                            else if (viewModel.members.first(where: { $0.memberId == uid}) != nil)
+                            else if (viewModel.members.first(where: { $0.memberUID == uid}) != nil)
                             {
                                 Text("참여중")
                             }

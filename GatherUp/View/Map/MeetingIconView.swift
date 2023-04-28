@@ -36,8 +36,6 @@ struct MeetingIconView: View {
                     .padding(4) // Adjust the padding value to increase or decrease the size of the blue circle
                     .background(Circle().fill(Color.blue))
                     
-                
-                
                 Image(systemName: "triangle.fill")
                     .resizable()
                     .scaledToFit()

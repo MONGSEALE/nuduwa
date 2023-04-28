@@ -169,7 +169,7 @@ class MapViewModel2: ObservableObject {
         Task{
             do{
                 guard let user = Auth.auth().currentUser else{return}
-                let member = Members(memberId: user.uid, memberName: user.displayName!, memberImage: user.photoURL)
+                let member = Members(memberUID: user.uid, memberName: user.displayName!, memberImage: user.photoURL)
                 let doc = db.collection(strMeetings).document(meetingId).collection(strMembers)
                 
                 let _ = try doc.document().setData(from: member, completion: {error in

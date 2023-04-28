@@ -36,96 +36,53 @@ class MeetingViewModel: ObservableObject {
     private let strMessage = "Message"          // Firestore에 저장된 콜렉션 이름
     @Published var messages: [ChatMessage] = []
     @Published  var lastMessageId: String = ""
-    //private var cancellables = Set<AnyCancellable>()
     private var listenerRegistration: ListenerRegistration?
     
     /// 서버 모임과 새로 추가하는 모임(서버 저장전) 배열 합치기
     func combineMeetings(){
         meetings = (newMeeting != nil) ? fetchedMeetings + [newMeeting!] : fetchedMeetings
     }
-    /// Firestore에 있는 모임 데이터 가져오기
-//    func fetchMeetings(passedMeeting: Bool = false)async{
-//        do{
-//            guard let uid = Auth.auth().currentUser?.uid else{return}
-//            let doc = try await db.collectionGroup(strMembers).whereField("memberId", isEqualTo: uid)
-//                    .getDocuments()
-//            var meetings: [Meeting] = []
-//
-//            doc.documents.forEach { document in
-//                document.reference.parent.parent?.getDocument { (meetingDocument, meetingError) in
-//                    if let meetingError = meetingError {print("에러!fetchMeetings:\(meetingError)");return}
-//
-//                    defer{self.fetchedMeetings = meetings;print("defer")}
-//
-//                    if let meetingDocument = meetingDocument, let meeting = try? meetingDocument.data(as: Meeting.self) {
-//                        meetings.append(meeting)
-//                    }
-//                }
-//            }
-//            await MainActor.run(body: {
-//                arrayMeetings()
-//                print("fetch")
-//            })
-//        }catch{
-//            print("fetchMeetings 에러!")
-//        }
-//    }
-
+    
     /// FireStore와 meetings 배열 실시간 연동
-    func meetingsListner(isJoin: Bool = false, isPassed: Bool = false){
-        print("addListner")
+    func meetingsListner(isPassed: Bool = false){
         guard let uid = Auth.auth().currentUser?.uid else{return}
-        if isJoin {
-            docListner = db.collectionGroup(strMembers).whereField("memberId", isEqualTo: uid)
-                .addSnapshotListener { (querySnapshot, error) in
-                    if let error = error {print("에러!meetingsListner:\(error)");return}
-                    print("listen")
-                    
-                    var meetings: [Meeting] = []
-                    let dispatchGroup = DispatchGroup()         // 비동기 작업 객체
-                    
-                    querySnapshot?.documents.forEach { document in
-                        dispatchGroup.enter()                   // 비동기 시작
-                        document.reference.parent.parent?.getDocument { (meetingDocument, meetingError) in
-                            defer { dispatchGroup.leave();}     // 이 블록이 끝나면 비동기 끝
-                            
-                            if let meetingError = meetingError {print("에러!meetingsListner2:\(meetingError)");return}
-                            
-                            if let meetingDocument = meetingDocument, let meeting = try? meetingDocument.data(as: Meeting.self) {
-                                meetings.append(meeting)
-                            }
+        docListner = db.collectionGroup(strMembers).whereField("memberId", isEqualTo: uid)
+            .addSnapshotListener { (querySnapshot, error) in
+                if let error = error {print("에러!meetingsListner:\(error)");return}
+                print("listen")
+                
+                var meetings: [Meeting] = []
+                let dispatchGroup = DispatchGroup()         // 비동기 작업 객체
+                
+                querySnapshot?.documents.forEach { document in
+                    dispatchGroup.enter()                   // 비동기 시작
+                    document.reference.parent.parent?.getDocument { (meetingDocument, meetingError) in
+                        defer { dispatchGroup.leave();}     // 이 블록이 끝나면 비동기 끝
+                        
+                        if let meetingError = meetingError {print("에러!meetingsListner2:\(meetingError)");return}
+                        
+                        if let meetingDocument = meetingDocument, let meeting = try? meetingDocument.data(as: Meeting.self) {
+                            meetings.append(meeting)
                         }
                     }
-                    dispatchGroup.notify(queue: .main) {        // 비동기 끝나면 실행
-                        guard let uid = Auth.auth().currentUser?.uid else{return}
-                        // 배열 정렬 host가 본인인경우 맨앞으로 그 다음에 meetingDate 날짜 순을 정렬
-                        meetings.sort { (meeting1, meeting2) -> Bool in
-                            if meeting1.hostUID == uid && meeting2.hostUID != uid {
-                                return true
-                            } else if meeting1.hostUID != uid && meeting2.hostUID == uid {
-                                return false
-                            } else {
-                                return meeting1.meetingDate < meeting2.meetingDate
-                            }
+                }
+                dispatchGroup.notify(queue: .main) {        // 비동기 끝나면 실행
+                    guard let uid = Auth.auth().currentUser?.uid else{return}
+                    // 배열 정렬 host가 본인인경우 맨앞으로 그 다음에 meetingDate 날짜 순을 정렬
+                    meetings.sort { (meeting1, meeting2) -> Bool in
+                        if meeting1.hostUID == uid && meeting2.hostUID != uid {
+                            return true
+                        } else if meeting1.hostUID != uid && meeting2.hostUID == uid {
+                            return false
+                        } else {
+                            return meeting1.meetingDate < meeting2.meetingDate
                         }
-                        self.isFetching = false
-                        self.meetings = meetings
                     }
+                    self.isFetching = false
+                    self.meetings = meetings
                 }
-        } else {
-            let doc = db.collection(strMeetings)
-            docListner = doc.addSnapshotListener { (snapshot, error) in
-                guard let documents = snapshot?.documents else {
-                    print("No documents")
-                    return
-                }
-                self.fetchedMeetings = documents.compactMap{ documents -> Meeting? in
-                    try? documents.data(as: Meeting.self)
-                }
-                print("fetchedMeetings: \(self.fetchedMeetings)")
-                self.combineMeetings()
             }
-        }
+        
     }
     
     /// 리스너 제거(리소스 확보)
@@ -192,7 +149,7 @@ class MeetingViewModel: ObservableObject {
         Task{
             do{
                 guard let user = Auth.auth().currentUser else{return}
-                let member = Members(memberId: user.uid, memberName: user.displayName!, memberImage: user.photoURL)
+                let member = Members(memberUID: user.uid, memberName: user.displayName!, memberImage: user.photoURL)
                 let doc = db.collection(strMeetings).document(meetingId).collection(strMembers).document()
 //                let doc = db.document(meetingId).collection("members").document()
                 let _ = try doc.setData(from: member, completion: {error in
