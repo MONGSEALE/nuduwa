@@ -14,20 +14,16 @@ import Firebase
 
 struct MapView: View {
     @StateObject private var viewModel = MapViewModel()
-    @State var showAnnotation = false
-    @State private var coordinate = CLLocationManager()
+    @StateObject private var serverViewModel: MapViewModel2 = .init()   /// Firebase 연결 viewmodel
     
-    @State private var showMessage = false
-    @State private var showCreateMessage = false
-    @State private var showSheet = false
-    @State private var showCreateConfirmedMessage = false
+    @State private var showAnnotation = false    /// 모임 생성시 지도에 핀 표시
+    @State private var coordinate = CLLocationManager()    ///
+    
+    @State private var showMessage = false    /// 중복생성등 알람 메시지
+    @State private var message: String = ""    /// 중복생성등 알람 메시지 내용
+    @State private var showSheet = false    /// 모임 제목, 내용 등 입력할 시트 띄우기
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
-    
-    
-    @StateObject private var serverViewModel: FirebaseViewModel = .init()   /// Firebase 연결 viewmodel
-    let user = Auth.auth().currentUser                                      /// 현재 로그인 중인 유저정보 변수
-    @State var message: String = ""
     
     @State var locate: CLLocationCoordinate2D?
     
@@ -38,9 +34,8 @@ struct MapView: View {
                 Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
                     MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
                         /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
-                        if(serverViewModel.isOverlap==false && user?.uid == item.hostUID){
+                        if(item.hostUID == ""){
                             CustomMapAnnotationView()
-                            
                         }else{
                             MeetingIconView(meeting: item) { locate in
                                 withAnimation(.easeInOut(duration: 0.25)){
@@ -54,9 +49,8 @@ struct MapView: View {
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))
                 .onAppear{
-                    guard let user = user else{return}             /// 혹시라도 로그인한 유저 정보 없으면 return
-                    serverViewModel.meetingsListner()              /// Map이 보여지는동안 Firebase와 실시간 연동
-                    serverViewModel.checkedOverlap(id: user.uid)   /// Map이 보여지는동안 실시간 중복확인
+                    serverViewModel.mapMeetingsListner(center: viewModel.region.center)              /// Map이 보여지는동안 Firebase와 실시간 연동
+                    serverViewModel.checkedOverlap()    /// Map이 보여지는동안 실시간 중복확인
                     viewModel.checkIfLocationServicesIsEnabled()
                 }
                 .onDisappear{
@@ -71,40 +65,13 @@ struct MapView: View {
                                let distanceInMeters = userLocation.distance(from: tappedLocation)
 
                                if distanceInMeters <= 3000 {
-                                   let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude, hostName: user!.displayName!, hostUID: user!.uid, hostImage: user!.photoURL)
-                                   
-                                   serverViewModel.addMeeting(newMeeting: newMeeting)
                                    coordinateCreated = CLLocationCoordinate2D(latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude)
+                                   serverViewModel.addMapAnnotation(newMapAnnotation: coordinateCreated)
                                } else {
                                    showPopupMessage(message: "모임의 거리가 너무 멀어요!", duration: 3)
                                }
-                
                     }
                 }
-                /*
-                 .overlay(GeometryReader { geometry in
-                 if(showAnnotation==true){
-                 Color.clear
-                 .contentShape(Rectangle())
-                 .gesture(DragGesture(minimumDistance: 0)
-                 .onChanged { gesture in
-                 // Calculate the translation in points
-                 self.viewModel.region.center.latitude += Double(gesture.translation.height) / Double(geometry.size.height) * self.viewModel.region.span.latitudeDelta
-                 self.viewModel.region.center.longitude -= Double(gesture.translation.width) / Double(geometry.size.width) * self.viewModel.region.span.longitudeDelta
-                 }
-                 .onEnded({ value in
-                 let tapLocation = value.location
-                 let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
-                 /// 지도에 위치표시하기 위한 임시 Meeting데이터
-                 let newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude, hostName: user!.displayName!, hostUID: user!.uid, hostImage: user!.photoURL)
-                 
-                 serverViewModel.addMeeting(newMeeting: newMeeting)
-                 coordinateCreated=tapCoordinate
-                 })
-                 )
-                 }
-                 })
-                 */
             }
             VStack{
                 HStack{
@@ -125,13 +92,13 @@ struct MapView: View {
                                 withAnimation(.spring()){
                                     showAnnotation.toggle()
                                 }
-                                serverViewModel.cancleMeeting()     /// 취소 버튼 누르면 MapPin 삭제
+                                serverViewModel.deleteMapAnnotation()     /// 취소 버튼 누르면 MapPin 삭제
                             }
                         }
                     }label: {
                         Group {
                             if showAnnotation {
-                                CustomCancleView()
+//                                CustomCancleView()
                             } else {
                                 Text("모임만들기")
                                     .fontWeight(.bold)
@@ -185,24 +152,25 @@ struct MapView: View {
                         .frame(width: 90, height: 35)
                         .buttonStyle(.borderedProminent)
                         .sheet(isPresented: $showSheet){
-                            MeetingSetSheetView(coordinateCreated: $coordinateCreated, onDismiss: {
+                            MeetingSetSheetView(coordinateCreated:coordinateCreated) { newMeeting in
+                                serverViewModel.createMeeting(meeting: newMeeting)
+                            } onDismiss: {
                                 /// 모임 생성 완료되면 실행
                                 showAnnotation = false
                                 serverViewModel.newMeeting = nil
                                 serverViewModel.isOverlap = true
-                            })
+                            }
                             .environmentObject(viewModel)
                         }
                     }
-                    
-                
-                
-                
             }
             if showMessage{
                 ShowMessage(message: message)
             }
         }
+        .overlay(content: {
+            LoadingView(show: $serverViewModel.isLoading)
+        })
     }
     
     func showPopupMessage(message: String, duration: TimeInterval) {
@@ -223,7 +191,7 @@ struct MapView: View {
     func coordinateFromTap(_ tapLocation: CGPoint, in geometry: GeometryProxy, region: MKCoordinateRegion) -> CLLocationCoordinate2D {
         if serverViewModel.newMeeting != nil {
             // Remove the previous annotation from the map
-            serverViewModel.cancleMeeting()
+            serverViewModel.deleteMapAnnotation()
             viewModel.objectWillChange.send()
         }
         let frame = geometry.frame(in: .local)
@@ -233,10 +201,6 @@ struct MapView: View {
     }
 }
         
-    
-
-
-
 struct ShowMessage: View {
     let message: String
     var body: some View {
@@ -259,10 +223,8 @@ struct ShowMessage: View {
 
 class MapViewModel : NSObject, ObservableObject,CLLocationManagerDelegate{
 
-    
     @Published var region = MKCoordinateRegion(center:CLLocationCoordinate2D(latitude: 37.5665, longitude:126.9780 ),
                                                    span:MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1))
-    
 
     var locationManager : CLLocationManager?
     

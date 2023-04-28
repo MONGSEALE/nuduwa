@@ -8,24 +8,31 @@
 import SwiftUI
 import CoreLocation
 import Firebase
+import FirebaseAuth
 
 
 struct MeetingSetSheetView: View {
     
-    @Environment(\.presentationMode) var presentationMode
-    @State private var title:String
-    @State private var description: String
-    @State private var place: String
-    @State private var members: Int
-    var onDismiss: (() -> Void)?
+//    @Environment(\.presentationMode) var presentationMode
+    
+    /// Meeting 저장용
+    @State private var title:String = ""
+    @State private var description: String = ""
+    @State private var place: String = ""
+    @State private var selection : Int = 0
+    @State private var meetingDate = Date()
+    let coordinateCreated: CLLocationCoordinate2D
+    
+    let onCreate: (Meeting)->()
+    let onDismiss: ()->()
+    
     @State private var showError = false
     @State private var showPlacePopUp = false
     @State private var noMorePlacePopUp = false
-    @Binding var coordinateCreated: CLLocationCoordinate2D
-    @State private var meetingDate = Date()
-    @State private var selection : Int
+    
+//    @StateObject private var viewModel: MapViewModel2 = .init()
+   
     let currentdate = Date()
-    @StateObject var viewModel: FirebaseViewModel = .init()
     
     /// 시간 설정 제한 범위
     var dateRange: ClosedRange<Date>{
@@ -35,19 +42,15 @@ struct MeetingSetSheetView: View {
         return min...max
     }
 
-    
-    
     var closedRange = Calendar.current.date(byAdding: .year, value: -1,to:Date())
     
-    init(coordinateCreated: Binding<CLLocationCoordinate2D>,onDismiss: (() -> Void)? = nil) {
-        _title = State(initialValue: "")
-        _description = State(initialValue: "")
-        _place = State(initialValue: "")
-        _members = State(initialValue: 0)
-        _selection = State(initialValue: 0)
-        _coordinateCreated = coordinateCreated
-        self.onDismiss = onDismiss
-    }
+    /// preview용 init 추후 삭제
+//    init(coordinateCreated: Binding<CLLocationCoordinate2D>,onDismiss: (() -> Void)? = nil) {
+//        _title = State(initialValue: "")
+//        _description = State(initialValue: "")
+//        _place = State(initialValue: "")
+//        _coordinateCreated = coordinateCreated
+//    }
     
     var body: some View {
         NavigationView {
@@ -129,16 +132,11 @@ struct MeetingSetSheetView: View {
                             showErrorMessage(duration: 2)
                         }
                         else{
-                            let user = Auth.auth().currentUser
-                            presentationMode.wrappedValue.dismiss()
-                            onDismiss?()
-                            
-                            let currentDate = Date()
-                           
-                            let newMeeting = Meeting(title: title, description: description, place:place,numbersOfMembers:selection+1,latitude:  coordinateCreated.latitude,longitude: coordinateCreated.longitude,publishedDate:currentDate, meetingDate:meetingDate, hostName: (user?.displayName!)!,hostUID: user!.uid,hostImage: user?.photoURL!)
-                            viewModel.createMeeting(meeting: newMeeting)
-                            print(newMeeting)
-                            
+                            let newMeeting = Meeting(title: title, description: description, place:place, numbersOfMembers:selection+2, latitude:coordinateCreated.latitude, longitude: coordinateCreated.longitude, geoHash: "", meetingDate:meetingDate, hostName: "", hostUID: "", hostImage: URL(string: ""))
+                            onCreate(newMeeting)
+//                            viewModel.createMeeting(meeting: newMeeting)
+//                            presentationMode.wrappedValue.dismiss()
+                            onDismiss()
                         }
                     }label: {
                         Text("확인")
@@ -169,7 +167,7 @@ struct MeetingSetSheetView: View {
             .navigationBarTitle("")
             .navigationBarItems(
                 leading: Button(action: {
-                    presentationMode.wrappedValue.dismiss()
+//                    presentationMode.wrappedValue.dismiss()
                 }, label: {
                     Image(systemName: "arrow.left")
                 })
@@ -193,14 +191,14 @@ struct MeetingSetSheetView: View {
 }
     
     
-
-struct MeetingSetSheetView_Previews: PreviewProvider {
-    
-    @State static var coordinateCreated = CLLocationCoordinate2D()
-        static var previews: some View {
-            MeetingSetSheetView(coordinateCreated: $coordinateCreated)
-        }
-}
+//
+//struct MeetingSetSheetView_Previews: PreviewProvider {
+//
+//    @State static var coordinateCreated = CLLocationCoordinate2D()
+//        static var previews: some View {
+//            MeetingSetSheetView(coordinateCreated: $coordinateCreated)
+//        }
+//}
 
 
 struct PopupError: View {

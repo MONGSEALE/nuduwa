@@ -10,7 +10,7 @@ import SDWebImageSwiftUI
 import Firebase
 
 struct DetailMeetingView: View {
-    @StateObject var viewModel: FirebaseViewModel = .init()
+    @StateObject var viewModel: MeetingViewModel = .init()
     
     @State var meeting: Meeting
     
@@ -81,7 +81,7 @@ struct DetailMeetingView: View {
                 .background(.blue,in: Capsule())
         }
         .sheet(isPresented: $toChatView){
-            ChatView(meeting:meeting)
+//            ChatView(meeting:meeting)
         }
         
         HStack{

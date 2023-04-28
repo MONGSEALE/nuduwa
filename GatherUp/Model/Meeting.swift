@@ -20,7 +20,7 @@ struct Meeting : Identifiable,Codable,Equatable, Hashable{
   
     let latitude : Double
     let longitude : Double
-    
+    var geoHash: String?
     
     var publishedDate: Date = Date()
     var meetingDate: Date = Date()

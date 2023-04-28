@@ -49,7 +49,7 @@ struct MeetingIconView: View {
             }
         }
         .sheet(isPresented: $showSheet){
-            MeetingInfoSheetView(meeting:meeting, hostUser: userViewModel.user!)
+            MeetingInfoSheetView(meeting:meeting)
                 .presentationDetents([.fraction(0.3),.height(700)])
                 .onAppear{
                     isClicked = true

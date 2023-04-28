@@ -8,7 +8,7 @@
 import SwiftUI
 
 import Firebase
-//import FirebaseCore
+import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
 
@@ -34,21 +34,47 @@ class LoginViewModel: ObservableObject {
     
     @Published var isLogin: Bool = false
     
-    // Firestore
-    //let db = Firestore.firestore()
+    private let db = Firestore.firestore().collection("Users")
     
-    init() {
-        if Auth.auth().currentUser != nil {
-            isLogin = true
-        }
+    func isUserLogin() {
+        listenForUserChanges()
         listenForAuthChanges()
-        
     }
     
+    /// Firestore User 컬랙션에 정보가 없을때 로그아웃
+    private func listenForUserChanges() {
+        print("userListener")
+        guard let userUID = Auth.auth().currentUser?.uid else{
+            DispatchQueue.main.async {
+                withAnimation(.easeInOut) {
+                    self.isLogin = false
+                }
+            }
+            return
+        }
+        db.document(userUID).addSnapshotListener { (snapshot, error) in
+            if let error = error {print("에러!userListner: \(error)");return}
+            if let snapshot{
+                if snapshot.exists{
+                    self.isLogin = true
+                    print("isLogin2: \(self.isLogin)")
+                } else {
+                    DispatchQueue.main.async {
+                        withAnimation(.easeInOut) {
+                            self.isLogin = false
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /// Firebase User 로그인 인증이 안될때 로그아웃
     private func listenForAuthChanges() {
+        print("listenForAuthChanges")
         Auth.auth().addStateDidChangeListener { _, user in
             if user != nil {
                 self.isLogin = true
+                print("isLogin1: \(self.isLogin)")
             } else {
                 DispatchQueue.main.async {
                     withAnimation(.easeInOut) {

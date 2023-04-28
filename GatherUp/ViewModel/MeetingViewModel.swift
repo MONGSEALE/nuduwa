@@ -7,9 +7,10 @@
 
 import SwiftUI
 import Firebase
+import FirebaseAuth
 import FirebaseFirestore
 
-class FirebaseViewModel: ObservableObject {
+class MeetingViewModel: ObservableObject {
     @Published var meetings: [Meeting] = []     // 모임 배열
     var fetchedMeetings: [Meeting] = []         // 서버에서 가져오는 모임 배열
     @Published var newMeeting: Meeting?         // 새로 추가하는 모임(저장전)

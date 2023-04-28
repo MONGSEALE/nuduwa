@@ -9,7 +9,7 @@ import SwiftUI
 import Firebase
 
 struct ReusableMeetingsView: View {
-    @StateObject var viewModel: FirebaseViewModel = .init()
+    @StateObject var viewModel: MeetingViewModel = .init()
     var title: String = ""
     var passedMeeting: Bool = false
     

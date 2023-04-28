@@ -39,6 +39,7 @@ struct ContentView: View {
             }
         }
         .onAppear{
+            loginViewModel.isUserLogin()
             DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {isLoading.toggle()
                 })
         }
