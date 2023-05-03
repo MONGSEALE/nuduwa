@@ -211,7 +211,7 @@ class MeetingViewModel: ObservableObject {
     }
     
     /// - 모임 수정하기
-    func updateMeeting(editMeeting: Meeting, title: String, description: String){
+    func updateMeeting(editMeeting: Meeting, title: String, description: String, meetingDate: Date){
         Task{
             do{
                 /// Delete Firestore Document
@@ -227,6 +227,12 @@ class MeetingViewModel: ObservableObject {
                     try await
                     db.collection(strMeetings).document(meetingID).updateData(["description": description])
                     print("description 수정")
+                }
+                
+                if meetingDate != editMeeting.meetingDate {
+                    try await
+                    db.collection(strMeetings).document(meetingID).updateData(["meetingDate": meetingDate])
+                    print("meetingDate 수정")
                 }
             }catch{
                 print(error.localizedDescription)

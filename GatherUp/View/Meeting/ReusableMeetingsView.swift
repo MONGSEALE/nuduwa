@@ -12,7 +12,7 @@ struct ReusableMeetingsView: View {
     @StateObject var viewModel: MeetingViewModel = .init()
     var title: String = ""
     var passedMeeting: Bool = false
-//    var user : User
+    
     var body: some View {
         NavigationStack{
             if viewModel.isFetching{
@@ -37,6 +37,7 @@ struct ReusableMeetingsView: View {
                                     {
                                         viewModel.meetings[index].title = updatedMeeting.title
                                         viewModel.meetings[index].description = updatedMeeting.description
+                                        viewModel.meetings[index].numbersOfMembers = updatedMeeting.numbersOfMembers
                                     }
                                 } onDelete: {
                                     /// 모임이 삭제되었을때 실시간 삭제
@@ -49,7 +50,7 @@ struct ReusableMeetingsView: View {
                         }
                         .navigationDestination(for: Meeting.self) { meeting in
                             /// 리스트에서 모임 클릭시 이동
-                            DetailMeetingView(meeting: meeting)
+                            DetailMeetingView(meeting: meeting, meetingDate: meeting.meetingDate)
                         }
                         .navigationTitle(title)
                         .navigationBarTitleDisplayMode(.inline)

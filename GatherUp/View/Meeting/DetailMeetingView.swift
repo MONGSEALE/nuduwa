@@ -17,12 +17,22 @@ struct DetailMeetingView: View {
     @State var isEdit: Bool = false
     @State private var title: String = ""
     @State private var description: String = ""
+    @State var meetingDate: Date
     
     @State private var toChatView: Bool = false
+    
+    /// 시간 설정 제한 범위
+    var dateRange: ClosedRange<Date>{
+        let min = Calendar.current.date(byAdding: .minute, value: 0, to: meeting.meetingDate)!
+        let max = Calendar.current.date(byAdding: .day, value: 6, to: meeting.meetingDate)!
+        
+        return min...max
+    }
 
   
     var body: some View {
         let isHost = meeting.hostUID == Auth.auth().currentUser?.uid ? true : false
+        
         ScrollView(.vertical, showsIndicators: false){
             LazyVStack{
                 HStack(spacing: 12){
@@ -52,7 +62,12 @@ struct DetailMeetingView: View {
                     .textSelection(.enabled)
                     .padding(.vertical,8)
                     .hAlign(.leading)
-                
+                if isHost && isEdit {
+                    Section(header:Text("시간 설정")){
+                        DatePicker("",selection: $meetingDate, in:dateRange)
+                            .datePickerStyle(GraphicalDatePickerStyle())
+                    }
+                }
                 HStack{
                     Text("참여자:")
                     ForEach(viewModel.members){ member in
@@ -96,7 +111,7 @@ struct DetailMeetingView: View {
                             print("내용없음")
                             return
                         }
-                        viewModel.updateMeeting(editMeeting: meeting, title: title, description: description)
+                        viewModel.updateMeeting(editMeeting: meeting, title: title, description: description, meetingDate: meetingDate)
                         meeting.title = title
                         meeting.description = description
                         isEdit.toggle()
