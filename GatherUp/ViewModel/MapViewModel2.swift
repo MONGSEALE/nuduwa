@@ -53,11 +53,13 @@ class MapViewModel2: ObservableObject {
         bigIconMeetings = [:]
         let delta = latitudeDelta * 0.1
         
-        let checkSet = fetchedMeetingsSet
+        var indices: [Set<Meeting>.Index] = []
+        // let checkSet = fetchedMeetingsSet
         for index in fetchedMeetingsSet.indices {
-            if !fetchedMeetingsSet.contains(checkSet[index]) {
-                continue
-            }
+            // if !fetchedMeetingsSet.contains(checkSet[index]) {
+            //     continue
+            // }
+            if indices.contains(index) {continue}
             let meeting1 = fetchedMeetingsSet[index]
             let latitude = meeting1.latitude
             let longitude = meeting1.longitude
@@ -73,6 +75,7 @@ class MapViewModel2: ObservableObject {
                 {
                     bigIconMeetings[meeting1.id!] = []
                     bigIconMeetings[meeting1.id!]!.append(meeting2)
+                    indices.append(fetchedMeetingsSet.firstIndex(of:meeting2))
                     fetchedMeetingsSet.remove(meeting2)
                 }
             }
@@ -112,8 +115,13 @@ class MapViewModel2: ObservableObject {
                                     .start(at: [bound.startValue])
                                     .end(at: [bound.endValue]),
                                 forKey: bound.startValue+bound.endValue)
+            // queries[bound.startValue + bound.endValue] = self.db
+            //     .collection(self.strMeetings)
+            //     .order(by: "geoHash")
+            //     .start(at: [bound.startValue])
+            //     .end(at: [bound.endValue])
         }
-        
+        // fetchedMeetings = fetchedMeetings.filter { !queries.keys.contains($0.key)}
         for (key,query) in queries {
             query.addSnapshotListener { (snapshot, error) in
                 self.fetchedMeetings[key] = []
