@@ -9,10 +9,10 @@ import SwiftUI
 import Firebase
 
 struct ReusableMeetingsView: View {
-    @StateObject var viewModel: MeetingViewModel = .init()
+    @StateObject var viewModel: FirebaseViewModel = .init()
     var title: String = ""
     var passedMeeting: Bool = false
-    
+//    var user : User
     var body: some View {
         NavigationStack{
             if viewModel.isFetching{
@@ -60,7 +60,7 @@ struct ReusableMeetingsView: View {
             }
         }
         .onAppear{
-            viewModel.meetingsListner()
+            viewModel.meetingsListner(isJoin: true)
         }
         .onDisappear{
             viewModel.removeListner()
@@ -74,3 +74,4 @@ struct ReusableMeetingsView_Previews: PreviewProvider {
         ContentView()
     }
 }
+

@@ -13,17 +13,9 @@ struct ChatMessage: Identifiable, Equatable, Hashable{
     @DocumentID var id: String?
     
     let text: String
-    let userId: String
+    let userUID: String
     let userName: String
     let timestamp: Timestamp
-    
-    let type: MessageType
-    
-    enum MessageType {
-        case host
-        case member
-        case system
-    }
+    var isSystemMessage: Bool
 }
-
 

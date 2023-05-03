@@ -17,17 +17,21 @@ class ChatViewModel: ObservableObject {
     private let strMessage = "Message"          // Firestore에 저장된 콜렉션 이름
     
     
-    private var docListner: ListenerRegistration?
+    private var docListener: ListenerRegistration?
     @Published var messages: [ChatMessage] = []
     @Published  var lastMessageId: String = ""
     
+    
+    
+    
     ///채팅구현
-    func messagesListner(meetingId: String) {
-        docListner = db.collection(strMeetings).document(meetingId).collection(strMessage)
+    func messagesListener(meetingId: String) {
+        docListener = db.collection(strMeetings).document(meetingId).collection(strMessage)
             .order(by: "timestamp", descending: false)
             .addSnapshotListener { (querySnapshot, error) in
                 if let error = error {print("에러!messagesListner:\(error)");return}
                 guard let documents = querySnapshot?.documents else {return}
+                
                 
                 self.messages = documents.compactMap { queryDocumentSnapshot -> ChatMessage? in
                     let data = queryDocumentSnapshot.data()
@@ -36,9 +40,9 @@ class ChatViewModel: ObservableObject {
                     let userId = data["userId"] as? String ?? ""
                     let userName = data["userName"] as? String ?? ""
                     let timestamp = data["timestamp"] as? Timestamp ?? Timestamp()
-                    let type = data["type"] as? ChatMessage.MessageType ?? .member
+                    let isSystemMessage = data["isSystemMessage"] as? Bool ?? false
                     
-                    return ChatMessage(id: id, text: text, userId: userId, userName: userName, timestamp: timestamp, type: type)
+                    return ChatMessage(id: id, text: text, userUID: userId, userName: userName, timestamp: timestamp ,isSystemMessage:isSystemMessage)
                 }
             }
     }
@@ -49,10 +53,25 @@ class ChatViewModel: ObservableObject {
             "text": text,
             "userId": user?.uid as Any,
             "userName": user?.displayName as Any,
-            "timestamp": Timestamp(),
-            "type" : ChatMessage.MessageType.member
+            "timestamp": Timestamp()
         ])
     }
+    
+    func joinChat(meetingId: String, userName: String) {
+        let joinMessage = "\(userName)님이 채팅에 참가하셨습니다."
+        sendSystemMessage(meetingId: meetingId, text: joinMessage)
+    }
+    
+    func sendSystemMessage(meetingId: String, text: String) {
+        db.collection(strMeetings).document(meetingId).collection(strMessage).addDocument(data: [
+            "text": text,
+            "userId": "SYSTEM",
+            "userName": "SYSTEM",
+            "timestamp": Timestamp(),
+            "isSystemMessage": true
+        ])
+    }
+
     
     func getMessage(){
         if let id = self.messages.last?.id {
@@ -60,3 +79,4 @@ class ChatViewModel: ObservableObject {
         }
     }
 }
+

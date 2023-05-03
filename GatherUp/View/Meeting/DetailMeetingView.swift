@@ -10,10 +10,9 @@ import SDWebImageSwiftUI
 import Firebase
 
 struct DetailMeetingView: View {
-    @StateObject var viewModel: MeetingViewModel = .init()
+    @StateObject var viewModel: FirebaseViewModel = .init()
     
     @State var meeting: Meeting
-    
     @Environment(\.dismiss) private var dismiss
     @State var isEdit: Bool = false
     @State private var title: String = ""
@@ -21,6 +20,7 @@ struct DetailMeetingView: View {
     
     @State private var toChatView: Bool = false
 
+  
     var body: some View {
         let isHost = meeting.hostUID == Auth.auth().currentUser?.uid ? true : false
         ScrollView(.vertical, showsIndicators: false){
@@ -81,9 +81,9 @@ struct DetailMeetingView: View {
                 .background(.blue,in: Capsule())
         }
         .sheet(isPresented: $toChatView){
-//            ChatView(meeting:meeting)
+            ChatView(meeting:meeting.id!,members: viewModel.members,meetingTitle: meeting.title)
         }
-        
+         
         HStack{
             if isHost {
                 if isEdit{
@@ -184,4 +184,5 @@ struct CustomText: View {
       }
     }
 }
+
 

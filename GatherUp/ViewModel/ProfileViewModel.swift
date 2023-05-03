@@ -17,6 +17,9 @@ class ProfileViewModel: ObservableObject {
     @Published var showError: Bool = false
     @Published var isLoading: Bool = false
     
+
+    
+    
     // MARK: Fetching User Data
     func fetchUserData()async{
         guard let userUID = Auth.auth().currentUser?.uid else{return}
@@ -67,3 +70,4 @@ class ProfileViewModel: ObservableObject {
         })
     }
 }
+

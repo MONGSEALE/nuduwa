@@ -8,14 +8,19 @@
 import SwiftUI
 import CoreLocation
 import Firebase
-import FirebaseAuth
 import SDWebImageSwiftUI
 
 struct MeetingInfoSheetView: View {
     
-    @StateObject var viewModel: MapViewModel2 = .init()
+    @StateObject var servermodel: FirebaseViewModel = .init()
+    @StateObject var chatViewModel: ChatViewModel = .init()
+    @StateObject var viewModel: ProfileViewModel = .init()
     
     let meeting: Meeting
+    let hostUser: User
+    
+    
+
     @State var showMessage = false
     
     var body: some View {
@@ -30,20 +35,17 @@ struct MeetingInfoSheetView: View {
                 .background(Color.white.opacity(0.00001))
                 
                 HStack {
-                    WebImage(url: meeting.hostImage)
+                    WebImage(url: hostUser.userImage)
                            .cornerRadius(60)
-                    //    .resizable()
+                   
                         .scaledToFit()
                         .frame(width: 15, height: 15)
                         .font(.headline)
-                     //   .foregroundColor(.white)
-                      //  .padding(6)
-                      //  .background(.blue)
-                       // .clipShape(Circle())
+                     
                         
                         .padding(.leading,40)
                     VStack(alignment: .leading) {
-                        Text(meeting.hostName)
+                        Text(hostUser.userName)
                             .font(.system(size:20))
                         Text("\(meeting.publishedDate.formatted(.dateTime.hour().minute()))에 생성됨")
                             .font(.caption2)
@@ -87,40 +89,45 @@ struct MeetingInfoSheetView: View {
                     HStack{
                         Image(systemName: "person.2")
                             .padding(.leading,30)
-                        Text("참여인원  \(viewModel.members.count)/\(meeting.numbersOfMembers)")
+                        Text("참여인원  \(servermodel.members.count)/\(meeting.numbersOfMembers)")
                         Spacer()
                     }
                     
                     Spacer()
-                    if let uid = Auth.auth().currentUser?.uid {
-                        if uid != meeting.hostUID {
-                            if (viewModel.members.first(where: { $0.memberUID == uid}) == nil &&
-                                viewModel.members.count < meeting.numbersOfMembers) {
-                                Button {
-                                    viewModel.joinMeeting(meetingId: meeting.id!, numbersOfMembers: meeting.numbersOfMembers)
-                                } label: {
-                                    Text("참여하기")
-                                }
-                            }
-                            else if (viewModel.members.count==meeting.numbersOfMembers && viewModel.members.first(where: { $0.memberUID == uid}) == nil){
-                                 Text("참여불가")
-                            }
-                            else if (viewModel.members.first(where: { $0.memberUID == uid}) != nil)
-                            {
-                                Text("참여중")
+                    if (Auth.auth().currentUser?.uid != meeting.hostUID){
+                        if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) == nil &&
+                            servermodel.members.count<meeting.numbersOfMembers){
+                            Button {
+                                servermodel.joinMeeting(meetingId: meeting.id!)
+                    
+                                chatViewModel.joinChat(meetingId: meeting.id!, userName: Auth.auth().currentUser!.displayName!)
+                                
+                              
+                            } label: {
+                                Text("참여하기")
                             }
                         }
+                        else if (servermodel.members.count==meeting.numbersOfMembers && servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) == nil){
+                             Text("참여불가")
+                        }
+                        else if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) != nil)
+                        {
+                            Text("참여중")
+                        }
+                        else if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) != nil && servermodel.members.count==meeting.numbersOfMembers)
+                        {
+                            Text("참여중")
+                        }
                     }
-                    
                 }
             }
             .onAppear {
-                viewModel.membersListener(meetingId: meeting.id!)
+                servermodel.membersListener(meetingId: meeting.id!)
             }
             .onDisappear{
-                viewModel.removeListner()
+                servermodel.removeListner()
             }
-            .onChange(of: viewModel.members) { _ in
+            .onChange(of: servermodel.members) { _ in
                     //멤버 나갈시 뷰 재생성
             }
         }
@@ -128,6 +135,7 @@ struct MeetingInfoSheetView: View {
     }
     
 }
+
 
 
 
