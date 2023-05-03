@@ -28,7 +28,7 @@ struct SlideOverView<Content: View>: View {
                     .cornerRadius(20)
                     .padding(.trailing)
                     .offset(x: isPresented ? UIScreen.main.bounds.width * 0.2 : UIScreen.main.bounds.width)
-                    .animation(.easeInOut(duration: 0.3))
+                    
             }
         }
     }

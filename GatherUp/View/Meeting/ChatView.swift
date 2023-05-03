@@ -43,7 +43,10 @@ struct ChatView: View {
                         .fontWeight(.bold)
                     Spacer()
                     Button(action: {
-                        self.showMemberList.toggle()
+                     
+                        withAnimation(.easeInOut) {
+                            self.showMemberList.toggle()
+                        }
                     }) {
                         Image(systemName: "list.bullet")
                             .foregroundColor(.white)
