@@ -10,7 +10,7 @@ import SDWebImageSwiftUI
 import Firebase
 
 struct DetailMeetingView: View {
-    @StateObject var viewModel: FirebaseViewModel = .init()
+    @StateObject var viewModel: MeetingViewModel = .init()
     
     @State var meeting: Meeting
     @Environment(\.dismiss) private var dismiss

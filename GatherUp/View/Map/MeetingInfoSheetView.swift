@@ -12,7 +12,7 @@ import SDWebImageSwiftUI
 
 struct MeetingInfoSheetView: View {
     
-    @StateObject var servermodel: FirebaseViewModel = .init()
+    @StateObject var servermodel: MeetingViewModel = .init()
     @StateObject var chatViewModel: ChatViewModel = .init()
     @StateObject var viewModel: ProfileViewModel = .init()
     
@@ -94,29 +94,31 @@ struct MeetingInfoSheetView: View {
                     }
                     
                     Spacer()
-                    if (Auth.auth().currentUser?.uid != meeting.hostUID){
-                        if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) == nil &&
-                            servermodel.members.count<meeting.numbersOfMembers){
-                            Button {
-                                servermodel.joinMeeting(meetingId: meeting.id!)
-                    
-                                chatViewModel.joinChat(meetingId: meeting.id!, userName: Auth.auth().currentUser!.displayName!)
-                                
-                              
-                            } label: {
-                                Text("참여하기")
+                    if let uid = Auth.auth().currentUser?.uid {
+                        if uid != meeting.hostUID{
+                            if (servermodel.members.first(where: { $0.memberUID == uid}) == nil &&
+                                servermodel.members.count<meeting.numbersOfMembers){
+                                Button {
+                                    servermodel.joinMeeting(meetingId: meeting.id!)
+                                    
+                                    chatViewModel.joinChat(meetingId: meeting.id!, userName: Auth.auth().currentUser!.displayName!)
+                                    
+                                    
+                                } label: {
+                                    Text("참여하기")
+                                }
                             }
-                        }
-                        else if (servermodel.members.count==meeting.numbersOfMembers && servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) == nil){
-                             Text("참여불가")
-                        }
-                        else if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) != nil)
-                        {
-                            Text("참여중")
-                        }
-                        else if (servermodel.members.first(where: { $0.memberId == Auth.auth().currentUser!.uid}) != nil && servermodel.members.count==meeting.numbersOfMembers)
-                        {
-                            Text("참여중")
+                            else if (servermodel.members.count==meeting.numbersOfMembers && servermodel.members.first(where: { $0.memberUID == uid}) == nil){
+                                Text("참여불가")
+                            }
+                            else if (servermodel.members.first(where: { $0.memberUID == uid}) != nil)
+                            {
+                                Text("참여중")
+                            }
+                            else if (servermodel.members.first(where: { $0.memberUID == uid}) != nil && servermodel.members.count==meeting.numbersOfMembers)
+                            {
+                                Text("참여중")
+                            }
                         }
                     }
                 }
@@ -135,6 +137,7 @@ struct MeetingInfoSheetView: View {
     }
     
 }
+
 
 
 
