@@ -17,7 +17,6 @@ struct MeetingInfoSheetView: View {
     @StateObject var viewModel: ProfileViewModel = .init()
     
     let meeting: Meeting
-    let hostUser: User
     
     
 
@@ -35,7 +34,7 @@ struct MeetingInfoSheetView: View {
                 .background(Color.white.opacity(0.00001))
                 
                 HStack {
-                    WebImage(url: hostUser.userImage)
+                    WebImage(url: meeting.hostImage)
                            .cornerRadius(60)
                    
                         .scaledToFit()
@@ -45,7 +44,7 @@ struct MeetingInfoSheetView: View {
                         
                         .padding(.leading,40)
                     VStack(alignment: .leading) {
-                        Text(hostUser.userName)
+                        Text(meeting.hostName)
                             .font(.system(size:20))
                         Text("\(meeting.publishedDate.formatted(.dateTime.hour().minute()))에 생성됨")
                             .font(.caption2)

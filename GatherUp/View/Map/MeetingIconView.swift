@@ -17,44 +17,62 @@ struct MeetingIconView: View {
     @StateObject var viewModel: ProfileViewModel = .init()
     @State private var showSheet = false
     
+    @Binding var showAnnotation: Bool  // 모임생성할때 아이콘 클릭 안되게
+
+    
     var meeting: Meeting
+    
+    var meetings: [Meeting]?
     
     
     var onLocate: (CLLocationCoordinate2D)->()
     
-    @State private var isClicked: Bool = false
+    @State var isClicked: Bool = false
     
     var body: some View {
        
             Button{
-                showSheet = true
-                onLocate(CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
+                if(showAnnotation==false){
+                    showSheet = true
+                    onLocate(CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
+                }
             } label: {
                 VStack(spacing:0){
-                    WebImage(url: userViewModel.user?.userImage)
-                        .resizable()
-                        .frame(width: 30, height: 30) // Adjust these values to resize the WebImage
-                        .scaledToFit()
-                        .cornerRadius(60)
-                        .clipShape(Circle())
-                        .padding(4) // Adjust the padding value to increase or decrease the size of the blue circle
-                        .background(Circle().fill(Color.blue))
-                    
+                    if meeting.type == .basic {
+                       WebImage(url: userViewModel.user?.userImage)
+                            .resizable()
+                            .frame(width: 30, height: 30) // Adjust these values to resize the WebImage
+                            .scaledToFit()
+                            .cornerRadius(60)
+                            .clipShape(Circle())
+                            .padding(4) // Adjust the padding value to increase or decrease the size of the blue circle
+                            .background(Circle().fill(Color.blue))
+                    } else {
+                        Image(systemName: "person.circle.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width:50,height: 50)
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding(6)
+                            .background(Color(.blue))
+                            .clipShape(Circle())
+                    }
                     
                     
                     Image(systemName: "triangle.fill")
                         .resizable()
                         .scaledToFit()
                         .foregroundColor(.blue)
-                        .frame(width: 10,height: 10)
+                        .frame(width: 15,height: 15)
                         .rotationEffect(Angle(degrees: 180))
                         .offset( y : -3)
                         .padding(.bottom , 40)
                 }
             }
             .sheet(isPresented: $showSheet){
-               
-                    MeetingInfoSheetView(meeting:meeting, hostUser: userViewModel.user!/*,user: viewModel.myProfile!*/)
+                if meeting.type == .basic {
+                    MeetingInfoSheetView(meeting:meeting)
                         .presentationDetents([.fraction(0.3),.height(700)])
                         .onAppear{
                             isClicked = true
@@ -62,14 +80,37 @@ struct MeetingIconView: View {
                         .onDisappear{
                             isClicked = false
                         }
+                } else {
+                    PiledMeetingsListView(meetings: meetings!)
+                        .presentationDetents([.fraction(0.3),.height(700)])
+                }
             }
             .scaleEffect(isClicked ? 1.7: 1.0)
             .onAppear{
-                userViewModel.userListener(userUID: meeting.hostUID)
+                if meeting.type == .basic{
+                    userViewModel.fetchUser(userUID: meeting.hostUID)
+                }
             }
         
     }
 }
-
+struct PiledMeetingsListView: View {
+    var meetings: [Meeting]
+    
+    var body: some View {
+        NavigationStack {
+            ForEach(meetings) { meeting in
+                NavigationLink(value: meeting){
+                    MeetingCardView(meeting: meeting) { updatedMeeting in
+                    } onDelete: {}
+                }
+            }
+            .navigationDestination(for: Meeting.self) { meeting in
+                MeetingInfoSheetView(meeting:meeting)
+            }
+        }
+        .padding(15)
+    }
+}
 
 

@@ -18,6 +18,7 @@ class MapViewModel2: ObservableObject {
     private var fetchedMeetings: [String:[Meeting]] = [:]         // 서버에서 가져오는 모임 배열
     @Published var newMeeting: Meeting?         // 새로 추가하는 모임(저장전)
     @Published var meeting: Meeting?            // 모임
+    @Published var bigIconMeetings: [String:[Meeting]] = [:]  // 중첩 아이콘 클릭시 나타낼 모임
     
     @Published var isOverlap: Bool = false
     
@@ -39,7 +40,7 @@ class MapViewModel2: ObservableObject {
     @Published var messages: [ChatMessage] = []
     
     /// 서버 모임과 새로 추가하는 모임(서버 저장전) 배열 합치기
-    func combineMeetings(){
+    func combineMeetings(latitudeDelta: Double = 0){
         print("combineMeetings")
         var fetchedMeetingsSet: Set<Meeting> = []
         for arr in fetchedMeetings.values {
@@ -48,9 +49,46 @@ class MapViewModel2: ObservableObject {
             }
         }
         print("Set:\(fetchedMeetingsSet)")
+        
+        bigIconMeetings = [:]
+        let delta = latitudeDelta * 0.1
+        
+        let checkSet = fetchedMeetingsSet
+        for index in fetchedMeetingsSet.indices {
+            if !fetchedMeetingsSet.contains(checkSet[index]) {
+                continue
+            }
+            let meeting1 = fetchedMeetingsSet[index]
+            let latitude = meeting1.latitude
+            let longitude = meeting1.longitude
+            
+            let startIndex = fetchedMeetingsSet.index(after: index)
+            let endIndex = fetchedMeetingsSet.endIndex
+            
+            for meeting2 in fetchedMeetingsSet[startIndex..<endIndex] {
+                if (latitude-delta < meeting2.latitude) &&
+                    (meeting2.latitude < latitude+delta) &&
+                    (longitude-delta < meeting2.longitude) &&
+                        (meeting2.longitude < longitude+delta)
+                {
+                    bigIconMeetings[meeting1.id!] = []
+                    bigIconMeetings[meeting1.id!]!.append(meeting2)
+                    fetchedMeetingsSet.remove(meeting2)
+                }
+            }
+            print("meeting1:\(meeting1)")
+            if let _ = bigIconMeetings[meeting1.id!] {
+                bigIconMeetings[meeting1.id!]?.append(meeting1)
+                let meeting = Meeting(id: meeting1.id, title: "", description: "", place: "", numbersOfMembers: 0, latitude: meeting1.latitude, longitude: meeting1.longitude, hostName: "", hostUID: "", type: .piled)
+                fetchedMeetingsSet.remove(meeting1)
+                fetchedMeetingsSet.insert(meeting)
+            }
+        }
+        
         if let newMeeting = newMeeting {
             fetchedMeetingsSet.insert(newMeeting)
         }
+        
         meetings = Array(fetchedMeetingsSet)
     }
     ///  지도 위치 체크해서 리스너 쿼리 변경
@@ -85,10 +123,9 @@ class MapViewModel2: ObservableObject {
                 }
                 print("documents: \(documents)")
                 self.fetchedMeetings[key] = documents.compactMap{ documents -> Meeting? in
-                                                    try? documents.data(as: Meeting.self)
-                                                }
-                print("fetchedMeeting: \(self.fetchedMeetings[key])")
-                self.combineMeetings()
+                    try? documents.data(as: Meeting.self)
+                }
+                self.combineMeetings(latitudeDelta: latitudeDelta)
             }
         }
         
@@ -105,7 +142,7 @@ class MapViewModel2: ObservableObject {
     /// 모임 추가시(서버 저장전)
     func addMapAnnotation(newMapAnnotation: CLLocationCoordinate2D){
         print("addMapAnnotation")
-        newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: newMapAnnotation.latitude, longitude: newMapAnnotation.longitude, hostName: "", hostUID: "")
+        newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: newMapAnnotation.latitude, longitude: newMapAnnotation.longitude, hostName: "", hostUID: "", type: .new)
         combineMeetings()
     }
     /// 모임 추가 취소 또는 모임 서버 저장했을때 newMeeting 초기화

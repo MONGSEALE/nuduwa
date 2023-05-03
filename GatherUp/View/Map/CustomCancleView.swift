@@ -28,4 +28,4 @@ struct CustomCancleView_Previews: PreviewProvider {
         CustomCancleView()
     }
 }
-}
+

@@ -35,16 +35,35 @@ struct MapView: View {
                 Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
                     MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
                         /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
-                        if(item.hostUID == ""){
-                            CustomMapAnnotationView()
-                        }else{
-                            MeetingIconView(meeting: item) { locate in
+                        switch item.type {
+                        case .basic:
+                            MeetingIconView(showAnnotation: $showAnnotation, meeting: item) { locate in
                                 withAnimation(.easeInOut(duration: 0.25)){
                                     viewModel.region.center = locate
                                     self.locate = locate
                                 }
                             }
+                        case .piled:
+                            MeetingIconView(showAnnotation: $showAnnotation, meeting: item, meetings: serverViewModel.bigIconMeetings[item.id!]) { locate in
+                                withAnimation(.easeInOut(duration: 0.25)){
+                                    viewModel.region.center = locate
+                                    self.locate = locate
+                                }
+                            }
+                        case .new:
+                            CustomMapAnnotationView()
                         }
+                        
+//                        if(item.hostUID == ""){
+//                            CustomMapAnnotationView()
+//                        }else{
+//                            MeetingIconView(meeting: item) { locate in
+//                                withAnimation(.easeInOut(duration: 0.25)){
+//                                    viewModel.region.center = locate
+//                                    self.locate = locate
+//                                }
+//                            }
+//                        }
                     })
                 }
                 .edgesIgnoringSafeArea(.top)
@@ -65,16 +84,16 @@ struct MapView: View {
                     if(showAnnotation==true){
                         
                         let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
-                               let userLocation = CLLocation(latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.longitude)
-                               let tappedLocation = CLLocation(latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude)
-                               let distanceInMeters = userLocation.distance(from: tappedLocation)
+                        let userLocation = CLLocation(latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.longitude)
+                        let tappedLocation = CLLocation(latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude)
+                        let distanceInMeters = userLocation.distance(from: tappedLocation)
 
-                               if distanceInMeters <= 3000 {
-                                   coordinateCreated = CLLocationCoordinate2D(latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude)
-                                   serverViewModel.addMapAnnotation(newMapAnnotation: coordinateCreated)
-                               } else {
-                                   showPopupMessage(message: "모임의 거리가 너무 멀어요!", duration: 3)
-                               }
+                        if distanceInMeters <= 3000 {
+                           coordinateCreated = CLLocationCoordinate2D(latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude)
+                           serverViewModel.addMapAnnotation(newMapAnnotation: coordinateCreated)
+                        } else {
+                           showPopupMessage(message: "모임의 거리가 너무 멀어요!", duration: 3)
+                        }
                     }
                 }
             }
@@ -202,6 +221,7 @@ struct MapView: View {
         let frame = geometry.frame(in: .local)
         let x = Double(tapLocation.x / frame.width) * region.span.longitudeDelta + region.center.longitude - region.span.longitudeDelta / 2
         let y = Double((frame.height - tapLocation.y) / frame.height) * region.span.latitudeDelta + region.center.latitude - region.span.latitudeDelta / 2
+        print("tap:\(tapLocation)")
         return CLLocationCoordinate2D(latitude: y, longitude: x)
     }
 }
