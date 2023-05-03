@@ -15,7 +15,7 @@ import GeoFireUtils
 class MapViewModel2: ObservableObject {
 
     @Published var meetings: [Meeting] = []     // 모임 배열
-    var fetchedMeetings: [Meeting] = []         // 서버에서 가져오는 모임 배열
+    private var fetchedMeetings: [String:[Meeting]] = [:]         // 서버에서 가져오는 모임 배열
     @Published var newMeeting: Meeting?         // 새로 추가하는 모임(저장전)
     @Published var meeting: Meeting?            // 모임
     
@@ -41,52 +41,57 @@ class MapViewModel2: ObservableObject {
     /// 서버 모임과 새로 추가하는 모임(서버 저장전) 배열 합치기
     func combineMeetings(){
         print("combineMeetings")
-        meetings = (newMeeting != nil) ? fetchedMeetings + [newMeeting!] : fetchedMeetings
+        var fetchedMeetingsSet: Set<Meeting> = []
+        for arr in fetchedMeetings.values {
+            for value in arr {
+                fetchedMeetingsSet.insert(value)
+            }
+        }
+        print("Set:\(fetchedMeetingsSet)")
+        if let newMeeting = newMeeting {
+            fetchedMeetingsSet.insert(newMeeting)
+        }
+        meetings = Array(fetchedMeetingsSet)
     }
-
+    ///  지도 위치 체크해서 리스너 쿼리 변경
+    func checkedLocation(){
+        
+    }
     /// FireStore와 meetings 배열 실시간 연동
     func mapMeetingsListner(center: CLLocationCoordinate2D, latitudeDelta: Double){
         print("mapMeetingsListner")
         let metersPerDegree: Double = 111_319.9 // 지구의 반지름 (m) * 2 * pi / 360
-
         let latitudeDeltaInMeters = latitudeDelta * metersPerDegree * 10
         print("델타: \(latitudeDelta)")
         print("거리: \(latitudeDeltaInMeters)")
         let queryBounds = GFUtils.queryBounds(forLocation: center,
                                               withRadius: latitudeDeltaInMeters)
-        let queries = queryBounds.map { bound -> Query in
-            return db.collection(strMeetings)
-                .order(by: "geoHash")
-                .start(at: [bound.startValue])
-                .end(at: [bound.endValue])
-        }
-        var queryMeetings: [Int : [Meeting]] = [:]
-
-        let dispatchGroup = DispatchGroup()
         
-        for (index, query) in queries.enumerated() {
-            dispatchGroup.enter()
-            queryMeetings[index] = [Meeting]()
-                query.addSnapshotListener { (snapshot, error) in
-                    defer { dispatchGroup.leave();}
-                    guard let documents = snapshot?.documents else {
-                        print("mapMeetingsListner 에러1: \(String(describing: error))")
-                        return
-                    }
-                    print("documents: \(documents)")
-                    queryMeetings[index]!.append(contentsOf: documents.compactMap{ documents -> Meeting? in
-                        try? documents.data(as: Meeting.self)
-                    })
+        var queries: [String:Query] = [:]
+        queryBounds.forEach{ bound in
+            queries.updateValue(self.db.collection(self.strMeetings)
+                                    .order(by: "geoHash")
+                                    .start(at: [bound.startValue])
+                                    .end(at: [bound.endValue]),
+                                forKey: bound.startValue+bound.endValue)
+        }
+        
+        for (key,query) in queries {
+            query.addSnapshotListener { (snapshot, error) in
+                self.fetchedMeetings[key] = []
+                guard let documents = snapshot?.documents else {
+                    print("mapMeetingsListner 에러1: \(String(describing: error))")
+                    return
                 }
-
-        }
-        print("fetchedMeetings")
-        dispatchGroup.notify(queue: .main) {
-            for (_,value) in queryMeetings{
-                self.fetchedMeetings.append(contentsOf: value)
+                print("documents: \(documents)")
+                self.fetchedMeetings[key] = documents.compactMap{ documents -> Meeting? in
+                                                    try? documents.data(as: Meeting.self)
+                                                }
+                print("fetchedMeeting: \(self.fetchedMeetings[key])")
+                self.combineMeetings()
             }
-            self.combineMeetings()
         }
+        
     }
     
     /// 리스너 제거(리소스 확보)

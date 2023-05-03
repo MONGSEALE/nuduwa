@@ -16,6 +16,14 @@ struct ChatMessage: Identifiable, Equatable, Hashable{
     let userId: String
     let userName: String
     let timestamp: Timestamp
+    
+    let type: MessageType
+    
+    enum MessageType {
+        case host
+        case member
+        case system
+    }
 }
 
 

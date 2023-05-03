@@ -36,8 +36,9 @@ class ChatViewModel: ObservableObject {
                     let userId = data["userId"] as? String ?? ""
                     let userName = data["userName"] as? String ?? ""
                     let timestamp = data["timestamp"] as? Timestamp ?? Timestamp()
+                    let type = data["type"] as? ChatMessage.MessageType ?? .member
                     
-                    return ChatMessage(id: id, text: text, userId: userId, userName: userName, timestamp: timestamp)
+                    return ChatMessage(id: id, text: text, userId: userId, userName: userName, timestamp: timestamp, type: type)
                 }
             }
     }
@@ -48,7 +49,8 @@ class ChatViewModel: ObservableObject {
             "text": text,
             "userId": user?.uid as Any,
             "userName": user?.displayName as Any,
-            "timestamp": Timestamp()
+            "timestamp": Timestamp(),
+            "type" : ChatMessage.MessageType.member
         ])
     }
     

@@ -24,7 +24,7 @@ struct MapView: View {
     @State private var showSheet = false    /// 모임 제목, 내용 등 입력할 시트 띄우기
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
-    @State var center: CLLocationCoordinate2D?
+    @State private var center: CLLocationCoordinate2D?
     
     @State var locate: CLLocationCoordinate2D?
     
@@ -55,9 +55,12 @@ struct MapView: View {
                     viewModel.checkIfLocationServicesIsEnabled()
                     center = viewModel.region.center
                 }
-                .onDisappear{
-                    serverViewModel.removeListner()                /// Map을 안보면 실시간 연동 중단
-                }
+//                .onDisappear{
+//                    serverViewModel.removeListner()                /// Map을 안보면 실시간 연동 중단
+//                }
+//                .onChange(of: viewModel.region.center.longitude) { _ in
+//                        serverViewModel.mapMeetingsListner(center: viewModel.region.center, latitudeDelta: viewModel.region.span.latitudeDelta)
+//                }
                 .onTapGesture { tapLocation in
                     if(showAnnotation==true){
                         

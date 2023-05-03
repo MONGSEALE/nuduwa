@@ -32,4 +32,11 @@ struct Meeting : Identifiable,Codable,Equatable, Hashable{
     var hostUID: String
     var hostImage: URL?
 
+    var type: MeetingType = .basic
+    
+    enum MeetingType: Codable {
+        case basic
+        case new
+        case piled
+    }
 }
