@@ -29,6 +29,7 @@
 		33A6B84029EE45460030E85B /* UserViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A6B83F29EE45450030E85B /* UserViewModel.swift */; };
 		33A6B84229EE460A0030E85B /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A6B84129EE460A0030E85B /* ChatViewModel.swift */; };
 		33A797CF2A01FE8200287D69 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A797CE2A01FE8200287D69 /* ChatView.swift */; };
+		33A797D12A020C1A00287D69 /* CustomCancleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A797D02A020C1A00287D69 /* CustomCancleView.swift */; };
 		33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A82CB829DBA57500FA2BA0 /* DetailMeetingView.swift */; };
 		33A9112029ED0B0000C36FA2 /* Members.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A9111F29ED0AFF00C36FA2 /* Members.swift */; };
 		33ABB70229DD2B030049D482 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ABB70129DD2B030049D482 /* MeetingViewModel.swift */; };
@@ -66,6 +67,7 @@
 		33A6B83F29EE45450030E85B /* UserViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserViewModel.swift; sourceTree = "<group>"; };
 		33A6B84129EE460A0030E85B /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		33A797CE2A01FE8200287D69 /* ChatView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		33A797D02A020C1A00287D69 /* CustomCancleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCancleView.swift; sourceTree = "<group>"; };
 		33A82CB829DBA57500FA2BA0 /* DetailMeetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailMeetingView.swift; sourceTree = "<group>"; };
 		33A9111F29ED0AFF00C36FA2 /* Members.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Members.swift; sourceTree = "<group>"; };
 		33ABB70129DD2B030049D482 /* MeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingViewModel.swift; sourceTree = "<group>"; };
@@ -74,7 +76,6 @@
 		33ADB13929D666A500352451 /* ReusableMeetingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableMeetingsView.swift; sourceTree = "<group>"; };
 		33ADB13B29D667E500352451 /* MeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCardView.swift; sourceTree = "<group>"; };
 		33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
-		422C679E29F8063200F0CAB7 /* CustomCancleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCancleView.swift; sourceTree = "<group>"; };
 		425050E929D07096009926FF /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingIconView.swift; sourceTree = "<group>"; };
 		4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMapAnnotationView.swift; sourceTree = "<group>"; };
@@ -203,9 +204,9 @@
 				4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */,
 				4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */,
 				4285616429DFDBE7004DCDB9 /* MeetingSetSheetView.swift */,
-				422C679E29F8063200F0CAB7 /* CustomCancleView.swift */,
 				429515DC29C4A766006DD4B3 /* MapView.swift */,
 				428C040229E8E6F3003443BA /* MeetingInfoSheetView.swift */,
+				33A797D02A020C1A00287D69 /* CustomCancleView.swift */,
 			);
 			path = Map;
 			sourceTree = "<group>";
@@ -350,6 +351,7 @@
 				335DF2D629E546060051B602 /* ChatMessage.swift in Sources */,
 				339A101529D3E9F400B4DD98 /* Login.swift in Sources */,
 				429515D129C4A744006DD4B3 /* ContentView.swift in Sources */,
+				33A797D12A020C1A00287D69 /* CustomCancleView.swift in Sources */,
 				0FAE23A629E640F000A826C8 /* Splash.swift in Sources */,
 				33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */,
 				429515DD29C4A766006DD4B3 /* MapView.swift in Sources */,
