@@ -14,13 +14,15 @@ import FirebaseAuth
 struct ChatView: View {
     @State var message = ""
     @StateObject var chatViewModel = ChatViewModel()
-    @State var meeting : String
+    @State var meetingID : String
+    let hostUID: String
     @State var userUID: String?
     @State var members:[Members]
     @Environment(\.presentationMode) var presentationMode
     @State var meetingTitle: String
     @State private var showMemberList = false
     @State private var xOffset: CGFloat = UIScreen.main.bounds.width
+    
     var body: some View {
         ZStack{
             VStack{
@@ -102,7 +104,7 @@ struct ChatView: View {
                 HStack{
                     CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $message)
                     Button{
-                        chatViewModel.sendMessage(meetingId: meeting , text: message)
+                        chatViewModel.sendMessage(meetingId: meetingID , text: message)
                         message = ""
                     }label: {
                         Image(systemName: "paperplane.fill")
@@ -118,11 +120,11 @@ struct ChatView: View {
                 .cornerRadius(50)
                 .padding()
             }
-            MemberList(members: members,userUID:Auth.auth().currentUser!.uid)
+            MemberList(members: members,hostUID: hostUID ,userUID:Auth.auth().currentUser!.uid)
                            .slideOverView(isPresented: $showMemberList)
         }
         .onAppear{
-            chatViewModel.messagesListener(meetingId: meeting)     // 채팅들이 화면에 보이게함
+            chatViewModel.messagesListener(meetingId: meetingID)     // 채팅들이 화면에 보이게함
             userUID = Auth.auth().currentUser?.uid
         }
         
@@ -154,9 +156,10 @@ struct ChatView: View {
 }
 
 struct MemberList: View {
-    var members: [Members]
-    var userUID: String
-
+    let members: [Members]
+    let hostUID: String
+    let userUID: String
+    
     var body: some View {
         VStack {
             HStack {
@@ -170,34 +173,86 @@ struct MemberList: View {
             ScrollView {
                 LazyVStack {
                     ForEach(members) { member in
-                        HStack {
-                            WebImage(url: member.memberImage)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 40, height: 40)
-                                .clipShape(Circle())
-                            
-                            if member.memberUID == userUID {
-                                    Text("나 - \(member.memberName)")
-                                    .font(.body)
-                                    } else {
-                                    Text(member.memberName)
-                                    .font(.body)
-                                }
-                            Spacer()
-                        }
-                        .padding(.horizontal)
+                        MemberItemView(member: member,hostUID: hostUID, userUID: userUID)
                     }
                 }
             }
+            
         }
         .background(Color(.systemGroupedBackground))
         .cornerRadius(20)
         .padding(.horizontal, 10)
     }
 }
-
-
+struct MemberItemView: View {
+    let member: Members
+    let hostUID: String
+    let userUID: String
+    @State var isShowMember: Bool = false
+    
+    var body: some View {
+            HStack {
+                if (member.memberUID == userUID){
+                    MemberChatImage(image: member.memberImage!)
+                } else if hostUID == userUID {
+                    Menu {
+                        Button("프로필보기", action: {isShowMember = true})
+                        Button("추방하기", role: .destructive, action: {})
+                    } label: {
+                        MemberChatImage(image: member.memberImage!)
+                    }
+                } else {
+                    Button{
+                        if !(member.memberUID == userUID) {
+                            isShowMember = true
+                        }
+                    } label: {
+                        MemberChatImage(image: member.memberImage!)
+                    }
+                }
+                
+                if member.memberUID == userUID {
+                    Text("나 - \(member.memberName)")
+                        .font(.body)
+                } else {
+                    Text(member.memberName)
+                        .font(.body)
+                }
+                Spacer()
+            }
+            .sheet(isPresented: $isShowMember){
+                MemberProfileView(member: member)
+            }
+            .padding(.horizontal)
+//
+//            if hostUID == userUID && isShowView {
+//                VStack {
+//                    Menu {
+//                        Button("프로필보기", action: {})
+//                        Button("추방하기", role: .destructive, action: {})
+//                    } label: {
+//                        WebImage(url: member.memberImage)
+//                            .resizable()
+//                            .scaledToFill()
+//                            .frame(width: 40, height: 40)
+//                            .clipShape(Circle())
+//                    }
+//                }
+//            }
+        
+    }
+}
+struct MemberChatImage: View {
+    let image: URL
+    
+    var body: some View {
+        WebImage(url: image)
+            .resizable()
+            .scaledToFill()
+            .frame(width: 40, height: 40)
+            .clipShape(Circle())
+    }
+}
 
 struct NickName: View {
     var name : String

@@ -50,9 +50,6 @@ struct MapView: View {
                                     self.locate = locate
                                 }
                             }
-                            .onAppear{
-                                print("bigIconMeetings:\(serverViewModel.bigIconMeetings[item.id!])")
-                            }
                         case .new:
                             CustomMapAnnotationView()
                         }
