@@ -76,8 +76,7 @@ class MapViewModel2: ObservableObject {
                     (longitude-delta < meeting2.longitude) &&
                         (meeting2.longitude < longitude+delta)
                 {
-                    bigIconMeetings[meeting1.id!] = []
-                    bigIconMeetings[meeting1.id!]!.append(meeting2)  // 가까이 있으면 bigIconMeetings에 저장
+                    bigIconMeetings[meeting1.id!, default: []].append(meeting2)  // 가까이 있으면 bigIconMeetings에 저장
                     print("meeting2:\(meeting2)")
                     fetchedMeetingsSet.remove(meeting2)  // 그리고 원래 Meetings에선 삭제
                 }

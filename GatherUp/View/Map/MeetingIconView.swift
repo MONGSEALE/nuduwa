@@ -142,11 +142,16 @@ struct PiledMeetingsListView: View {
                 NavigationLink(value: meeting){
                     PiledMeetingCardView(meeting: meeting)
                 }
+                Divider()
             }
             .navigationDestination(for: Meeting.self) { meeting in
                 MeetingInfoSheetView(meeting:meeting)
                     .navigationBarBackButtonHidden(true)
+                    
             }
+        }
+        .onAppear{
+            print("meetings:\(meetings)")
         }
         .padding(15)
     }

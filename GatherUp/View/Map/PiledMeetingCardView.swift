@@ -44,10 +44,8 @@ struct PiledMeetingCardView: View {
                 .foregroundColor(.black)
                 .lineLimit(3)
              
-            
         }
         .hAlign(.leading)
-        .padding(.bottom, 10)
     }
 }
 
