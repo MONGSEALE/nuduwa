@@ -17,7 +17,7 @@ struct ChatView: View {
     @State var meetingID : String
     let hostUID: String
     @State var userUID: String?
-    @State var members:[Members]
+    @Binding var members:[Members]
     @Environment(\.presentationMode) var presentationMode
     @State var meetingTitle: String
     @State private var showMemberList = false
@@ -120,7 +120,7 @@ struct ChatView: View {
                 .cornerRadius(50)
                 .padding()
             }
-            MemberList(members: members,hostUID: hostUID ,userUID:Auth.auth().currentUser!.uid)
+            MemberList(meetingID: meetingID, members: members,hostUID: hostUID ,userUID:Auth.auth().currentUser!.uid)
                            .slideOverView(isPresented: $showMemberList)
         }
         .onAppear{
@@ -156,6 +156,7 @@ struct ChatView: View {
 }
 
 struct MemberList: View {
+    let meetingID: String
     let members: [Members]
     let hostUID: String
     let userUID: String
@@ -173,7 +174,7 @@ struct MemberList: View {
             ScrollView {
                 LazyVStack {
                     ForEach(members) { member in
-                        MemberItemView(member: member,hostUID: hostUID, userUID: userUID)
+                        MemberItemView(meetingID: meetingID, member: member,hostUID: hostUID, userUID: userUID)
                     }
                 }
             }
@@ -185,10 +186,12 @@ struct MemberList: View {
     }
 }
 struct MemberItemView: View {
+    let meetingID: String
     let member: Members
     let hostUID: String
     let userUID: String
     @State var isShowMember: Bool = false
+    @StateObject var viewModel: MeetingViewModel = .init()
     
     var body: some View {
             HStack {
@@ -197,7 +200,9 @@ struct MemberItemView: View {
                 } else if hostUID == userUID {
                     Menu {
                         Button("프로필보기", action: {isShowMember = true})
-                        Button("추방하기", role: .destructive, action: {})
+                        Button("추방하기", role: .destructive, action: {
+                            viewModel.leaveMeeting(meetingId: meetingID, memberUID: member.memberUID)
+                        })
                     } label: {
                         MemberChatImage(image: member.memberImage!)
                     }
@@ -224,22 +229,6 @@ struct MemberItemView: View {
                 MemberProfileView(member: member)
             }
             .padding(.horizontal)
-//
-//            if hostUID == userUID && isShowView {
-//                VStack {
-//                    Menu {
-//                        Button("프로필보기", action: {})
-//                        Button("추방하기", role: .destructive, action: {})
-//                    } label: {
-//                        WebImage(url: member.memberImage)
-//                            .resizable()
-//                            .scaledToFill()
-//                            .frame(width: 40, height: 40)
-//                            .clipShape(Circle())
-//                    }
-//                }
-//            }
-        
     }
 }
 struct MemberChatImage: View {

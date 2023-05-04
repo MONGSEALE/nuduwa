@@ -167,11 +167,14 @@ class MeetingViewModel: ObservableObject {
     }
     
     ///모임 나가기
-    func leaveMeeting(meetingId: String) {
-        guard let currentUser = Auth.auth().currentUser else { return }
+    func leaveMeeting(meetingId: String, memberUID: String = "") {
+        var memberUID = memberUID
+        if memberUID == "" {
+            memberUID = Auth.auth().currentUser!.uid
+        }
         let doc = db.collection(strMeetings).document(meetingId).collection(strMembers)
 
-        doc.whereField("memberUID", isEqualTo: currentUser.uid).getDocuments { (snapshot, error) in
+        doc.whereField("memberUID", isEqualTo: memberUID).getDocuments { (snapshot, error) in
             if let error = error {
                 print("에러: \(error)")
             } else {

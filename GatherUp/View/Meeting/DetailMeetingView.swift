@@ -96,7 +96,7 @@ struct DetailMeetingView: View {
                 .background(.blue,in: Capsule())
         }
         .sheet(isPresented: $toChatView){
-            ChatView(meetingID:meeting.id!,hostUID: meeting.hostUID, members: viewModel.members,meetingTitle: meeting.title)
+            ChatView(meetingID:meeting.id!,hostUID: meeting.hostUID, members: $viewModel.members,meetingTitle: meeting.title)
         }
          
         HStack{
