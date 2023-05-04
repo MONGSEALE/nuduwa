@@ -86,7 +86,7 @@ struct MeetingIconView: View {
                 Image(systemName: "person.circle.fill")
                     .resizable()
                     .scaledToFit()
-                    .frame(width:50,height: 50)
+                    .frame(width:40,height: 40)
                     .font(.headline)
                     .foregroundColor(.white)
                     .padding(6)
