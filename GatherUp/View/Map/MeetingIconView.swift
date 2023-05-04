@@ -30,7 +30,8 @@ struct MeetingIconView: View {
     @State var isClicked: Bool = false
     
     var body: some View {
-       
+        
+       /*
             Button{
                 if(showAnnotation==false){
                     showSheet = true
@@ -70,28 +71,66 @@ struct MeetingIconView: View {
                         .padding(.bottom , 40)
                 }
             }
-            .sheet(isPresented: $showSheet){
-                if meeting.type == .basic {
-                    MeetingInfoSheetView(meeting:meeting)
-                        .presentationDetents([.fraction(0.3),.height(700)])
-                        .onAppear{
-                            isClicked = true
-                        }
-                        .onDisappear{
-                            isClicked = false
-                        }
-                } else {
-                    PiledMeetingsListView(meetings: meetings!)
-                        .presentationDetents([.fraction(0.3),.height(700)])
-                }
+        */ // 모임 만들기 할때 다른 모임 클릭기능 막기 위해 변경
+        VStack(spacing:0){
+            if meeting.type == .basic {
+               WebImage(url: userViewModel.user?.userImage)
+                    .resizable()
+                    .frame(width: 30, height: 30) // Adjust these values to resize the WebImage
+                    .scaledToFit()
+                    .cornerRadius(60)
+                    .clipShape(Circle())
+                    .padding(4) // Adjust the padding value to increase or decrease the size of the blue circle
+                    .background(Circle().fill(Color.blue))
+            } else {
+                Image(systemName: "person.circle.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width:50,height: 50)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding(6)
+                    .background(Color(.blue))
+                    .clipShape(Circle())
             }
-            .scaleEffect(isClicked ? 1.7: 1.0)
-            .onAppear{
-                if meeting.type == .basic{
-                    userViewModel.fetchUser(userUID: meeting.hostUID)
-                }
+            
+            
+            Image(systemName: "triangle.fill")
+                .resizable()
+                .scaledToFit()
+                .foregroundColor(.blue)
+                .frame(width: 15,height: 15)
+                .rotationEffect(Angle(degrees: 180))
+                .offset( y : -3)
+                .padding(.bottom , 40)
+        }
+        .onTapGesture {
+            if(showAnnotation==false){
+                showSheet = true
+                onLocate(CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
             }
-        
+        }
+        .sheet(isPresented: $showSheet){
+            if meeting.type == .basic {
+                MeetingInfoSheetView(meeting:meeting)
+                    .presentationDetents([.fraction(0.3),.height(700)])
+                    .onAppear{
+                        isClicked = true
+                    }
+                    .onDisappear{
+                        isClicked = false
+                    }
+            } else {
+                PiledMeetingsListView(meetings: meetings!)
+                    .presentationDetents([.fraction(0.3),.height(700)])
+            }
+        }
+        .scaleEffect(isClicked ? 1.7: 1.0)
+        .onAppear{
+            if meeting.type == .basic{
+                userViewModel.fetchUser(userUID: meeting.hostUID)
+            }
+        }
     }
 }
 struct PiledMeetingsListView: View {
@@ -101,12 +140,12 @@ struct PiledMeetingsListView: View {
         NavigationStack {
             ForEach(meetings) { meeting in
                 NavigationLink(value: meeting){
-                    MeetingCardView(meeting: meeting) { updatedMeeting in
-                    } onDelete: {}
+                    PiledMeetingCardView(meeting: meeting)
                 }
             }
             .navigationDestination(for: Meeting.self) { meeting in
                 MeetingInfoSheetView(meeting:meeting)
+                    .navigationBarBackButtonHidden(true)
             }
         }
         .padding(15)
