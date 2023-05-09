@@ -10,7 +10,6 @@
 import SwiftUI
 import MapKit
 import CoreLocationUI
-import Firebase
 
 struct MapView: View {
     @StateObject private var viewModel = MapViewModel()
@@ -28,7 +27,7 @@ struct MapView: View {
     var body: some View {
         ZStack(alignment:.bottom){
             GeometryReader { geometry in
-                /// serverViewModel의 meetings 배열에서 item(meeting) 하나씩 가져와서 지도에 Pin 표시
+                /// serverViewModel의 meetings 배열에서 item(=meeting) 하나씩 가져와서 지도에 Pin 표시
                 Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
                     MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
                         /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
@@ -58,12 +57,14 @@ struct MapView: View {
                     serverViewModel.checkedOverlap()    /// Map이 보여지는동안 실시간 중복확인
                     viewModel.checkIfLocationServicesIsEnabled()
                 }
-//                .onChange(of: viewModel.region) { region in
-//                    serverViewModel.checkedLocation(region: region)
-//                }
+                .onChange(of: viewModel.region.center) { _ in
+                    serverViewModel.checkedLocation(region: viewModel.region)
+                }
+                .onChange(of: viewModel.region.span) { re_gion in
+                    serverViewModel.checkedLocation(region: viewModel.region)
+                }
                 .onTapGesture { tapLocation in
                     if(showAnnotation==true){
-                        
                         let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
                         let userLocation = CLLocation(latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.longitude)
                         let tappedLocation = CLLocation(latitude: tapCoordinate.latitude, longitude: tapCoordinate.longitude)
@@ -77,7 +78,8 @@ struct MapView: View {
                         }
                     }
                 }
-            }
+            }  //GeometryReader끝
+
             VStack{
                 HStack{
                     Spacer()

@@ -13,29 +13,29 @@ struct ContentView: View {
    
     var body: some View {
         ZStack{
-            // 로그인변수가 false면 Login뷰로 이동
-            if loginViewModel.isLogin {
-                TabView{
-                    MapView()
-                        .tabItem{
-                            Label("찾기",systemImage:"map.circle")
-                        }
-                    MeetingsView()
-                        .tabItem{
-                            Label("모임",systemImage: "person.3.sequence")
-                        }
-                    
-                    ProfileView()
-                        .tabItem{
-                            Label("내 정보",systemImage:"person.crop.circle")
-                        }
-                }
-            } else {
-                Login()
-            }
-            
             if isLoading {
                 Splash()
+            }else{
+                // 로그인변수가 false면 Login뷰로 이동
+                if loginViewModel.isLogin {
+                    TabView{
+                        MapView()
+                            .tabItem{
+                                Label("찾기",systemImage:"map.circle")
+                            }
+                        MeetingsView()
+                            .tabItem{
+                                Label("모임",systemImage: "person.3.sequence")
+                            }
+                        
+                        ProfileView()
+                            .tabItem{
+                                Label("내 정보",systemImage:"person.crop.circle")
+                            }
+                    }
+                } else {
+                    Login()
+                }
             }
         }
         .onAppear{

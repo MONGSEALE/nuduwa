@@ -7,18 +7,17 @@
 
 import SwiftUI
 import CoreLocation
-import Firebase
 import SDWebImageSwiftUI
 
 struct MeetingInfoSheetView: View {
     
-    @StateObject var viewModel: MeetingInfoSheetViewModel = .init()
-    
     @Environment(\.dismiss) private var dismiss
-    var meeting: Meeting
-
+    @StateObject var viewModel: MeetingInfoSheetViewModel = .init()
     @State var showMessage = false
-    
+
+    let meetingID: String
+    let hostUID: String
+
     var body: some View {
         GeometryReader { geometry in
             if viewModel.isLoading {
@@ -114,9 +113,9 @@ struct MeetingInfoSheetView: View {
             
         }
         .onAppear {
-            viewModel.fetchUser(userUID: meeting.hostUID)
-            viewModel.meetingListner(meetingID: meeting.id!)
-            viewModel.membersListener(meetingID: meeting.id!)
+            viewModel.fetchUser(userUID: hostUID)
+            viewModel.meetingListner(meetingID: meetingID)
+            viewModel.membersListener(meetingID: meetingID)
         }
         .onDisappear{
             viewModel.removeListener()

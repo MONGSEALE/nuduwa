@@ -7,7 +7,6 @@
 
 import SwiftUI
 import SDWebImageSwiftUI
-import Firebase
 
 struct DetailMeetingView: View {
     @StateObject var viewModel: MeetingViewModel = .init()

@@ -24,11 +24,14 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
                     let imageUrl = document.data()?["userImage"] as? String ?? ""
                     let image = URL(string: imageUrl)
                     self.dicMembersData[uid] = MemberData(memberName: name, memberImage: image!)
+                    if !dicMembers[uid].isEmpty{
+                        self.dicMembers[uid]!.memberName = name
+                        self.dicMembers[uid]!.memberImage = image!
+                    }
                 } catch {
                     print("Error getting document: \(error)")
                 }
             }
-            
         }
     }
     ///채팅구현

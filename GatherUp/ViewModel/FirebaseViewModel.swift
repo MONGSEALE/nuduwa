@@ -29,6 +29,12 @@ class FirebaseViewModel: ObservableObject {
 
     @Published var currentUser: User?
     @Published var user: User?
+
+    // @Published var currentUID: String{
+    //     get{
+    //         return Auth.auth().currentUser?.uid ?? ""
+    //     }
+    // }
     
     deinit {
         removeListener()

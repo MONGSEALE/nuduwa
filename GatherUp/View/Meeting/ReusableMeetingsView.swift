@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Firebase
 
 struct ReusableMeetingsView: View {
     @StateObject var viewModel: MeetingViewModel = .init()

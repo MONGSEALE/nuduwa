@@ -7,9 +7,6 @@
 
 import SwiftUI
 import SDWebImageSwiftUI
-import Firebase
-import FirebaseStorage
-import FirebaseFirestore
 
 struct MeetingCardView: View {
     

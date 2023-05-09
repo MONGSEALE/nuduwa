@@ -38,16 +38,10 @@ struct PiledMeetingCardView: View {
                     .font(.caption2)
                     .foregroundColor(.gray)
             }
-            /*
-            Text(meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))
-                .font(.caption2)
-                .foregroundColor(.gray)
-            */
             Text(meeting.description)
                 .textSelection(.enabled)
                 .foregroundColor(.black)
                 .lineLimit(3)
-             
         }
         .hAlign(.leading)
         .onAppear{

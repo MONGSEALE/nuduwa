@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreLocation
-import Firebase
 import SDWebImageSwiftUI
 
 
@@ -15,38 +14,25 @@ struct MeetingIconView: View {
     
     @StateObject var viewModel: FirebaseViewModel = .init()
 
+    // 나중에 이 두개 변수 통합 고려
     @State private var showSheet = false  //클릭시 시트 보이게
     @State var isClicked: Bool = false    // 클릭시 커지게
     
     @Binding var showAnnotation: Bool  // 모임생성할때 아이콘 클릭 안되게
 
-    var meeting: Meeting
-    
+    let meeting: Meeting
     var onLocate: (CLLocationCoordinate2D)->()
     
     var body: some View {
         VStack(spacing:0){
-            if meeting.type == .basic {
-                WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
-                    .resizable()
-                    .frame(width: 30, height: 30) // Adjust these values to resize the WebImage
-                    .scaledToFit()
-                    .cornerRadius(60)
-                    .clipShape(Circle())
-                    .padding(4) // Adjust the padding value to increase or decrease the size of the blue circle
-                    .background(Circle().fill(Color.blue))
-            } else {
-                Image(systemName: "person.circle.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width:40,height: 40)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding(6)
-                    .background(Color(.blue))
-                    .clipShape(Circle())
-            }
-            
+            WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 30) // Adjust these values to resize the WebImage
+                .cornerRadius(60)
+                .clipShape(Circle())
+                .padding(4) // Adjust the padding value to increase or decrease the size of the blue circle
+                .background(Circle().fill(Color.blue))
             
             Image(systemName: "triangle.fill")
                 .resizable()
@@ -61,16 +47,21 @@ struct MeetingIconView: View {
             if(showAnnotation==false){
                 showSheet = true
                 onLocate(CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
+                viewModel.fetchUser(userUID: meeting.hostUID)
             }
         }
         .sheet(isPresented: $showSheet){
-            MeetingInfoSheetView(meeting:meeting)
+            MeetingInfoSheetView(meetingID: meeting.id, hostUID: meeting.hostUID)
                 .presentationDetents([.fraction(0.3),.height(700)])
                 .onAppear{
-                    isClicked = true
+                    withAnimation(.easeInOut(duration: 0.25)){
+                        isClicked = true
+                    }
                 }
                 .onDisappear{
-                    isClicked = false
+                    withAnimation(.easeInOut(duration: 0.25)){
+                        isClicked = false
+                    }
                 }
         }
         .scaleEffect(isClicked ? 1.7: 1.0)

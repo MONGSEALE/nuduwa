@@ -7,8 +7,6 @@
 
 import SwiftUI
 import CoreLocation
-import Firebase
-import FirebaseAuth
 
 
 struct MeetingSetSheetView: View {

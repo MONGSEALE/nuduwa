@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import MapKit
+import MapKit  //필요없으면 삭제
 
 struct CustomMapAnnotationView: View {
     

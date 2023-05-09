@@ -7,9 +7,6 @@
 
 import SwiftUI
 import SDWebImageSwiftUI
-import FirebaseFirestore
-import Firebase
-import FirebaseAuth
 
 struct ChatView: View {
 
@@ -129,7 +126,6 @@ struct ChatView: View {
         }
         .onAppear{
             chatViewModel.messagesListener(meetingID: meetingID)     // 채팅들이 화면에 보이게함
-            chatViewModel.convertMembers()
         }
         
     }

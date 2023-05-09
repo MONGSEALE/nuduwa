@@ -23,6 +23,8 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     @Published var dicMembersData: [String:MemberData] = [:]
 
     @Published var meetings: [Meeting] = []     // 모임 배열
+
+    //나중에 하위 클래스로 이동
     @Published var meeting: Meeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: 0, longitude: 0, hostUID: "")
 
     /// 찾기쉽게 members 배열을 딕셔너리로 변환
@@ -101,6 +103,12 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                         ])
                     })
                 }else{print("모임 참가 실패")}
+
+
+                //참가 실패시 에러핸들 구현
+
+
+            
                 await MainActor.run(body: {
                     isLoading = false
                 })
