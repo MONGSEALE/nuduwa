@@ -20,51 +20,45 @@ import CryptoKit
 
 import PhotosUI
 
-class LoginViewModel: ObservableObject {
+class LoginViewModel: FirebaseViewModel {
     
-    // MARK: Error Properties
-    @Published var showError: Bool = false
-    @Published var errorMessage: String = ""
-    
+    @Published var isLogin: Bool = false
     // MARK: Apple Sign in Properies
     @Published var nonce: String = ""
     
-    //로딩
-    @Published var isLoading: Bool = false
-    
-    @Published var isLogin: Bool = false
-    
-    private let db = Firestore.firestore().collection("Users")
-    
-    func isUserLogin() {
+    override init() {
+        super.init()
         listenForUserChanges()
         listenForAuthChanges()
     }
     
     /// Firestore User 컬랙션에 정보가 없을때 로그아웃
     private func listenForUserChanges() {
-        print("userListener")
-        guard let userUID = Auth.auth().currentUser?.uid else{
-            DispatchQueue.main.async {
-                withAnimation(.easeInOut) {
-                    self.isLogin = false
+        print("listenForUserChanges")
+        Task{
+            guard let userUID = Auth.auth().currentUser?.uid else{
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut) {
+                        self.isLogin = false
+                    }
                 }
+                return
             }
-            return
-        }
-        db.document(userUID).addSnapshotListener { (snapshot, error) in
-            if let error = error {print("에러!userListner: \(error)");return}
-            if let snapshot{
-                if snapshot.exists{
-                    self.isLogin = true
-                    print("isLogin2: \(self.isLogin)")
-                } else {
-                    DispatchQueue.main.async {
-                        withAnimation(.easeInOut) {
-                            self.isLogin = false
+            db.collection(strUsers).document(userUID).addSnapshotListener { (snapshot, error) in
+                if let error = error {print("에러!listenForUserChanges: \(error)");return}
+                if let snapshot{
+                    if snapshot.exists{
+                        self.isLogin = true
+                        print("isLogin2: \(self.isLogin)")
+                    } else {
+                        DispatchQueue.main.async {
+                            withAnimation(.easeInOut) {
+                                self.isLogin = false
+                            }
                         }
                     }
                 }
+                
             }
         }
     }
@@ -74,7 +68,6 @@ class LoginViewModel: ObservableObject {
         Auth.auth().addStateDidChangeListener { _, user in
             if user != nil {
                 self.isLogin = true
-                print("isLogin1: \(self.isLogin)")
             } else {
                 DispatchQueue.main.async {
                     withAnimation(.easeInOut) {
@@ -117,6 +110,7 @@ class LoginViewModel: ObservableObject {
     
     // MARK: Loggin Google User into Firebase
     func logGoogleUser(user: GIDGoogleUser) {
+        print("logGoogleUser")
         //로딩
         isLoading = true
         Task{
@@ -127,29 +121,23 @@ class LoginViewModel: ObservableObject {
                 
                 try await Auth.auth().signIn(with: credential)
                 
-                registerUser()
+                await fetchCurrentUserAsync()
+                if self.user == nil{
+                    registerUser()
+                }
                 
                 print("Success Google")
                 await MainActor.run(body: {
                     isLoading = false
                 })
             } catch {
-                await handleError(error: error)
+                await handleError(error)
             }
         }
     }
-    
-    
-    // MARK: Handling Error
-    func handleError(error: Error)async{
-        await MainActor.run(body: {
-            errorMessage = error.localizedDescription
-            showError.toggle()
-            isLoading = false
-        })
-    }
 
     func registerUser() {
+        print("registerUser")
         Task{
             do{
                 let userData = Auth.auth().currentUser?.providerData[0]
@@ -159,14 +147,14 @@ class LoginViewModel: ObservableObject {
                 // Creating a User Firestore Object
                 let user = User(userName: (userData?.displayName)!, userUID: userUID, userSNSID: userData?.uid, userEmail: userData?.email, userImage: userData?.photoURL)
                 // Saving User Doc into Firestore Database
-                let _ = try Firestore.firestore().collection("Users").document(userUID).setData(from: user, completion: {
+                try db.collection(strUsers).document(userUID).setData(from: user, completion: {
                     error in
                     if error == nil{
                         print("Saved Successfully")
                     }
                 })
             }catch{
-                await handleError(error: error)
+                await handleError(error)
             }
         }
     }
