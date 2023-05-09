@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		0FAE23A629E640F000A826C8 /* Splash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FAE23A529E640F000A826C8 /* Splash.swift */; };
 		335DF2D629E546060051B602 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335DF2D529E546060051B602 /* ChatMessage.swift */; };
-		339A0FF129D3E5D100B4DD98 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 339A0FF029D3E5D100B4DD98 /* GoogleService-Info.plist */; };
 		339A101229D3E9C100B4DD98 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101129D3E9C000B4DD98 /* LoginViewModel.swift */; };
 		339A101529D3E9F400B4DD98 /* Login.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101429D3E9F400B4DD98 /* Login.swift */; };
 		339A101829D3EAE500B4DD98 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101729D3EAE500B4DD98 /* User.swift */; };
@@ -34,6 +33,7 @@
 		33A9112029ED0B0000C36FA2 /* Members.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A9111F29ED0AFF00C36FA2 /* Members.swift */; };
 		33ABB70229DD2B030049D482 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ABB70129DD2B030049D482 /* MeetingViewModel.swift */; };
 		33ABB70429DD421E0049D482 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ABB70329DD421E0049D482 /* ProfileViewModel.swift */; };
+		33AD61BB2A0A2D5B00CD908D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 33AD61BA2A0A2D5A00CD908D /* GoogleService-Info.plist */; };
 		33ADB13829D6610900352451 /* Meeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13729D6610900352451 /* Meeting.swift */; };
 		33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13929D666A500352451 /* ReusableMeetingsView.swift */; };
 		33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13B29D667E500352451 /* MeetingCardView.swift */; };
@@ -59,7 +59,6 @@
 /* Begin PBXFileReference section */
 		0FAE23A529E640F000A826C8 /* Splash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Splash.swift; sourceTree = "<group>"; };
 		335DF2D529E546060051B602 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
-		339A0FF029D3E5D100B4DD98 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		339A101129D3E9C000B4DD98 /* LoginViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		339A101429D3E9F400B4DD98 /* Login.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Login.swift; sourceTree = "<group>"; };
 		339A101729D3EAE500B4DD98 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -75,6 +74,7 @@
 		33A9111F29ED0AFF00C36FA2 /* Members.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Members.swift; sourceTree = "<group>"; };
 		33ABB70129DD2B030049D482 /* MeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingViewModel.swift; sourceTree = "<group>"; };
 		33ABB70329DD421E0049D482 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
+		33AD61BA2A0A2D5A00CD908D /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		33ADB13729D6610900352451 /* Meeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meeting.swift; sourceTree = "<group>"; };
 		33ADB13929D666A500352451 /* ReusableMeetingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableMeetingsView.swift; sourceTree = "<group>"; };
 		33ADB13B29D667E500352451 /* MeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCardView.swift; sourceTree = "<group>"; };
@@ -242,9 +242,9 @@
 				339A101629D3EA0600B4DD98 /* Model */,
 				339A101329D3E9E900B4DD98 /* View */,
 				339A101029D3E9C000B4DD98 /* ViewModel */,
-				339A0FF029D3E5D100B4DD98 /* GoogleService-Info.plist */,
 				429515CE29C4A744006DD4B3 /* GatherUpApp.swift */,
 				429515D029C4A744006DD4B3 /* ContentView.swift */,
+				33AD61BA2A0A2D5A00CD908D /* GoogleService-Info.plist */,
 				429515D229C4A746006DD4B3 /* Assets.xcassets */,
 				429515D429C4A746006DD4B3 /* Preview Content */,
 			);
@@ -335,8 +335,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				429515D629C4A746006DD4B3 /* Preview Assets.xcassets in Resources */,
+				33AD61BB2A0A2D5B00CD908D /* GoogleService-Info.plist in Resources */,
 				429515D329C4A746006DD4B3 /* Assets.xcassets in Resources */,
-				339A0FF129D3E5D100B4DD98 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

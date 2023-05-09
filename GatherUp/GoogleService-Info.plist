@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>734097382432-mkkuuo1g6bteg41q8nodbf8jpp6uevnr.apps.googleusercontent.com</string>
+	<string>728791006221-pfpevmkrup07pvlr6d5uokk2m012n0et.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.734097382432-mkkuuo1g6bteg41q8nodbf8jpp6uevnr</string>
+	<string>com.googleusercontent.apps.728791006221-pfpevmkrup07pvlr6d5uokk2m012n0et</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBLPeGwOAPTYqJ6-TyoGVNIs9j07_PF2os</string>
+	<string>AIzaSyBNc1_doFoEr7yTY-hLM9VBodozxxWMo40</string>
 	<key>GCM_SENDER_ID</key>
-	<string>734097382432</string>
+	<string>728791006221</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.Mongseal.GatherUp</string>
 	<key>PROJECT_ID</key>
-	<string>login-39dc0</string>
+	<string>nuduwa-b26a0</string>
 	<key>STORAGE_BUCKET</key>
-	<string>login-39dc0.appspot.com</string>
+	<string>nuduwa-b26a0.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,8 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:734097382432:ios:fd11d3f17c0396a68e3045</string>
-	<key>DATABASE_URL</key>
-	<string>https://login-39dc0-default-rtdb.firebaseio.com</string>
+	<string>1:728791006221:ios:fb1cd8f2a66c9c8c5e2944</string>
 </dict>
 </plist>
