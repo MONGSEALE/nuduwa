@@ -28,9 +28,7 @@ struct Meeting : Identifiable,Codable,Equatable, Hashable{
      참가비
      */
     // MARK: Basic User Info
-    var hostName: String
     var hostUID: String
-    var hostImage: URL?
 
     var type: MeetingType = .basic
     

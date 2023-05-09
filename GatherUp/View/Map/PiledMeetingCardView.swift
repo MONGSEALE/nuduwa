@@ -9,11 +9,14 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct PiledMeetingCardView: View {
+    
+    @StateObject var viewModel: FirebaseViewModel = .init()
+
     var meeting: Meeting
     
     var body: some View {
         HStack(spacing: 12){
-            WebImage(url: meeting.hostImage)
+            WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: 50, height: 50)
@@ -28,7 +31,8 @@ struct PiledMeetingCardView: View {
                 
             
             VStack(alignment: .leading){
-                Text(meeting.hostName)
+                Text(viewModel.user?.userName ?? "")
+                    .lineLimit(1)
                     .foregroundColor(.black)
                 Text(meeting.meetingDate.formatted(.dateTime.month().day().hour().minute()))
                     .font(.caption2)
@@ -46,6 +50,9 @@ struct PiledMeetingCardView: View {
              
         }
         .hAlign(.leading)
+        .onAppear{
+            viewModel.fetchUser(userUID: meeting.hostUID)
+        }
     }
 }
 

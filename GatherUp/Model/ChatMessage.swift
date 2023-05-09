@@ -14,7 +14,6 @@ struct ChatMessage: Identifiable, Equatable, Hashable{
     
     let text: String
     let userUID: String
-    let userName: String
     let timestamp: Timestamp
     var isSystemMessage: Bool
 }

@@ -16,17 +16,14 @@ struct MapView: View {
     @StateObject private var viewModel = MapViewModel()
     @StateObject private var serverViewModel: MapViewModel2 = .init()   /// Firebase 연결 viewmodel
     
-    @State private var showAnnotation = false    /// 모임 생성시 지도에 핀 표시
-    @State private var coordinate = CLLocationManager()    ///
+    @State private var showAnnotation = false             /// 모임 생성시 지도에 핀 표시
+    @State private var coordinate = CLLocationManager()   ///
     
     @State private var showMessage = false    /// 중복생성등 알람 메시지
     @State private var message: String = ""    /// 중복생성등 알람 메시지 내용
     @State private var showSheet = false    /// 모임 제목, 내용 등 입력할 시트 띄우기
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
-    @State private var center: CLLocationCoordinate2D?
-    
-    @State var locate: CLLocationCoordinate2D?
     
     var body: some View {
         ZStack(alignment:.bottom){
@@ -40,45 +37,29 @@ struct MapView: View {
                             MeetingIconView(showAnnotation: $showAnnotation, meeting: item) { locate in
                                 withAnimation(.easeInOut(duration: 0.25)){
                                     viewModel.region.center = locate
-                                    self.locate = locate
                                 }
                             }
+                            
                         case .piled:
-                            MeetingIconView(showAnnotation: $showAnnotation, meeting: item, meetings: serverViewModel.bigIconMeetings[item.id!]) { locate in
+                            PiledMeetingIconView(showAnnotation: $showAnnotation, meetings: serverViewModel.bigIconMeetings[item.id!]!) { locate in
                                 withAnimation(.easeInOut(duration: 0.25)){
                                     viewModel.region.center = locate
-                                    self.locate = locate
                                 }
                             }
                         case .new:
                             CustomMapAnnotationView()
                         }
-                        
-//                        if(item.hostUID == ""){
-//                            CustomMapAnnotationView()
-//                        }else{
-//                            MeetingIconView(meeting: item) { locate in
-//                                withAnimation(.easeInOut(duration: 0.25)){
-//                                    viewModel.region.center = locate
-//                                    self.locate = locate
-//                                }
-//                            }
-//                        }
                     })
                 }
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))
                 .onAppear{
-                    serverViewModel.mapMeetingsListner(center: viewModel.region.center, latitudeDelta: viewModel.region.span.latitudeDelta)              /// Map이 보여지는동안 Firebase와 실시간 연동
+                    serverViewModel.mapMeetingsListener(region: viewModel.region)              /// Map이 보여지는동안 Firebase와 실시간 연동
                     serverViewModel.checkedOverlap()    /// Map이 보여지는동안 실시간 중복확인
                     viewModel.checkIfLocationServicesIsEnabled()
-                    center = viewModel.region.center
                 }
-//                .onDisappear{
-//                    serverViewModel.removeListner()                /// Map을 안보면 실시간 연동 중단
-//                }
-//                .onChange(of: viewModel.region.center.longitude) { _ in
-//                        serverViewModel.mapMeetingsListner(center: viewModel.region.center, latitudeDelta: viewModel.region.span.latitudeDelta)
+//                .onChange(of: viewModel.region) { region in
+//                    serverViewModel.checkedLocation(region: region)
 //                }
                 .onTapGesture { tapLocation in
                     if(showAnnotation==true){
@@ -178,8 +159,6 @@ struct MapView: View {
                         .sheet(isPresented: $showSheet){
                             MeetingSetSheetView(coordinateCreated:coordinateCreated) { newMeeting in
                                 serverViewModel.createMeeting(meeting: newMeeting)
-                            } onDismiss: {
-                                /// 모임 생성 완료되면 실행
                                 showAnnotation = false
                                 serverViewModel.newMeeting = nil
                                 serverViewModel.isOverlap = true

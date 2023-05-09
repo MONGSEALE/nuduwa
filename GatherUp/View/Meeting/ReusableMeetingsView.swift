@@ -10,12 +10,13 @@ import Firebase
 
 struct ReusableMeetingsView: View {
     @StateObject var viewModel: MeetingViewModel = .init()
-    var title: String = ""
+    let title: String
     var passedMeeting: Bool = false
     
     var body: some View {
         NavigationStack{
-            if viewModel.isFetching{
+            if viewModel.isLoading{
+                /// 모임데이터 가져오는 중일때
                 ProgressView()
                     .padding(.top,30)
             } else {
@@ -28,29 +29,18 @@ struct ReusableMeetingsView: View {
                 }else{
                     ScrollView{
                         ForEach(viewModel.meetings){ meeting in
-                            NavigationLink(value: meeting){
+                            NavigationLink(destination: DetailMeetingView(meeting: meeting)){
                                 MeetingCardView(meeting: meeting) { updatedMeeting in
                                     /// 모임 내용이 업데이트 되었을때 viewModel.meetings 배열값을 수정하여 실시간 업데이트
-                                    if let index = viewModel.meetings.firstIndex(where: { meeting in
-                                        meeting.id == updatedMeeting.id
-                                    })
-                                    {
-                                        viewModel.meetings[index].title = updatedMeeting.title
-                                        viewModel.meetings[index].description = updatedMeeting.description
-                                        viewModel.meetings[index].numbersOfMembers = updatedMeeting.numbersOfMembers
-                                    }
+                                    viewModel.updateLocalMeetingDataFromServer(updatedMeeting: updatedMeeting)
                                 } onDelete: {
                                     /// 모임이 삭제되었을때 실시간 삭제
                                     withAnimation(.easeInOut(duration: 0.25)){
-                                        viewModel.meetings.removeAll{meeting.id == $0.id}
+                                        viewModel.deleteLocalMeetingDataFromServer(deletedMeetingID: meeting.id!)
                                     }
                                 }
                             }
                             Divider()
-                        }
-                        .navigationDestination(for: Meeting.self) { meeting in
-                            /// 리스트에서 모임 클릭시 이동
-                            DetailMeetingView(meeting: meeting, meetingDate: meeting.meetingDate)
                         }
                         .navigationTitle(title)
                         .navigationBarTitleDisplayMode(.inline)
@@ -61,10 +51,7 @@ struct ReusableMeetingsView: View {
             }
         }
         .onAppear{
-            viewModel.meetingsListner()
-        }
-        .onDisappear{
-            viewModel.removeListner()
+            viewModel.meetingsListener()
         }
     }
 }

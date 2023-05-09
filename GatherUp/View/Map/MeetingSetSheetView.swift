@@ -13,8 +13,6 @@ import FirebaseAuth
 
 struct MeetingSetSheetView: View {
     
-//    @Environment(\.presentationMode) var presentationMode
-    
     /// Meeting 저장용
     @State private var title:String = ""
     @State private var description: String = ""
@@ -24,7 +22,6 @@ struct MeetingSetSheetView: View {
     let coordinateCreated: CLLocationCoordinate2D
     
     let onCreate: (Meeting)->()
-    let onDismiss: ()->()
     
     @State private var showError = false
     @State private var showPlacePopUp = false
@@ -43,14 +40,6 @@ struct MeetingSetSheetView: View {
     }
 
     var closedRange = Calendar.current.date(byAdding: .year, value: -1,to:Date())
-    
-    /// preview용 init 추후 삭제
-//    init(coordinateCreated: Binding<CLLocationCoordinate2D>,onDismiss: (() -> Void)? = nil) {
-//        _title = State(initialValue: "")
-//        _description = State(initialValue: "")
-//        _place = State(initialValue: "")
-//        _coordinateCreated = coordinateCreated
-//    }
     
     var body: some View {
         NavigationView {
@@ -132,11 +121,8 @@ struct MeetingSetSheetView: View {
                             showErrorMessage(duration: 2)
                         }
                         else{
-                            let newMeeting = Meeting(title: title, description: description, place:place, numbersOfMembers:selection+2, latitude:coordinateCreated.latitude, longitude: coordinateCreated.longitude, geoHash: "", meetingDate:meetingDate, hostName: "", hostUID: "", hostImage: URL(string: ""))
+                            let newMeeting = Meeting(title: title, description: description, place:place, numbersOfMembers:selection+2, latitude:coordinateCreated.latitude, longitude: coordinateCreated.longitude, geoHash: "", meetingDate:meetingDate, hostUID: "")
                             onCreate(newMeeting)
-//                            viewModel.createMeeting(meeting: newMeeting)
-//                            presentationMode.wrappedValue.dismiss()
-                            onDismiss()
                         }
                     }label: {
                         Text("확인")
@@ -189,17 +175,6 @@ struct MeetingSetSheetView: View {
         }
     }
 }
-    
-    
-//
-//struct MeetingSetSheetView_Previews: PreviewProvider {
-//
-//    @State static var coordinateCreated = CLLocationCoordinate2D()
-//        static var previews: some View {
-//            MeetingSetSheetView(coordinateCreated: $coordinateCreated)
-//        }
-//}
-
 
 struct PopupError: View {
     var body: some View {

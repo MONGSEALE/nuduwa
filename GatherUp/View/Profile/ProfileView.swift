@@ -16,13 +16,10 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack{
             VStack{
-                if (viewModel.myProfile != nil) {
-                    ReusableProfileContent(user: viewModel.myProfile!)
-                        .refreshable {
-                            // MARK: Refresh User Data
-                            viewModel.myProfile = nil
-                            await viewModel.fetchUserData()
-                        }
+                if (viewModel.currentUser != nil) {
+                    ReusableProfileContent(user: viewModel.currentUser!){ updateUserImage in
+                        viewModel.imageChaged(photoItem: updateUserImage)
+                    }
                 }else{
                     ProgressView()
                 }
@@ -45,19 +42,26 @@ struct ProfileView: View {
                     }
                 }
             }
+            .toolbar{
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink {
+                        SearchUserView()
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                            .tint(.black)
+                            .scaleEffect(0.9)
+                    }
+                }
+            }
             .overlay {
                 LoadingView(show: $viewModel.isLoading)
             }
             .alert(viewModel.errorMessage, isPresented: $viewModel.showError) {
                 
             }
-            .task {
-                // This Modifer is like onAppear
-                // So Fetching for the First Time Only
-                if viewModel.myProfile != nil{return }
-                // MARK: Initial Fetch
-                await viewModel.fetchUserData()
-            }
+        }
+        .onAppear{
+            viewModel.currentUserListener()
         }
     }
 }

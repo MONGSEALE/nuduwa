@@ -12,18 +12,22 @@ import Firebase
 import FirebaseAuth
 
 struct ChatView: View {
+
+    let meetingID : String
+    let meetingTitle: String
+    let hostUID: String
+
     @State var message = ""
     @StateObject var chatViewModel = ChatViewModel()
-    @State var meetingID : String
-    let hostUID: String
-    @State var userUID: String?
-    @Binding var members:[Members]
+   
+    @Binding var members:[Member]
     @Environment(\.presentationMode) var presentationMode
-    @State var meetingTitle: String
+    
     @State private var showMemberList = false
     @State private var xOffset: CGFloat = UIScreen.main.bounds.width
     
     var body: some View {
+        let userUID = Auth.auth().currentUser?.uid ?? ""
         ZStack{
             VStack{
                 HStack{
@@ -86,7 +90,7 @@ struct ChatView: View {
                                         .id("system-\(index)")
                                 }
                                 else{
-                                    MessageRow(message: chatViewModel.messages[index], identifying: chatViewModel.messages[index].userUID == userUID, url: memberImage(id: chatViewModel.messages[index].userUID))
+                                    MessageRow(message: chatViewModel.messages[index], member: chatViewModel.dicMembers[currentMessage.userUID]!, identifying: chatViewModel.messages[index].userUID == userUID, url: memberImage(id: chatViewModel.messages[index].userUID))
                                         .id(index)
                                 }
                             }
@@ -104,7 +108,7 @@ struct ChatView: View {
                 HStack{
                     CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $message)
                     Button{
-                        chatViewModel.sendMessage(meetingId: meetingID , text: message)
+                        chatViewModel.sendMessage(meetingID: meetingID , text: message)
                         message = ""
                     }label: {
                         Image(systemName: "paperplane.fill")
@@ -124,8 +128,8 @@ struct ChatView: View {
                            .slideOverView(isPresented: $showMemberList)
         }
         .onAppear{
-            chatViewModel.messagesListener(meetingId: meetingID)     // 채팅들이 화면에 보이게함
-            userUID = Auth.auth().currentUser?.uid
+            chatViewModel.messagesListener(meetingID: meetingID)     // 채팅들이 화면에 보이게함
+            chatViewModel.convertMembers()
         }
         
     }
@@ -157,7 +161,7 @@ struct ChatView: View {
 
 struct MemberList: View {
     let meetingID: String
-    let members: [Members]
+    let members: [Member]
     let hostUID: String
     let userUID: String
     
@@ -187,7 +191,7 @@ struct MemberList: View {
 }
 struct MemberItemView: View {
     let meetingID: String
-    let member: Members
+    let member: Member
     let hostUID: String
     let userUID: String
     @State var isShowMember: Bool = false
@@ -195,32 +199,30 @@ struct MemberItemView: View {
     
     var body: some View {
             HStack {
-                if (member.memberUID == userUID){
+                if member.memberUID == userUID {
                     MemberChatImage(image: member.memberImage!)
                 } else if hostUID == userUID {
                     Menu {
                         Button("프로필보기", action: {isShowMember = true})
                         Button("추방하기", role: .destructive, action: {
-                            viewModel.leaveMeeting(meetingId: meetingID, memberUID: member.memberUID)
+                            viewModel.leaveMeeting(meetingID: meetingID, memberUID: member.memberUID)
                         })
                     } label: {
                         MemberChatImage(image: member.memberImage!)
                     }
                 } else {
                     Button{
-                        if !(member.memberUID == userUID) {
-                            isShowMember = true
-                        }
+                        isShowMember = true
                     } label: {
                         MemberChatImage(image: member.memberImage!)
                     }
                 }
                 
                 if member.memberUID == userUID {
-                    Text("나 - \(member.memberName)")
+                    Text("나 - \(member.memberName ?? "")")
                         .font(.body)
                 } else {
-                    Text(member.memberName)
+                    Text(member.memberName ?? "")
                         .font(.body)
                 }
                 Spacer()
@@ -235,7 +237,10 @@ struct MemberChatImage: View {
     let image: URL
     
     var body: some View {
-        WebImage(url: image)
+        WebImage(url: image).placeholder{
+            Image(systemName: "xmark.app")
+                .resizable()
+        }
             .resizable()
             .scaledToFill()
             .frame(width: 40, height: 40)
@@ -253,23 +258,21 @@ struct NickName: View {
 
 struct MessageRow: View {
   
-    @State var message : ChatMessage
-    @State var identifying:Bool
-    @State var url : URL
-    
-    
-    
-    @StateObject var ViewModel:MeetingViewModel  = .init()
+    let message: ChatMessage
+    let member: Member
+    let identifying: Bool
+    let url: URL
+
     var body: some View {
         HStack{
             if(identifying==false){
-                WebImage(url:url)
+                WebImage(url:url).placeholder{ProgressView()}
                     .resizable()
-                       .scaledToFill()
-                       .frame(width: 40, height: 40)
-                       .clipShape(Circle())
+                   .scaledToFill()
+                   .frame(width: 40, height: 40)
+                   .clipShape(Circle())
                 VStack(alignment:.leading,spacing: 0, content: {
-                    NickName(name: message.userName)
+                    NickName(name: member.memberName ?? "")
                         .padding(.leading, 10)
                     ZStack {
                         Text(message.text)
@@ -342,10 +345,10 @@ struct MyChatBubble: Shape {
 }
 
 struct CustomTextFieldRow: View {
-    var placeholder : Text
+    let placeholder : Text
     @Binding var text : String
-    var editingChanged: (Bool) -> () = {_ in}
-    var commit: () -> () = {}
+    // var editingChanged: (Bool) -> () = {_ in}
+    // var commit: () -> () = {}
     
     var body: some View {
         ZStack(alignment: .leading){
@@ -353,7 +356,7 @@ struct CustomTextFieldRow: View {
                 placeholder
                     .opacity(0.5)
             }
-            TextField("",text:$text,onEditingChanged:editingChanged,onCommit:commit)
+            TextField("",text:$text) //,onEditingChanged:editingChanged,onCommit:commit)
         }
     }
 }

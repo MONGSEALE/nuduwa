@@ -9,7 +9,7 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct MemberProfileView: View {
-    var member: Members
+    var member: Member
     @State var showMessage: Bool = false
     @State var message: String = ""
     
@@ -17,17 +17,13 @@ struct MemberProfileView: View {
         ZStack{
             VStack{
                 HStack(spacing: 12){
-                    WebImage(url: member.memberImage).placeholder{
-                        // MARK: Placeholder Image
-                        Image("NullProfile")
-                            .resizable()
-                    }
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 100, height: 100)
-                    .clipShape(Circle())
+                    WebImage(url: member.memberImage).placeholder{ProgressView()}
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 100, height: 100)
+                        .clipShape(Circle())
                     
-                    Text(member.memberName)
+                    Text(member.memberName ?? "")
                         .font(.title3)
                         .fontWeight(.semibold)
                     

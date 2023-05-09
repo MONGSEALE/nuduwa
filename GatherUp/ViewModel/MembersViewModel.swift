@@ -11,7 +11,7 @@ import FirebaseAuth
 import FirebaseFirestore
 
 class MembersViewModel: ObservableObject {
-    @Published var members: [Members] = []
+    @Published var members: [Member] = []
     
     private var docListner: ListenerRegistration?
     
@@ -26,8 +26,8 @@ class MembersViewModel: ObservableObject {
             .addSnapshotListener { (querySnapshot, error) in
                 guard let documents = querySnapshot?.documents else {return}
                 documents.forEach{document in
-                    self.members = documents.compactMap{ documents -> Members? in
-                        try? documents.data(as: Members.self)
+                    self.members = documents.compactMap{ documents -> Member? in
+                        try? documents.data(as: Member.self)
                     }
                 }
             }
