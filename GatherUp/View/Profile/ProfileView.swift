@@ -16,7 +16,7 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack{
             VStack{
-                if (viewModel.currentUser != nil) {
+                if (viewModel.currentUser != nil || viewModel.isLoading) {
                     ReusableProfileContent(isEdit: $isEdit, user: viewModel.currentUser!){ updateName, updateImage in
                         viewModel.editUser(userName: updateName, userImage: updateImage)
                     }
