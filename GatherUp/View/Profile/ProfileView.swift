@@ -18,7 +18,9 @@ struct ProfileView: View {
             VStack{
                 if (viewModel.currentUser != nil && !viewModel.isLoading) {
                     ReusableProfileContent(isEdit: $isEdit, user: viewModel.currentUser!){ updateName, updateImage in
-                        viewModel.editUser(userName: updateName, userImage: updateImage)
+                        if updateName != nil || updateImage != nil{
+                            viewModel.editUser(userName: updateName, userImage: updateImage)
+                        }
                     }
                 }else{
                     ProgressView()
