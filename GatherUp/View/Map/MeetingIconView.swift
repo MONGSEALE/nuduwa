@@ -27,8 +27,8 @@ struct MeetingIconView: View {
         VStack(spacing:0){
             WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
                 .resizable()
-                .scaledToFit()
                 .frame(width: 30, height: 30) // Adjust these values to resize the WebImage
+                .scaledToFit()
                 .cornerRadius(60)
                 .clipShape(Circle())
                 .padding(4) // Adjust the padding value to increase or decrease the size of the blue circle

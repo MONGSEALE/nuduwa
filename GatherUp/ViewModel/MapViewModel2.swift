@@ -121,7 +121,8 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                         .start(at: [bound.startValue])
                         .end(at: [bound.endValue])
                 }
-                fetchedMeetings = fetchedMeetings.filter { !queries.keys.contains($0.key)}
+                let removedKeys = Array(Set(fetchedMeetings.keys).subtracting(queries.keys))
+                fetchedMeetings.removeValues(forKeys: removedKeys)
                 for (key,query) in queries {
                     query.addSnapshotListener { (querySnapshot, error) in
                         self.fetchedMeetings[key] = []

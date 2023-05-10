@@ -90,10 +90,10 @@ struct MapView: View {
                 HStack{
                     Spacer()
                     Button{
-                        /// 모임 중복 생성이면 if문 실행
-                        if (serverViewModel.isOverlap==true){
-                            showPopupMessage(message: "모임은 최대 한개만 생성할 수 있습니다!", duration: 2)
-                        }else{
+                        /// 모임 중복 생성이면 if문 실행 - test 중 비활성화
+//                        if (serverViewModel.isOverlap==true){
+//                            showPopupMessage(message: "모임은 최대 한개만 생성할 수 있습니다!", duration: 2)
+//                        }else{
                             /// 모임만들기 버튼 클릭할때마다 if문과 else문 번갈아 실행
                             if(showAnnotation==false){
                                 /// 모임만들기 버튼 클릭하면 "장소를 선택해주세요!" 메시지 출력
@@ -107,7 +107,7 @@ struct MapView: View {
                                 }
                                 serverViewModel.deleteMapAnnotation()     /// 취소 버튼 누르면 MapPin 삭제
                             }
-                        }
+//                        }
                     }label: {
                         Group {
                             if showAnnotation {
