@@ -70,6 +70,7 @@ class FirebaseViewModel: ObservableObject {
     }
     func currentUserListener() {
         print("userListener")
+        isLoading = true
         Task{
             let doc = db.collection(strUsers).document(currentUID())
             docListener = doc.addSnapshotListener { snapshot, error in
@@ -79,6 +80,7 @@ class FirebaseViewModel: ObservableObject {
                 }
                 guard let document = snapshot else{print("No Users");return}
                 self.currentUser = try? document.data(as: User.self)
+                self.isLoading = false
             }
         }
     }
