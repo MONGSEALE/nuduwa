@@ -57,10 +57,16 @@ struct MapView: View {
                     serverViewModel.checkedOverlap()    /// Map이 보여지는동안 실시간 중복확인
                     viewModel.checkIfLocationServicesIsEnabled()
                 }
-                .onChange(of: viewModel.region.center) { _ in
+                .onChange(of: viewModel.region.center.latitude) { _ in
                     serverViewModel.checkedLocation(region: viewModel.region)
                 }
-                .onChange(of: viewModel.region.span) { re_gion in
+                .onChange(of: viewModel.region.center.longitude) { _ in
+                    serverViewModel.checkedLocation(region: viewModel.region)
+                }
+                .onChange(of: viewModel.region.span.latitudeDelta) { _ in
+                    serverViewModel.checkedLocation(region: viewModel.region)
+                }
+                .onChange(of: viewModel.region.span.longitudeDelta) { _ in
                     serverViewModel.checkedLocation(region: viewModel.region)
                 }
                 .onTapGesture { tapLocation in

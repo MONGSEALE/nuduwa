@@ -25,7 +25,6 @@
 		33A21E5429FB4F94009AFD5A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 33A21E5329FB4F94009AFD5A /* GoogleSignIn */; };
 		33A21E5629FB4F94009AFD5A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 33A21E5529FB4F94009AFD5A /* GoogleSignInSwift */; };
 		33A21E5829FB4FF4009AFD5A /* MapViewModel2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A21E5729FB4FF4009AFD5A /* MapViewModel2.swift */; };
-		33A6B84029EE45460030E85B /* UserViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A6B83F29EE45450030E85B /* UserViewModel.swift */; };
 		33A6B84229EE460A0030E85B /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A6B84129EE460A0030E85B /* ChatViewModel.swift */; };
 		33A797CF2A01FE8200287D69 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A797CE2A01FE8200287D69 /* ChatView.swift */; };
 		33A797D12A020C1A00287D69 /* CustomCancleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A797D02A020C1A00287D69 /* CustomCancleView.swift */; };
@@ -44,7 +43,6 @@
 		33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13B29D667E500352451 /* MeetingCardView.swift */; };
 		33ADDF7B2A035D8F003FE79B /* PiledMeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADDF7A2A035D8F003FE79B /* PiledMeetingCardView.swift */; };
 		33ADDF7D2A036AFE003FE79B /* MemberProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */; };
-		33ADDF7F2A038348003FE79B /* MembersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADDF7E2A038348003FE79B /* MembersViewModel.swift */; };
 		33EDC97929DFF1DB0087FA29 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */; };
 		4285616029DFDAAB004DCDB9 /* MeetingIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */; };
 		4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */; };
@@ -70,7 +68,6 @@
 		339A101B29D3EBBE00B4DD98 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		339A102229D4093800B4DD98 /* ReusableProfileContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReusableProfileContent.swift; sourceTree = "<group>"; };
 		33A21E5729FB4FF4009AFD5A /* MapViewModel2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewModel2.swift; sourceTree = "<group>"; };
-		33A6B83F29EE45450030E85B /* UserViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserViewModel.swift; sourceTree = "<group>"; };
 		33A6B84129EE460A0030E85B /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		33A797CE2A01FE8200287D69 /* ChatView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		33A797D02A020C1A00287D69 /* CustomCancleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCancleView.swift; sourceTree = "<group>"; };
@@ -89,7 +86,6 @@
 		33ADB13B29D667E500352451 /* MeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCardView.swift; sourceTree = "<group>"; };
 		33ADDF7A2A035D8F003FE79B /* PiledMeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiledMeetingCardView.swift; sourceTree = "<group>"; };
 		33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberProfileView.swift; sourceTree = "<group>"; };
-		33ADDF7E2A038348003FE79B /* MembersViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembersViewModel.swift; sourceTree = "<group>"; };
 		33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
 		4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingIconView.swift; sourceTree = "<group>"; };
 		4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMapAnnotationView.swift; sourceTree = "<group>"; };
@@ -146,12 +142,10 @@
 			isa = PBXGroup;
 			children = (
 				33A21E5729FB4FF4009AFD5A /* MapViewModel2.swift */,
-				33A6B83F29EE45450030E85B /* UserViewModel.swift */,
 				339A101129D3E9C000B4DD98 /* LoginViewModel.swift */,
 				33ABB70129DD2B030049D482 /* MeetingViewModel.swift */,
 				33ABB70329DD421E0049D482 /* ProfileViewModel.swift */,
 				33A6B84129EE460A0030E85B /* ChatViewModel.swift */,
-				33ADDF7E2A038348003FE79B /* MembersViewModel.swift */,
 				33AD61C02A0A31B400CD908D /* FirebaseViewModel.swift */,
 				33AD61C22A0A31D300CD908D /* FirebaseViewModelwithMeetings.swift */,
 				33AD61C42A0A320F00CD908D /* MeetingInfoSheetViewModel.swift */,
@@ -360,7 +354,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				339A101829D3EAE500B4DD98 /* User.swift in Sources */,
-				33A6B84029EE45460030E85B /* UserViewModel.swift in Sources */,
 				33ADDF7D2A036AFE003FE79B /* MemberProfileView.swift in Sources */,
 				33AD61BF2A0A318800CD908D /* SearchUserView.swift in Sources */,
 				4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */,
@@ -371,7 +364,6 @@
 				33ADDF7B2A035D8F003FE79B /* PiledMeetingCardView.swift in Sources */,
 				33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */,
 				33A9112029ED0B0000C36FA2 /* Member.swift in Sources */,
-				33ADDF7F2A038348003FE79B /* MembersViewModel.swift in Sources */,
 				339A101229D3E9C100B4DD98 /* LoginViewModel.swift in Sources */,
 				335DF2D629E546060051B602 /* ChatMessage.swift in Sources */,
 				33AD61C52A0A320F00CD908D /* MeetingInfoSheetViewModel.swift in Sources */,

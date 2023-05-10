@@ -51,7 +51,7 @@ struct MeetingIconView: View {
             }
         }
         .sheet(isPresented: $showSheet){
-            MeetingInfoSheetView(meetingID: meeting.id, hostUID: meeting.hostUID)
+            MeetingInfoSheetView(meetingID: meeting.id!, hostUID: meeting.hostUID)
                 .presentationDetents([.fraction(0.3),.height(700)])
                 .onAppear{
                     withAnimation(.easeInOut(duration: 0.25)){

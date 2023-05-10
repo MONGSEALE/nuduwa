@@ -71,6 +71,7 @@ struct DetailMeetingView: View {
                             Text("참여자ID:")
                             ForEach(viewModel.members){ member in
                                 Text(" \(member.memberUID),")
+                                    .font(.caption2)
                                     .lineLimit(1)
                             }
                         }

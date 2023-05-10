@@ -14,7 +14,7 @@ struct PiledMeetingIconView: View {
 
     // 나중에 이 두개 변수 통합 고려
     @State private var showSheet = false        // 클릭시 시트 보임
-    @State var isClicked: Bool = false면        // 클릭시 커짐
+    @State var isClicked: Bool = false        // 클릭시 커짐
     
     @Binding var showAnnotation: Bool           // 모임생성할때 아이콘 클릭 안되게
     
@@ -45,12 +45,11 @@ struct PiledMeetingIconView: View {
             if(showAnnotation==false){
                 showSheet = true
                 onLocate(CLLocationCoordinate2D(latitude: meetings.last!.latitude, longitude: meetings.last!.longitude))
-                viewModel.fetchUser(userUID: meeting.hostUID)
             }
         }
         .sheet(isPresented: $showSheet){
             PiledMeetingsListView(meetings: meetings)
-                .presentationDetents([.fraction(meetings.count*0.1),.height(700)])
+                .presentationDetents([.fraction((CGFloat(meetings.count)*0.1)+0.03),.height(700)])
                 .onAppear{
                     withAnimation(.easeInOut(duration: 0.25)){
                         isClicked = true
@@ -79,7 +78,7 @@ struct PiledMeetingsListView: View {
                 Divider()
             }
             .navigationDestination(for: Meeting.self) { meeting in
-                MeetingInfoSheetView(meetingID: meeting.id, hostUID: meeting.hostUID)
+                MeetingInfoSheetView(meetingID: meeting.id!, hostUID: meeting.hostUID)
                     .navigationBarBackButtonHidden(true)
             }
         }
