@@ -46,7 +46,7 @@ struct DetailMeetingView: View {
                                 .clipShape(Circle())
                             
                             VStack(alignment: .leading, spacing: 6){
-                                CustomText(text: viewModel.meeting.title, editText: $title, item: "모임 제목",isEditable: isEdit)
+                                EditText(text: viewModel.meeting.title, editText: $title, item: "모임 제목",isEditable: isEdit)
                                     .font(.title3)
                                     .fontWeight(.semibold)
                                 Text(viewModel.user?.userName ?? "")
@@ -57,7 +57,7 @@ struct DetailMeetingView: View {
                             }
                             .hAlign(.leading)
                         }
-                        CustomText(text: viewModel.meeting.description, editText: $description, item: "모임 내용", isEditable: isEdit)
+                        EditText(text: viewModel.meeting.description, editText: $description, item: "모임 내용", isEditable: isEdit)
                             .textSelection(.enabled)
                             .padding(.vertical,8)
                             .hAlign(.leading)
@@ -115,7 +115,7 @@ struct DetailMeetingView: View {
                         }
                     }
                 }
-                .padding(.bottom,20)
+                
             }
         }
         .onAppear{
@@ -134,7 +134,7 @@ struct DetailMeetingView: View {
     }
 }
 
-struct CustomText: View {
+struct EditText: View {
     let text: String
     @Binding var editText: String
     let item: String

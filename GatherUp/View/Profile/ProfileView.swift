@@ -11,12 +11,14 @@ struct ProfileView: View {
     
     @StateObject var viewModel: ProfileViewModel = .init()
     
+    @State var isEdit: Bool = false
+    
     var body: some View {
         NavigationStack{
             VStack{
                 if (viewModel.currentUser != nil) {
-                    ReusableProfileContent(user: viewModel.currentUser!){ updateUserImage in
-                        viewModel.imageChaged(photoItem: updateUserImage)
+                    ReusableProfileContent(isEdit: $isEdit, user: viewModel.currentUser!){ updateName, updateImage in
+                        viewModel.editUser(userName: updateName, userImage: updateImage)
                     }
                 }else{
                     ProgressView()
@@ -27,10 +29,8 @@ struct ProfileView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
-                        // MARK: Two Action's
-                        // 1. Logout
+                        Button("프로필 편집", action: {isEdit = true})
                         Button("로그아웃", action: viewModel.logOutUser)
-                        // 2. Delete Account
                         Button("계정 삭제", role: .destructive, action: viewModel.deleteAccount)
                     } label: {
                         Image(systemName: "ellipsis")

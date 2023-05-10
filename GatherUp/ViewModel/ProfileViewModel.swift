@@ -47,45 +47,63 @@ class ProfileViewModel: FirebaseViewModel {
         }
     }
     
-    func updateUser(userName: String = "", userImage: Data = Data()){
+    func editUser(userName: String?, userImage: PhotosPickerItem?){
         print("updateUser")
-        Task{
-            do{
-                let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
-                if userName != "" {
-                    try await
-                    db.collection(strUsers).document(currentUID()).updateData(["userName": userName])
-                    print("userName 수정")
-                    changeRequest?.displayName = userName
-                    try await changeRequest?.commitChanges()
+        isLoading = true
+        if (userName != nil) || (userImage != nil) {
+            Task{
+                do{
+                    let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
+                    
+                    let dispatchGroup = DispatchGroup() // DispatchGroup 생성
+                    
+                    if let userName = userName {
+                        dispatchGroup.enter() // DispatchGroup에 진입
+                        db.collection(strUsers).document(currentUID()).updateData(["userName": userName]){ _ in
+                            changeRequest?.displayName = userName
+                            changeRequest?.commitChanges()
+                            print("userName 수정")
+                            dispatchGroup.leave() // DispatchGroup에서 나옴
+                        }
+                    }
+                    if let userImage = userImage {
+                        guard let imageData = try await userImage.loadTransferable(type: Data.self) else{
+                            print("에러 imageData")
+                            return
+                        }
+                        let storageRef = Storage.storage().reference().child("Profile_Images").child(currentUID())
+                        storageRef.putData(imageData)
+                        
+                        let downloadURL = try await storageRef.downloadURL()
+                        
+                        dispatchGroup.enter() // DispatchGroup에 진입
+                        db.collection(strUsers).document(currentUID()).updateData(["userImage": downloadURL.absoluteString]){ _ in
+                            print("userImage 수정")
+                            dispatchGroup.leave() // DispatchGroup에서 나옴
+                        }
+                    }
+                    dispatchGroup.notify(queue: .main) { // DispatchGroup에 속한 모든 작업이 끝났을 때 호출됨
+                        self.isLoading = false
+                    }
+                }catch{
+                    await handleError(error)
                 }
-                if userImage != Data() {
-                    let storageRef = Storage.storage().reference().child("Profile_Images").child(currentUID())
-                    storageRef.putData(userImage)
-
-                    let downloadURL = try await storageRef.downloadURL()
-
-                    try await db.collection(strUsers).document(currentUID()).updateData(["userImage": downloadURL.absoluteString])
-                    print("userImage 수정")
-                }
-            }catch{
-                await handleError(error)
             }
         }
     }
 
-    func imageChaged(photoItem: PhotosPickerItem) {
-        print("imageChaged")
-        Task{
-            do{
-                guard let imageData = try await photoItem.loadTransferable(type: Data.self) else{
-                    print("에러 imageData")
-                    return
-                }
-                updateUser(userImage: imageData)
-            }catch{
-                await handleError(error)
-            }
-        }
-    }
+//    func imageChaged(photoItem: PhotosPickerItem) {
+//        print("imageChaged")
+//        Task{
+//            do{
+//                guard let imageData = try await photoItem.loadTransferable(type: Data.self) else{
+//                    print("에러 imageData")
+//                    return
+//                }
+//                editUser(userImage: imageData)
+//            }catch{
+//                await handleError(error)
+//            }
+//        }
+//    }
 }
