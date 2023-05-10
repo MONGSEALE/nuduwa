@@ -69,6 +69,7 @@ struct DetailMeetingView: View {
                         }
                         HStack{
                             Text("참여자ID:")
+                                .font(.caption2)
                             ForEach(viewModel.members){ member in
                                 Text(" \(member.memberUID),")
                                     .font(.caption2)
