@@ -69,73 +69,101 @@ class DMViewModel: FirebaseViewModel {
         }
     }
     
-    func receiverUser(id: String) {
-       if let _ = userImageURLs[id] {
-           // Image URL already fetched, do nothing
-           return
-       } else {
-           let userDocumentRef = Firestore.firestore().collection("Users").document(id)
-           userDocumentRef.getDocument { documentSnapshot, error in
-               if let error = error {
-                   print("Error retrieving user profile image URL: \(error.localizedDescription)")
-               } else if let documentSnapshot = documentSnapshot, let data = documentSnapshot.data() {
-                   if let user = try? documentSnapshot.data(as: User.self) {
-                       DispatchQueue.main.async {
-                           self.userImageURLs[id] = user
-                       }
-                   }
-               }
-           }
-       }
-   }
-    
     func startListeningDM(chatterUID: String) {
         print("startListeningDM")
-        guard let currentUID = currentUID else{return}
-        print("currentUID:\(currentUID)")
-        print("chatterUID:\(chatterUID)")
-        let doc = db.collection(strUsers).document(currentUID).collection(strChatters)
-        var dmPeopleID: String?
-        
-        doc.whereField("chatterUID", isEqualTo: chatterUID).getDocuments{ querySnapshot, error in
-            if let error = error {print("startListeningDM에러1\(error.localizedDescription)");return}
-            if let querySnapshot = querySnapshot {
+        Task{
+            guard let currentUID = currentUID else{return}
+            let chattersQuery = db.collection(strUsers).document(currentUID).collection(strChatters)
+                        .whereField("chatterUID", isEqualTo: chatterUID)
+            let dmPeopleDoc = db.collection(strDMPeople)
+            let dmPeopleQuery = dmPeopleDoc.whereField("users", arrayContains: chatterUID)
+            var dmPeopleID: String?
+            
+            do{
+                let chattersSnapshot = try await chattersQuery.getDocuments()
+
+                if !chattersSnapshot.documents.isEmpty {
+                    for document in chattersSnapshot.documents {
+                        dmPeopleID = document.data()["DMPeopleID"] as? String ?? ""
+                    }
+                } else {
+                    let dmPeopleSnapshot = try await dmPeopleQuery.getDocuments()
+                    
+                    if !dmPeopleSnapshot.documents.isEmpty {
+                        for document in dmPeopleSnapshot.documents {
+                            dmPeopleID = document.documentID
+                        }
+                    } else {
+                        print("서버저장된DM없음")
+                        return
+                    }
+                }
+
+                guard let dmPeopleID = dmPeopleID else {handleErrorTask(error);return}
+
+                let dmDoc = dmPeopleDoc.document(dmPeopleID).collection(self.strDM)
+                let query = dmDoc.order(by: "timestamp")
+
+                self.docListener = try await query.addSnapshotListener { querySnapshot, error in
+                    if let error = error {self.handleErrorTask(error);return}
+                    guard let querySnapshot = querySnapshot else {self.handleErrorTask(error);return}
+
+                    self.messages = querySnapshot.documents.compactMap { document -> DM? in
+                        try? document.data(as: DM.self)
+                    }
+                }
+            } catch {
+                handleErrorTask(error)
+            }
+        }
+        /*
+        chattersQuery.getDocuments{ querySnapshot, error in
+            if let error = error || querySnapshot == nil {self.handleErrorTask(error);return}
+
+            if !querySnapshot.documents.isEmpty {
                 for document in querySnapshot.documents {
                     dmPeopleID = document.data()["DMPeopleID"] as? String ?? ""
                 }
-                guard let dmPeopleID = dmPeopleID else{print("디엠피플오류");return}
-                print("dmPeopleID:\(dmPeopleID)")
-                // 두 유저 간의 DM 문서를 참조합니다.
-                let dmColletionRef = self.db.collection(self.strDMPeople).document(dmPeopleID).collection(self.strDM)
+            } else {
+                dmPeopleQuery.getDocuments{ querySnapshot, error in
+                    if let error = error || querySnapshot == nil {self.handleErrorTask(error);return}
 
-                // DM 컬렉션에서 모든 DM을 시간순으로 가져오는 쿼리를 생성합니다.
-                let query = dmColletionRef.order(by: "timestamp")
-                
-                // 쿼리의 결과에 대한 리스너를 추가합니다.
-                self.docListener = query.addSnapshotListener { querySnapshot, error in
-                    if let error = error {print("startListeningDM에러2");return}
-                    print("dm리스너")
-                    if let querySnapshot = querySnapshot {
-                        // 쿼리 결과를 DM 객체의 배열로 변환하고, 이를 messages 배열에 저장합니다.
-                        self.messages = querySnapshot.documents.compactMap { document -> DM? in
-                            try? document.data(as: DM.self)
+                    if !querySnapshot.documents.isEmpty {
+                        for document in querySnapshot.documents {
+                            dmPeopleID = document.documentID
                         }
-                        print("메시지:\(self.messages)")
-                    } else if let error = error {
-                        print("Error listening for DMs: \(error.localizedDescription)")
+                    } else {
+                        print("서버저장된DM없음");return
                     }
                 }
             }
-        }
+            guard let dmPeopleID = dmPeopleID else{print("디엠피플오류");return}
+            print("dmPeopleID:\(dmPeopleID)")
+            // 두 유저 간의 DM 문서를 참조합니다.
+            let dmDoc = dmPeopleDoc.document(dmPeopleID).collection(self.strDM)
+
+            // DM 컬렉션에서 모든 DM을 시간순으로 가져오는 쿼리를 생성합니다.
+            let query = dmDoc.order(by: "timestamp")
+            
+            // 쿼리의 결과에 대한 리스너를 추가합니다.
+            self.docListener = query.addSnapshotListener { querySnapshot, error in
+                if let error = error || querySnapshot == nil {self.handleErrorTask(error);return}
+                    // 쿼리 결과를 DM 객체의 배열로 변환하고, 이를 messages 배열에 저장합니다.
+                self.messages = querySnapshot.documents.compactMap { document -> DM? in
+                    try? document.data(as: DM.self)
+                }
+            }
+        }*/
     }
     func dmListener(dmPeopleID: String) {
         print("dmListener")
         guard let currentUID = currentUID else{return}
-        let doc = db.collection(strDMPeople).document(dmPeopleID).collection(strDM).order(by: "timestamp")
+        let query = db.collection(strDMPeople).document(dmPeopleID).collection(strDM)
+                    .order(by: "timestamp")
 
-        docListener = doc.addSnapshotListener { querySnapshot, error in
-                        if let error = error {self.firebaseError(error);return}
-                        guard let querySnapshot = querySnapshot else{self.firebaseError(error);return}
+        docListener = query.addSnapshotListener { querySnapshot, error in
+                        if let error = error {self.handleErrorTask(error);return}
+                        guard let querySnapshot = querySnapshot else{self.handleErrorTask(error);return}
                         // 쿼리 결과를 DM 객체의 배열로 변환하고, 이를 messages 배열에 저장합니다.
                         self.messages = querySnapshot.documents.compactMap { document -> DM? in
                             try? document.data(as: DM.self)
@@ -176,21 +204,21 @@ class DMViewModel: FirebaseViewModel {
     
     func deleteRecentMessage(receiverID: String) {
         isLoading = true
-        let doc= = db.collection(strUsers).document(currentUID).collection(strChatters)
+        let query= = db.collection(strUsers).document(currentUID).collection(strChatters)
                     whereField("chatterUID", isEqualTo: receiverID)
-        doc.getDocuments{ querySnapshot, error in
+        query.getDocuments{ querySnapshot, error in
             if let error = error {
-               firebaseError(error)
+               handleErrorTask(error)
             } else {
                 guard let documents = querySnapshot?.documents else {
-                    firebaseError(error)
+                    handleErrorTask(error)
                     return
                 }
 
                 for document in documents {
                     document.delete(){ error in
                         guard let error = error else{
-                            firebaseError(error, isShowError: true)
+                            handleErrorTask(error, isShowError: true)
                         } else {
                             print("DM나가기 완료")
                             self.isLoading = false

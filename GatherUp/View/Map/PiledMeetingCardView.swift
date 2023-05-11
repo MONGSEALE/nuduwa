@@ -15,35 +15,42 @@ struct PiledMeetingCardView: View {
     var meeting: Meeting
     
     var body: some View {
-        HStack(spacing: 12){
-            WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 50, height: 50)
-                .clipShape(Circle())
-            
-            Text(meeting.title)
-                .font(.callout)
-                .fontWeight(.semibold)
-                .foregroundColor(.black)
-                .frame(width: 100)
-                .lineLimit(2)
+        ZStack(spacing: 12){
+            HStack{
+                WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
                 
-            
-            VStack(alignment: .leading){
-                Text(viewModel.user?.userName ?? "")
-                    .lineLimit(1)
+                Text(meeting.title)
+                    .font(.callout)
+                    .fontWeight(.semibold)
                     .foregroundColor(.black)
-                Text(meeting.meetingDate.formatted(.dateTime.month().day().hour().minute()))
-                    .font(.caption2)
-                    .foregroundColor(.gray)
+                    .frame(width: 100)
+                    .lineLimit(2)
+                    
+                
+                VStack(alignment: .leading){
+                    Text(viewModel.user?.userName ?? "")
+                        .lineLimit(1)
+                        .foregroundColor(.black)
+                    Text(meeting.meetingDate.formatted(.dateTime.month().day().hour().minute()))
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                }
+                Text(meeting.description)
+                    .textSelection(.enabled)
+                    .foregroundColor(.black)
+                    .lineLimit(3)
             }
-            Text(meeting.description)
-                .textSelection(.enabled)
-                .foregroundColor(.black)
-                .lineLimit(3)
+            .hAlign(.leading)
+            if meeting.hostUID == viewModel.currentUID!{
+                VStack(){
+                    Text("MINE")
+                }
+            }
         }
-        .hAlign(.leading)
         .onAppear{
             viewModel.fetchUser(userUID: meeting.hostUID)
         }

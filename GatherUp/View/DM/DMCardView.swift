@@ -38,7 +38,7 @@ struct DMCardView: View {
         .buttonStyle(PlainButtonStyle())
         .onAppear{
             viewModel.fetchUser(userUID: chattingRoom.chatterUID)
-            viewModel.startListeningDM(chatterUID: chattingRoom.DMPeopleID)
+            viewModel.dmListener(dmPeopleID: chattingRoom.DMPeopleID)
         }
         .onDisappear{
             viewModel.removeListener()

@@ -27,56 +27,32 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
             let uid = member.memberUID
             dicMembers[uid] = member
             
-            if let memberData = dicMembersData[uid]{
-                dicMembers[uid]?.memberName = memberData.userName
-                dicMembers[uid]?.memberImage = memberData.userImage
-            }else{
+            if dicMembersData[uid] == nil{
                 Task{
-                    await fetchMemberData(meetingID: meetingID, memberUID: uid)
+                    dicMembersData[uid] = await fetchUserData(userUID: uid)
                 }
             }
+            dicMembers[uid]?.memberName = dicMembersData[uid].userName
+            dicMembers[uid]?.memberImage = dicMembersData[uid].userImage
         }
     }
-    func fetchMemberData(meetingID: String, memberUID: String)async{
-        do {
-            let document = try await db.collection(strUsers).document(memberUID).getDocument()
-            let name = document.data()?["userName"] as? String ?? ""
-            let imageUrl = document.data()?["userImage"] as? String ?? ""
-            let image = URL(string: imageUrl)
-            self.dicMembersData[memberUID] = UserData(userName: name, userImage: image!)
-            if dicMembers[memberUID] != nil{
-                dicMembers[memberUID]!.memberName = name
-                dicMembers[memberUID]!.memberImage = image!
-            }
-        } catch {
-            print("에러 fetchMemberData: \(error)")
-        }
-    }
-    
-//    func fetchMembersData(meetingID: String){
-//        Task{
-//            if !dicMembers.isEmpty{
-//                for uid in dicMembers.keys{
-//                    do {
-//                        let document = try await db.collection(strUsers).document(uid).getDocument()
-//                        let name = document.data()?["userName"] as? String ?? ""
-//                        let imageUrl = document.data()?["userImage"] as? String ?? ""
-//                        let image = URL(string: imageUrl)
-//                        self.dicMembersData[uid] = UserData(userName: name, userImage: image!)
-////                        if dicMembers[uid] != nil{
-////                            dicMembers[uid]!.memberName = name
-////                            dicMembers[uid]!.memberImage = image!
-////                        }
-//                    } catch {
-//                        print("Error getting document: \(error)")
-//                    }
-//                }
-//            }
-//        }
-//    }
-    
-    
-    
+    // override func fetchUserData(userUID: String)async -> UserData{
+    //     print("fetchUserData:\(userUID)")
+    //     do {
+    //         let document = try await db.collection(strUsers).document(userUID).getDocument()
+    //         let name = document.data()?["userName"] as? String ?? ""
+    //         let imageUrl = document.data()?["userImage"] as? String ?? ""
+    //         let image = URL(string: imageUrl)
+    //         self.dicMembersData[userUID] = UserData(userName: name, userImage: image!)
+    //         if dicMembers[userUID] != nil{
+    //             dicMembers[userUID]!.memberName = name
+    //             dicMembers[userUID]!.memberImage = image!
+    //         }
+    //     } catch {
+    //         print("에러 fetchUserData: \(error)")
+    //         return UserData(userName: "name", userImage: URL(string:"image"))
+    //     }
+    // }
     
     /// FireStore와 meetings 배열 실시간 연동
     func meetingsListener(){
@@ -173,11 +149,11 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
             let doc = db.collection(strMeetings).document(meetingID)
             doc.delete{ error in
                 if let error = error{
-                    self.firebaseError(error)
+                    self.handleErrorTask(error)
                 }else{
                     doc.collection(self.strMembers).getDocuments{ querySnapshot, error in
                         if let error = error{
-                            self.firebaseError(error)
+                            self.handleErrorTask(error)
                         }else{
                             for document in querySnapshot!.documents {
                                 document.reference.delete()
@@ -186,7 +162,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                     }
                     doc.collection(self.strMessage).getDocuments{ querySnapshot, error in
                         if let error = error{
-                            self.firebaseError(error)
+                            self.handleErrorTask(error)
                         }else{
                             for document in querySnapshot!.documents {
                                 document.reference.delete()

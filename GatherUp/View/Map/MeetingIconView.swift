@@ -20,6 +20,8 @@ struct MeetingIconView: View {
     
     @Binding var showAnnotation: Bool  // 모임생성할때 아이콘 클릭 안되게
 
+    let isJoin: Bool
+
     let meeting: Meeting
     var onLocate: (CLLocationCoordinate2D)->()
     
@@ -37,7 +39,7 @@ struct MeetingIconView: View {
             Image(systemName: "triangle.fill")
                 .resizable()
                 .scaledToFit()
-                .foregroundColor(.blue)
+                .foregroundColor(isJoin ? .green : .blue)
                 .frame(width: 15,height: 15)
                 .rotationEffect(Angle(degrees: 180))
                 .offset( y : -3)

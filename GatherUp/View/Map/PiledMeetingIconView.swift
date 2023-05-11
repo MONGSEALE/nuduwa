@@ -23,14 +23,17 @@ struct PiledMeetingIconView: View {
     
     var body: some View {
         VStack(spacing:0){
-            Image(systemName: "person.circle.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width:40,height: 40)
-                .foregroundColor(.white)
-                .padding(6)
-                .background(Color(.blue))
-                .clipShape(Circle())
+            ZStack{
+                Image(systemName: "person.circle.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width:40,height: 40)
+                    .foregroundColor(.white)
+                    .padding(6)
+                    .background(Color(.blue))
+                    .clipShape(Circle())
+                Text(meetings.count)
+            }
             
             Image(systemName: "triangle.fill")
                 .resizable()

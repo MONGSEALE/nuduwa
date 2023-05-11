@@ -269,19 +269,51 @@ func mapMeetingsListener(region: MKCoordinateRegion) {
                 
                 let document = try db.collection(strMeetings).addDocument(from: meeting){ error in
                     if let error = error{
-                        self.firebaseError(error)
+                        self.handleErrorTask(error)
                         self.isLoading = false
                         return
                     }
                 }
                 let meetingID = document.documentID
-                self.joinMeeting(meetingID: meetingID, numbersOfMembers: meeting.numbersOfMembers)
+                self.joinMeeting(meetingID: meetingID)
                 
                 await MainActor.run(body: {
                     isLoading = false
                 })
             } catch {
                 await handleError(error)
+            }
+        }
+    }
+    override func joinMeeting(meetingID: String){
+        print("joinMeeting")
+        isLoading = true
+        Task{
+            do{
+                guard let currentUID = currentUID else{return}
+                let userData = await fetchUserData(currentUID)
+
+                let member = Member(memberUID: currentUID)
+                let joinMeeting = JoinMeeting(meetingID: meetingID, isHost: true)
+                let message = ChatMessage(
+                    text: "\(userData.userName)님이 채팅에 참가하셨습니다.",
+                    userUID: "SYSTEM",
+                    timestamp: Timestamp(),
+                    isSystemMessage: true
+                )
+
+                let meetingsDoc = db.collection(strMeetings).document(meetingID)
+                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
+                
+                try meetingsDoc.collection(strMembers).addDocument(from: member)
+
+                try joinMeetingsCol.addDocument(from: joinMeeting)
+                
+                try meetingsDoc.collection(self.strMessage).addDocumentt(from: message)
+                
+                isLoading = false
+            } catch {
+                handleErrorTask(error)
             }
         }
     }
