@@ -35,6 +35,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         print("combineNewMeetings")
         meetings = newMeeting == nil ? Array(setMeetings) : Array(setMeetings) + [newMeeting!]
     }
+    /*
     /// 가까이 있는 모임들 하나로 합치고 정렬
     func mergeMeetings(latitudeDelta: Double){
         print("mergeMeetings")
@@ -82,17 +83,56 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         }
         setMeetings = setFetchedMeetings
         combineNewMeetings()
+    }*/
+
+    /// 가까이 있는 모임들 하나로 합치고 정렬
+    func mergeMeetings(latitudeDelta: Double){
+        print("mergeMeetings")
+
+        var setFetchedMeetings: Set<Meeting> = Set(fetchedMeetings.values.flatMap { $0 })
+        bigIconMeetings = [:]
+        let delta = latitudeDelta * 0.05   // 지도세로길이 * 0.1 이하로 가까이 있으면 중첩
+        // let copySet = setFetchedMeetings  // for문용으로 복사
+        
+        for meeting1 in setFetchedMeetings {
+            guard setFetchedMeetings.contains(meeting1) else { continue }     // 중첩돼서 지운 모임이면 continue
+            let latitude = meeting1.latitude
+            let longitude = meeting1.longitude
+            
+            var nearbyMeetings: [Meeting] = []
+            for meeting2 in setFetchedMeetings.subtracting([meeting1]) {
+                // delta값으로 meeting1과 meeting2가 가까이 있는지 비교
+                if (latitude-delta < meeting2.latitude) &&
+                    (meeting2.latitude < latitude+delta) &&
+                    (longitude-delta < meeting2.longitude) &&
+                        (meeting2.longitude < longitude+delta)
+                {
+                    nearbyMeetings.append(meeting2)  // 가까이 있으면 bigIconMeetings에 저장
+                    setFetchedMeetings.remove(meeting2)  // 그리고 원래 Meetings에선 삭제
+                }
+            }
+            // meeting1과 가까이 있는 모임 있으면 meeting1도 bigIconMeetings에 저장후 원래 Meetings에선 삭제하고 type.piled Meeting 저장
+            if !nearbyMeetings.isEmpty {
+                bigIconMeetings[meeting1.id!, default: []] = [meeting1] + nearbyMeetings
+                let meeting = Meeting(id: meeting1.id, title: "", description: "", place: "", numbersOfMembers: 0, latitude: meeting1.latitude, longitude: meeting1.longitude, hostUID: "", type: .piled)
+                setFetchedMeetings.remove(meeting1)
+                setFetchedMeetings.insert(meeting)
+            }
+        }
+        setMeetings = setFetchedMeetings
+        combineNewMeetings()
     }
      /*
 func mergeMeetings(latitudeDelta: Double) {
     var setFetchedMeetings: Set<Meeting> = Set(fetchedMeetings.values.flatMap { $0 })
     bigIconMeetings = [:]
     let delta = latitudeDelta * 0.1
+
     for meeting1 in setFetchedMeetings {
         let (nearbyMeetings, remainingMeetings) = findNearbyMeetings(meeting1: meeting1, meetings: setFetchedMeetings.subtracting([meeting1]), delta: delta)
         setFetchedMeetings = remainingMeetings
         if !nearbyMeetings.isEmpty {
-            bigIconMeetings[meeting1.id!, default: []] = nearbyMeetings + [meeting1]
+            bigIconMeetings[meeting1.id!, default: []] = [meeting1] + nearbyMeetings
             let meeting = Meeting(id: meeting1.id, title: "", description: "", place: "", numbersOfMembers: 0, latitude: meeting1.latitude, longitude: meeting1.longitude, hostUID: "", type: .piled)
             setFetchedMeetings.remove(meeting1)
             setFetchedMeetings.insert(meeting)
@@ -142,9 +182,8 @@ func findNearbyMeetings(meeting1: Meeting, meetings: Set<Meeting>, delta: Double
                 checkRegion = region
 
                 let metersPerDegree: Double = 111_319.9 // 지구의 반지름 (m) * 2 * pi / 360
-                let latitudeDeltaInMeters = region.span.latitudeDelta * metersPerDegree * 10
-                print("델타: \(region.span.latitudeDelta)")
-                print("거리: \(latitudeDeltaInMeters)")
+                let latitudeDeltaInMeters = region.span.latitudeDelta * metersPerDegree * 4
+                
                 let queryBounds = GFUtils.queryBounds(forLocation: region.center,
                                                     withRadius: latitudeDeltaInMeters)
                 
@@ -178,7 +217,7 @@ func findNearbyMeetings(meeting1: Meeting, meetings: Set<Meeting>, delta: Double
             }
         }
     }
-        /*
+        
 func getMeetingQueries(for region: MKCoordinateRegion) -> [String: Query] {
     let earthRadiusMeters: Double = 6_371_000
     let metersPerDegree: Double = earthRadiusMeters * 2 * .pi / 360
