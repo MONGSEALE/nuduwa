@@ -13,38 +13,21 @@ import FirebaseFirestore
 
 class FirebaseViewModelwithMeetings: FirebaseViewModel {
 
-    struct MemberData {
-        var memberName: String
-        var memberImage: URL
-    }
+    
     
     @Published var members: [Member] = []
-    @Published var dicMembers: [String:Member] = [:]
-    @Published var dicMembersData: [String:MemberData] = [:]
 
     @Published var meetings: [Meeting] = []     // 모임 배열
 
     //나중에 하위 클래스로 이동
     @Published var meeting: Meeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: 0, longitude: 0, hostUID: "")
 
-    /// 찾기쉽게 members 배열을 딕셔너리로 변환
-    func convertMembers() {
-        members.forEach { member in
-            let uid = member.memberUID
-            dicMembers[uid] = member
-            
-//            if !dicMembersData.isEmpty{
-//                if let memberData = dicMembersData[uid] {
-//                    dicMembers[uid]?.memberName = memberData.memberName
-//                    dicMembers[uid]?.memberImage = memberData.memberImage
-//                }
-//            }
-        }
-    }
+    /// 자식Class MeetingViewModel에서 쓸 함수
+    func convertMembers(meetingID: String) { }
+    
     /// 모임맴버 가져오기
     func membersListener(meetingID: String){
         print("membersListener")
-        print("members:\(members)")
         Task{
             let doc = db.collection(strMeetings).document(meetingID).collection(strMembers)
             docListener = doc.addSnapshotListener { (querySnapshot, error) in
@@ -56,7 +39,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                 self.members = documents.compactMap{ documents -> Member? in
                     try? documents.data(as: Member.self)
                 }
-                self.convertMembers()
+                self.convertMembers(meetingID: meetingID)
             }
         }
     }

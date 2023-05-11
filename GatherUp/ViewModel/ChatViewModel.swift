@@ -14,26 +14,40 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
 
     @Published var messages: [ChatMessage] = []
     @Published  var lastMessageId: String = ""
-
-    override func convertMembers(){
-        Task{
-            for uid in dicMembers.keys{
-                do {
-                    let document = try await db.collection(strUsers).document(uid).getDocument()
-                    let name = document.data()?["userName"] as? String ?? ""
-                    let imageUrl = document.data()?["userImage"] as? String ?? ""
-                    let image = URL(string: imageUrl)
-                    self.dicMembersData[uid] = MemberData(memberName: name, memberImage: image!)
-                    if dicMembers[uid] != nil{
-                        dicMembers[uid]!.memberName = name
-                        dicMembers[uid]!.memberImage = image!
-                    }
-                } catch {
-                    print("Error getting document: \(error)")
-                }
-            }
-        }
-    }
+    
+//    @Published var dicMembersData: [String:MemberData] = [:]
+//
+//    override func convertMembers(){
+//        Task{
+//            members.forEach { member in
+//                let uid = member.memberUID
+//                dicMembers[uid] = member
+//                if !dicMembersData.isEmpty{
+//                    if let memberData = dicMembersData[uid] {
+//                        dicMembers[uid]?.memberName = memberData.memberName
+//                        dicMembers[uid]?.memberImage = memberData.memberImage
+//                    }
+//                }
+//                
+//            }
+//            
+//            for uid in dicMembers.keys{
+//                do {
+//                    let document = try await db.collection(strUsers).document(uid).getDocument()
+//                    let name = document.data()?["userName"] as? String ?? ""
+//                    let imageUrl = document.data()?["userImage"] as? String ?? ""
+//                    let image = URL(string: imageUrl)
+//                    self.dicMembersData[uid] = MemberData(memberName: name, memberImage: image!)
+//                    if dicMembers[uid] != nil{
+//                        dicMembers[uid]!.memberName = name
+//                        dicMembers[uid]!.memberImage = image!
+//                    }
+//                } catch {
+//                    print("Error getting document: \(error)")
+//                }
+//            }
+//        }
+//    }
     ///채팅구현
     func messagesListener(meetingID: String) {
         isLoading = true

@@ -27,3 +27,8 @@ struct User: Identifiable, Codable {
     }
      */
 }
+
+struct UserData {
+    var userName: String
+    var userImage: URL
+}

@@ -18,7 +18,7 @@ struct ChatView: View {
     @State var message = ""
     @StateObject var chatViewModel = ChatViewModel()
    
-    @Binding var members:[Member]
+    @Binding var members: [String: Member]
     @Environment(\.presentationMode) var presentationMode
     
     @State private var showMemberList = false
@@ -87,7 +87,7 @@ struct ChatView: View {
                                         .id("system-\(index)")
                                 }
                                 else{
-                                    MessageRow(message: chatViewModel.messages[index], member: chatViewModel.dicMembers[currentMessage.userUID]!, identifying: chatViewModel.messages[index].userUID == chatViewModel.currentUID, url: memberImage(id: chatViewModel.messages[index].userUID))
+                                    MessageRow(message: chatViewModel.messages[index], member: members[currentMessage.userUID]!, identifying: chatViewModel.messages[index].userUID == chatViewModel.currentUID)
                                         .id(index)
                                 }
                             }
@@ -121,7 +121,7 @@ struct ChatView: View {
                 .cornerRadius(50)
                 .padding()
             }
-            MemberList(meetingID: meetingID, members: members, hostUID: hostUID ,userUID: chatViewModel.currentUID!)
+            MemberList(meetingID: meetingID, members: Array(members.values), hostUID: hostUID ,userUID: chatViewModel.currentUID!)
                            .slideOverView(isPresented: $showMemberList)
         }
         .onAppear{
@@ -144,14 +144,6 @@ struct ChatView: View {
         let currentDate = currentMessage.timestamp.dateValue()
         
         return !calendar.isDate(previousDate, inSameDayAs: currentDate)
-    }
-    func memberImage(id: String) -> URL{
-        for member in members {
-            if id == member.memberUID{
-                return member.memberImage!
-            }
-        }
-        return URL(filePath: "")
     }
 }
 
@@ -257,12 +249,11 @@ struct MessageRow: View {
     let message: ChatMessage
     let member: Member
     let identifying: Bool
-    let url: URL
 
     var body: some View {
         HStack{
             if(identifying==false){
-                WebImage(url:url).placeholder{ProgressView()}
+                WebImage(url: member.memberImage).placeholder{ProgressView()}
                     .resizable()
                    .scaledToFill()
                    .frame(width: 40, height: 40)

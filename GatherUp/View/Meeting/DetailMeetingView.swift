@@ -91,7 +91,7 @@ struct DetailMeetingView: View {
                         .background(.blue,in: Capsule())
                 }
                 .sheet(isPresented: $toChatView){
-                    ChatView(meetingID:meeting.id!,meetingTitle: meeting.title, hostUID: meeting.hostUID, members: $viewModel.members)
+                    ChatView(meetingID:meeting.id!,meetingTitle: meeting.title, hostUID: meeting.hostUID, members: $viewModel.dicMembers)
                 }
                 
                 /// Host 여부에 따라 버튼 보이기
@@ -119,11 +119,10 @@ struct DetailMeetingView: View {
             }
         }
         .onAppear{
-            viewModel.meeting = meeting
+            meetingDate = meeting.meetingDate
             viewModel.fetchUser(userUID: meeting.hostUID)
             viewModel.meetingListener(meetingID: meeting.id!)
             viewModel.membersListener(meetingID: meeting.id!)
-            meetingDate = meeting.meetingDate
         }
         .onDisappear{
             viewModel.removeListener()

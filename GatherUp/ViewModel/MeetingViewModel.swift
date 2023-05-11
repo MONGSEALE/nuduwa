@@ -11,10 +11,73 @@ import FirebaseAuth
 import FirebaseFirestore
 
 class MeetingViewModel: FirebaseViewModelwithMeetings {
+    
+    
 
     private var fetchedMeetings: [Meeting] = []         // 서버에서 가져오는 모임 배열
     @Published var deletedMeeting: Bool = false
+    
+    @Published var dicMembers: [String: Member] = [:]
+    @Published var dicMembersData: [String: UserData] = [:]
 
+    /// 찾기쉽게 members 배열을 딕셔너리로 변환
+    override func convertMembers(meetingID: String){
+        print("convertMembers")
+        members.forEach { member in
+            let uid = member.memberUID
+            dicMembers[uid] = member
+            
+            if let memberData = dicMembersData[uid]{
+                dicMembers[uid]?.memberName = memberData.userName
+                dicMembers[uid]?.memberImage = memberData.userImage
+            }else{
+                Task{
+                    await fetchMemberData(meetingID: meetingID, memberUID: uid)
+                }
+            }
+        }
+    }
+    func fetchMemberData(meetingID: String, memberUID: String)async{
+        do {
+            let document = try await db.collection(strUsers).document(memberUID).getDocument()
+            let name = document.data()?["userName"] as? String ?? ""
+            let imageUrl = document.data()?["userImage"] as? String ?? ""
+            let image = URL(string: imageUrl)
+            self.dicMembersData[memberUID] = UserData(userName: name, userImage: image!)
+            if dicMembers[memberUID] != nil{
+                dicMembers[memberUID]!.memberName = name
+                dicMembers[memberUID]!.memberImage = image!
+            }
+        } catch {
+            print("에러 fetchMemberData: \(error)")
+        }
+    }
+    
+//    func fetchMembersData(meetingID: String){
+//        Task{
+//            if !dicMembers.isEmpty{
+//                for uid in dicMembers.keys{
+//                    do {
+//                        let document = try await db.collection(strUsers).document(uid).getDocument()
+//                        let name = document.data()?["userName"] as? String ?? ""
+//                        let imageUrl = document.data()?["userImage"] as? String ?? ""
+//                        let image = URL(string: imageUrl)
+//                        self.dicMembersData[uid] = UserData(userName: name, userImage: image!)
+////                        if dicMembers[uid] != nil{
+////                            dicMembers[uid]!.memberName = name
+////                            dicMembers[uid]!.memberImage = image!
+////                        }
+//                    } catch {
+//                        print("Error getting document: \(error)")
+//                    }
+//                }
+//            }
+//        }
+//    }
+    
+    
+    
+    
     /// FireStore와 meetings 배열 실시간 연동
     func meetingsListener(){
         print("meetingsListener")
