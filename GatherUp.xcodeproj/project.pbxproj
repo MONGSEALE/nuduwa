@@ -49,6 +49,7 @@
 		33AF5ABD2A0C7F770060427E /* DMListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5ABC2A0C7F770060427E /* DMListView.swift */; };
 		33AF5ABF2A0C7F7F0060427E /* DMView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5ABE2A0C7F7F0060427E /* DMView.swift */; };
 		33AF5AC12A0C84490060427E /* DMViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5AC02A0C84490060427E /* DMViewModel.swift */; };
+		33AF5AC32A0C974D0060427E /* DMCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5AC22A0C974D0060427E /* DMCardView.swift */; };
 		33EDC97929DFF1DB0087FA29 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */; };
 		4285616029DFDAAB004DCDB9 /* MeetingIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */; };
 		4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */; };
@@ -98,6 +99,7 @@
 		33AF5ABC2A0C7F770060427E /* DMListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMListView.swift; sourceTree = "<group>"; };
 		33AF5ABE2A0C7F7F0060427E /* DMView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMView.swift; sourceTree = "<group>"; };
 		33AF5AC02A0C84490060427E /* DMViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMViewModel.swift; sourceTree = "<group>"; };
+		33AF5AC22A0C974D0060427E /* DMCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMCardView.swift; sourceTree = "<group>"; };
 		33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
 		4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingIconView.swift; sourceTree = "<group>"; };
 		4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMapAnnotationView.swift; sourceTree = "<group>"; };
@@ -248,6 +250,7 @@
 			children = (
 				33AF5ABC2A0C7F770060427E /* DMListView.swift */,
 				33AF5ABE2A0C7F7F0060427E /* DMView.swift */,
+				33AF5AC22A0C974D0060427E /* DMCardView.swift */,
 			);
 			path = DM;
 			sourceTree = "<group>";
@@ -380,6 +383,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				339A101829D3EAE500B4DD98 /* User.swift in Sources */,
+				33AF5AC32A0C974D0060427E /* DMCardView.swift in Sources */,
 				33ADDF7D2A036AFE003FE79B /* MemberProfileView.swift in Sources */,
 				33AD61BF2A0A318800CD908D /* SearchUserView.swift in Sources */,
 				33AF5AB62A0C7E950060427E /* Chatter.swift in Sources */,

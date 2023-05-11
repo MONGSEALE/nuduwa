@@ -14,9 +14,9 @@ import FirebaseAuth
 struct DMView: View {
     @StateObject private var viewModel = DMViewModel()
     
+    @Environment(\.dismiss) private var dismiss
     @State private var messageText: String = ""
-    let senderID: String
-    let receiverID: String
+    var receiverID: String
     @State private var userImageURLs: [String: URL] = [:]
     @Binding var showDMView: Bool
     
@@ -38,10 +38,10 @@ struct DMView: View {
                                     .frame(maxWidth:.infinity)
                             }
                             
-                            let isCurrentUser = message.senderID == senderID
-                            let userImageURL = isCurrentUser ? receiverImage(id: receiverID) : receiverImage(id: senderID)
+                            let isCurrentUser = message.senderID == viewModel.currentUID
+//                            let userImageURL = isCurrentUser ? receiverImage(id: receiverID) : receiverImage(id: senderID)
                             
-                            DMMessageRow(message: message, identifying: isCurrentUser, url: userImageURL)
+                            DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
                         }
                     }
                     .onChange(of: viewModel.messages) { messages in
@@ -57,7 +57,7 @@ struct DMView: View {
             HStack{
                 CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $messageText)
                 Button{
-                    viewModel.sendDM(message: messageText, senderID: senderID, receiverID: receiverID)
+                    viewModel.sendDM(message: messageText, senderID: viewModel.currentUID, receiverID: receiverID)
                     messageText = ""
                     
                 }label: {
@@ -88,8 +88,9 @@ struct DMView: View {
                     }
                 }
                 .onAppear {
-                          viewModel.startListeningDM(senderID: senderID, receiverID: receiverID)
-                      }
+                      viewModel.startListeningDM(senderID: viewModel.currentUID, receiverID: receiverID)
+                    viewModel.fetchUser(userUID: viewModel.currentUID)
+                  }
               .onDisappear {
                   viewModel.removeListener()
               }
@@ -113,23 +114,7 @@ struct DMView: View {
         return dateFormatter.string(from: date)
     }
     
-    func receiverImage(id: String) -> URL {
-        if let url = userImageURLs[id] {
-            return url
-        } else {
-            let userDocumentRef = Firestore.firestore().collection("users").document(id)
-            userDocumentRef.getDocument { documentSnapshot, error in
-                if let error = error {
-                    print("Error retrieving user profile image URL: \(error.localizedDescription)")
-                } else if let documentSnapshot = documentSnapshot, let data = documentSnapshot.data() {
-                    if let user = try? documentSnapshot.data(as: User.self), let url = user.userImage {
-                        self.userImageURLs[id] = url
-                    }
-                }
-            }
-            return URL(string: "https://example.com/placeholder.jpg")! // Return a placeholder URL while fetching the actual URL
-        }
-    }
+    
 }
 
 
@@ -139,19 +124,20 @@ struct DMMessageRow: View {
   
     @State var message : DM
     @State var identifying:Bool
-    @State var url : URL
+    let name: String?
+    let image: URL?
     
 
     var body: some View {
         HStack{
             if(identifying==false){
-                WebImage(url:url)
+                WebImage(url:image ?? URL(string: ""))
                     .resizable()
                        .scaledToFill()
                        .frame(width: 40, height: 40)
                        .clipShape(Circle())
                 VStack(alignment:.leading,spacing: 0, content: {
-                    NickName(name: "message.senderName")
+                    NickName(name: name ?? "")
                         .padding(.leading, 10)
                     ZStack {
                         Text(message.message)

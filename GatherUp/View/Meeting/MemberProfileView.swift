@@ -44,7 +44,7 @@ struct MemberProfileView: View {
                 }
             }
             if showDMView {
-                DMView(senderID: userUID, receiverID: member.memberUID, showDMView: $showDMView)
+                DMView(receiverID: member.memberUID, showDMView: $showDMView)
                     .edgesIgnoringSafeArea(.all)
                     .transition(.move(edge: .trailing))
                     .animation(.easeInOut(duration: 0.3))

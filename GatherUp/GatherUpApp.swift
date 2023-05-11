@@ -12,10 +12,8 @@ import Firebase
 
 @main
 struct GatherUpApp: App {
-    @AppStorage("isLoading") var isLoading: Bool = false
     init() {
         FirebaseApp.configure()
-        isLoading = false
     }
     var body: some Scene {
         WindowGroup {

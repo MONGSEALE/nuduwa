@@ -12,7 +12,6 @@ struct ContentView: View {
     @State var isLoading: Bool = true
     @State private var showDMView = false
     @State private var selectedReceiverID: String = ""
-    @State private var selectedReceiverName: String = ""
    
     var body: some View {
         ZStack{
@@ -31,7 +30,7 @@ struct ContentView: View {
                                 .tabItem{
                                     Label("모임",systemImage: "person.3.sequence")
                                 }
-                            DMListView(showDMView: $showDMView,selectedReceiverID: $selectedReceiverID,selectedReceiverName: $selectedReceiverName)
+                            DMListView(showDMView: $showDMView, selectedReceiverID: $selectedReceiverID)
                                 .tabItem{
                                     Label("채팅",systemImage: "message")
                                 }
@@ -41,9 +40,10 @@ struct ContentView: View {
                                 }
                         }
                         if showDMView {
-                            DMView(senderID: loginViewModel.currentUID, receiverID: selectedReceiverID, showDMView: $showDMView)
-                                 .edgesIgnoringSafeArea(.all)
-                                 .transition(.move(edge: .bottom))
+                            DMView(receiverID: selectedReceiverID, showDMView: $showDMView)
+                                .edgesIgnoringSafeArea(.all)
+                                .transition(.move(edge: .trailing))
+                                .animation(.easeInOut(duration: 0.3))
                          }
                     }
                 } else {

@@ -14,8 +14,9 @@ import FirebaseFirestore
 class DMViewModel: FirebaseViewModel {
     
     @Published var messages: [DM] = []
-    @Published var recentMessages: [String: DM] = [:]
+    @Published var chattingRooms: [Chatter] = []
     @Published var isTabBarHidden: Bool = false
+    @Published var userImageURLs: [String: User] = [:]
     
     func sendDM(message: String, senderID: String, receiverID: String) {
 
@@ -65,6 +66,26 @@ class DMViewModel: FirebaseViewModel {
         }
     }
     
+    func receiverUser(id: String) {
+       if let _ = userImageURLs[id] {
+           // Image URL already fetched, do nothing
+           return
+       } else {
+           let userDocumentRef = Firestore.firestore().collection("Users").document(id)
+           userDocumentRef.getDocument { documentSnapshot, error in
+               if let error = error {
+                   print("Error retrieving user profile image URL: \(error.localizedDescription)")
+               } else if let documentSnapshot = documentSnapshot, let data = documentSnapshot.data() {
+                   if let user = try? documentSnapshot.data(as: User.self) {
+                       DispatchQueue.main.async {
+                           self.userImageURLs[id] = user
+                       }
+                   }
+               }
+           }
+       }
+   }
+    
     func startListeningDM(senderID: String, receiverID: String) {
         print("startListeningDM")
         let doc = Firestore.firestore().collection(strUsers).document(senderID).collection(strChatters)
@@ -105,25 +126,41 @@ class DMViewModel: FirebaseViewModel {
     }
     
     func startListeningRecentMessages() {
-        docListener = db.collection(strDM)
-            .order(by: "timestamp", descending: true)
-            .addSnapshotListener { querySnapshot, error in
-                if let error = error {
-                    print("Error listening for DM updates: \(error.localizedDescription)")
-                    return
-                }
-                querySnapshot?.documents.forEach { document in
-                    if let dm = try? document.data(as: DM.self) {
-                        let receiverID = dm.senderID == Auth.auth().currentUser?.uid ? dm.receiverID : dm.senderID
-                        
-                        if let currentRecentMessage = self.recentMessages[receiverID], currentRecentMessage.timestamp.dateValue() >= dm.timestamp.dateValue() {
-                            return
-                        }
-                        
-                        self.recentMessages[receiverID] = dm
-                    }
-                }
+        let chatterDoc = db.collection(strUsers).document(currentUID).collection(strChatters)
+        
+        chatterDoc.addSnapshotListener{ querySnapshot, error in
+            if let error = error {
+                print("Error listening for DM updates: \(error.localizedDescription)")
+                return
             }
+            guard let documents = querySnapshot?.documents else {
+                print("mapMeetingsListener 에러1: \(String(describing: error))")
+                return
+            }
+            self.chattingRooms = documents.compactMap{ documents -> Chatter? in
+                try? documents.data(as: Chatter.self)
+            }
+        }
+        
+//        docListener = db.collection(strDMPeople)
+//            .order(by: "timestamp", descending: true)
+//            .addSnapshotListener { querySnapshot, error in
+//                if let error = error {
+//                    print("Error listening for DM updates: \(error.localizedDescription)")
+//                    return
+//                }
+//                querySnapshot?.documents.forEach { document in
+//                    if let dm = try? document.data(as: DM.self) {
+//                        let receiverID = dm.senderID == Auth.auth().currentUser?.uid ? dm.receiverID : dm.senderID
+//
+//                        if let currentRecentMessage = self.recentMessages[receiverID], currentRecentMessage.timestamp.dateValue() >= dm.timestamp.dateValue() {
+//                            return
+//                        }
+//
+//                        self.recentMessages[receiverID] = dm
+//                    }
+//                }
+//            }
     }
 
     func uniqueChatDocumentID(senderID: String, receiverID: String) -> String {
