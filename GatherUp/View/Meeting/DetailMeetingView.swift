@@ -68,12 +68,14 @@ struct DetailMeetingView: View {
                             }
                         }
                         HStack{
-                            Text("참여자ID:")
+                            Text("참여자:")
                                 .font(.caption2)
                             ForEach(viewModel.members){ member in
-                                Text(" \(member.memberUID),")
-                                    .font(.caption2)
-                                    .lineLimit(1)
+                                WebImage(url: member.memberImage).placeholder{ProgressView()}
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 10, height: 10)
+                                    .clipShape(Circle())
                             }
                         }
                     }
