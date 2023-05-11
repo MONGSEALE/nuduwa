@@ -83,23 +83,44 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         setMeetings = setFetchedMeetings
         combineNewMeetings()
     }
-    ///  지도 위치 체크해서 리스너 쿼리 변경
-    /*
-    func checkedLocation(region: MKCoordinateRegion){
-        print("checkedLocation")
-        if let checkRegion {
-            if (checkRegion.span.latitudeDelta > region.span.latitudeDelta * 2) ||
-                (checkRegion.span.latitudeDelta > region.span.latitudeDelta / 2) ||
-                (checkRegion.span.longitudeDelta > region.span.longitudeDelta * 2) ||
-                (checkRegion.span.longitudeDelta > region.span.longitudeDelta / 2) ||
-                (checkRegion.center.latitude > region.center.latitude + region.span.latitudeDelta) ||
-                (checkRegion.center.latitude < region.center.latitude - region.span.latitudeDelta) ||
-                (checkRegion.center.longitude > region.center.longitude + region.span.longitudeDelta) ||
-                (checkRegion.center.longitude < region.center.longitude - region.span.longitudeDelta) {
-                mapMeetingsListener(region: region)
-            }
+     /*
+func mergeMeetings(latitudeDelta: Double) {
+    var setFetchedMeetings: Set<Meeting> = Set(fetchedMeetings.values.flatMap { $0 })
+    bigIconMeetings = [:]
+    let delta = latitudeDelta * 0.1
+    for meeting1 in setFetchedMeetings {
+        let (nearbyMeetings, remainingMeetings) = findNearbyMeetings(meeting1: meeting1, meetings: setFetchedMeetings.subtracting([meeting1]), delta: delta)
+        setFetchedMeetings = remainingMeetings
+        if !nearbyMeetings.isEmpty {
+            bigIconMeetings[meeting1.id!, default: []] = nearbyMeetings + [meeting1]
+            let meeting = Meeting(id: meeting1.id, title: "", description: "", place: "", numbersOfMembers: 0, latitude: meeting1.latitude, longitude: meeting1.longitude, hostUID: "", type: .piled)
+            setFetchedMeetings.remove(meeting1)
+            setFetchedMeetings.insert(meeting)
         }
-    }*/ // 예전코드 밑이 수정코드
+    }
+    
+    setMeetings = setFetchedMeetings
+    combineNewMeetings()
+}
+func findNearbyMeetings(meeting1: Meeting, meetings: Set<Meeting>, delta: Double) -> (nearbyMeetings: [Meeting], remainingMeetings: Set<Meeting>) {
+    var nearbyMeetings: [Meeting] = []
+    var remainingMeetings = meetings
+    
+    for meeting2 in meetings {
+        if (meeting1.latitude - delta < meeting2.latitude) &&
+            (meeting2.latitude < meeting1.latitude + delta) &&
+            (meeting1.longitude - delta < meeting2.longitude) &&
+            (meeting2.longitude < meeting1.longitude + delta)
+        {
+            nearbyMeetings.append(meeting2)
+            remainingMeetings.remove(meeting2)
+        }
+    }
+    
+    return (nearbyMeetings, remainingMeetings)
+}
+*/
+    ///  지도 위치 체크해서 리스너 쿼리 변경
     func checkedLocation(region: MKCoordinateRegion) {
         print("checkedLocation")
         if let checkRegion = checkRegion {
@@ -157,6 +178,64 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
             }
         }
     }
+        /*
+func getMeetingQueries(for region: MKCoordinateRegion) -> [String: Query] {
+    let earthRadiusMeters: Double = 6_371_000
+    let metersPerDegree: Double = earthRadiusMeters * 2 * .pi / 360
+    let latitudeDeltaInMeters = region.span.latitudeDelta * metersPerDegree * 10
+    let queryBounds = GFUtils.queryBounds(forLocation: region.center, withRadius: latitudeDeltaInMeters)
+    var queries: [String: Query] = [:]
+    queryBounds.forEach { bound in
+        queries[bound.startValue + bound.endValue] = self.db.collection(self.strMeetings)
+            .order(by: "geoHash")
+            .start(at: [bound.startValue])
+            .end(at: [bound.endValue])
+    }
+    return queries
+}
+func fetchMeetings(with query: Query) async throws -> [Meeting] {
+    let querySnapshot = try await query.getDocuments()
+    let meetings = querySnapshot.documents.compactMap { document in
+        try? document.data(as: Meeting.self)
+    }
+    return meetings
+}
+func fetchAndMergeMeetings(for queries: [String: Query], withRegion region: MKCoordinateRegion) {
+    for (key, query) in queries {
+        query.addSnapshotListener { (querySnapshot, error) in
+            if let error = error {
+                print("fetchAndMergeMeetings 에러: \(error.localizedDescription)")
+                return
+            }
+            guard let documents = querySnapshot?.documents else {
+                print("fetchAndMergeMeetings 에러: snapshot is empty")
+                return
+            }
+            let meetings = try? fetchMeetings(with: query)
+            DispatchQueue.main.async {
+                fetchedMeetings[key] = meetings ?? []
+                mergeMeetings(forRegion: region)
+            }
+        }
+    }
+}
+func mapMeetingsListener(region: MKCoordinateRegion) {
+    guard region.center.latitude != 0, region.center.longitude != 0 else {
+        return
+    }
+    checkRegion = region
+    let queries = getMeetingQueries(for: region)
+    // remove unnecessary queries
+    let removedKeys = Array(Set(fetchedMeetings.keys).subtracting(queries.keys))
+    fetchedMeetings.removeValues(forKeys: removedKeys)
+    do {
+        try await fetchAndMergeMeetings(for: queries, withRegion: region)
+    } catch {
+        print("mapMeetingsListener 에러: \(error.localizedDescription)")
+        handleError(error)
+    }
+}
+*/
 
     /// 모임 추가시(서버 저장전)
     func addMapAnnotation(newMapAnnotation: CLLocationCoordinate2D){

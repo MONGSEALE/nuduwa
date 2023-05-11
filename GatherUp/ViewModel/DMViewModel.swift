@@ -128,6 +128,20 @@ class DMViewModel: FirebaseViewModel {
             }
         }
     }
+    func dmListener(dmPeopleID: String) {
+        print("dmListener")
+        guard let currentUID = currentUID else{return}
+        let doc = db.collection(strDMPeople).document(dmPeopleID).collection(strDM).order(by: "timestamp")
+
+        docListener = doc.addSnapshotListener { querySnapshot, error in
+                        if let error = error {self.firebaseError(error);return}
+                        guard let querySnapshot = querySnapshot else{self.firebaseError(error);return}
+                        // 쿼리 결과를 DM 객체의 배열로 변환하고, 이를 messages 배열에 저장합니다.
+                        self.messages = querySnapshot.documents.compactMap { document -> DM? in
+                            try? document.data(as: DM.self)
+                        }
+                    }
+    }
     
     func startListeningRecentMessages() {
         guard let currentUID = currentUID else{return}
@@ -154,43 +168,37 @@ class DMViewModel: FirebaseViewModel {
             self.isLoading = false
             print("Rooms:\(self.chattingRooms)")
         }
-//        docListener = db.collection(strDMPeople)
-//            .order(by: "timestamp", descending: true)
-//            .addSnapshotListener { querySnapshot, error in
-//                if let error = error {
-//                    print("Error listening for DM updates: \(error.localizedDescription)")
-//                    return
-//                }
-//                querySnapshot?.documents.forEach { document in
-//                    if let dm = try? document.data(as: DM.self) {
-//                        let receiverID = dm.senderID == Auth.auth().currentUser?.uid ? dm.receiverID : dm.senderID
-//
-//                        if let currentRecentMessage = self.recentMessages[receiverID], currentRecentMessage.timestamp.dateValue() >= dm.timestamp.dateValue() {
-//                            return
-//                        }
-//
-//                        self.recentMessages[receiverID] = dm
-//                    }
-//                }
-//            }
     }
 
     func uniqueChatDocumentID(senderID: String, receiverID: String) -> String {
         return senderID < receiverID ? "\(senderID)_\(receiverID)" : "\(receiverID)_\(senderID)"
     }
     
-//    func deleteRecentMessage(receiverID: String) {
-//        let docListener = Firestore.firestore().collection("Users").document(currentUID).collection("recentMessages")
-//        docListener.document(receiverID).delete { [weak self] error in
-//            if let error = error {
-//                print("Error deleting recent message: \(error.localizedDescription)")
-//            } else {
-//                DispatchQueue.main.async {
-//                    self?.recentMessages.removeValue(forKey: receiverID)
-//                    print("Recent message successfully deleted")
-//                }
-//            }
-//        }
-//    }
+    func deleteRecentMessage(receiverID: String) {
+        isLoading = true
+        let doc= = db.collection(strUsers).document(currentUID).collection(strChatters)
+                    whereField("chatterUID", isEqualTo: receiverID)
+        doc.getDocuments{ querySnapshot, error in
+            if let error = error {
+               firebaseError(error)
+            } else {
+                guard let documents = querySnapshot?.documents else {
+                    firebaseError(error)
+                    return
+                }
+
+                for document in documents {
+                    document.delete(){ error in
+                        guard let error = error else{
+                            firebaseError(error, isShowError: true)
+                        } else {
+                            print("DM나가기 완료")
+                            self.isLoading = false
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
