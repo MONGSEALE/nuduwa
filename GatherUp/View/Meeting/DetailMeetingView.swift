@@ -74,7 +74,7 @@ struct DetailMeetingView: View {
                                 WebImage(url: member.memberImage).placeholder{ProgressView()}
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
-                                    .frame(width: 10, height: 10)
+                                    .frame(width: 30, height: 30)
                                     .clipShape(Circle())
                             }
                         }
