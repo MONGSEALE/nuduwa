@@ -86,7 +86,7 @@ struct DMView: View {
                 }
             }
             .onAppear {
-                viewModel.startListeningDM(chatterUID: receiverID)
+                viewModel.startListeningDM(senderID: viewModel.currentUID!, receiverID: receiverID)
                 viewModel.fetchUser(userUID: receiverID)
             }
             .onDisappear {
