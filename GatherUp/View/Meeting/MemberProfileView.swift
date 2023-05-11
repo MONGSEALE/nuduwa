@@ -9,9 +9,11 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct MemberProfileView: View {
-    var member: Member
+    let member: Member
     @State var showMessage: Bool = false
     @State var message: String = ""
+    @State private var showDMView: Bool = false
+    let userUID: String
     
     var body: some View {
         ZStack{
@@ -31,35 +33,23 @@ struct MemberProfileView: View {
                 }
                 Spacer()
                 Button {
-                    showPopupMessage(message: "친구추가 완료!(미구현)", duration: 3)
+                    showDMView = true
                 } label: {
-                    Text("친구추가")
+                    Text("1:1 메시지")
                         .font(.callout)
                         .foregroundColor(.white)
-                        .padding(.horizontal,30)
-                        .padding(.vertical,10)
-                        .background(.blue,in: Capsule())
+                        .padding(.horizontal, 30)
+                        .padding(.vertical, 10)
+                        .background(.blue, in: Capsule())
                 }
             }
-            if showMessage{
-                ShowMessage(message: message)
+            if showDMView {
+                DMView(senderID: userUID, receiverID: member.memberUID, showDMView: $showDMView)
+                    .edgesIgnoringSafeArea(.all)
+                    .transition(.move(edge: .trailing))
+                    .animation(.easeInOut(duration: 0.3))
             }
         }
         .padding(30)
-    }
-    
-    func showPopupMessage(message: String, duration: TimeInterval) {
-        // Show the message
-        withAnimation {
-            self.message = message
-            showMessage = true
-        }
-        // Hide the message after the specified duration
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            withAnimation {
-                showMessage = false
-                self.message = ""
-            }
-        }
     }
 }

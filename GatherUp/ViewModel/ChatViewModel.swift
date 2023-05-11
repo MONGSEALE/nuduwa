@@ -15,7 +15,7 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
     @Published var messages: [ChatMessage] = []
     @Published  var lastMessageId: String = ""
 
-    func getMembersData(){
+    override func convertMembers(){
         Task{
             for uid in dicMembers.keys{
                 do {

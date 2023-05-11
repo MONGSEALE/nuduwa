@@ -25,7 +25,6 @@ struct ChatView: View {
     @State private var xOffset: CGFloat = UIScreen.main.bounds.width
     
     var body: some View {
-        let userUID = Auth.auth().currentUser?.uid ?? ""
         ZStack{
             VStack{
                 HStack{
@@ -88,7 +87,7 @@ struct ChatView: View {
                                         .id("system-\(index)")
                                 }
                                 else{
-                                    MessageRow(message: chatViewModel.messages[index], member: chatViewModel.dicMembers[currentMessage.userUID]!, identifying: chatViewModel.messages[index].userUID == userUID, url: memberImage(id: chatViewModel.messages[index].userUID))
+                                    MessageRow(message: chatViewModel.messages[index], member: chatViewModel.dicMembers[currentMessage.userUID]!, identifying: chatViewModel.messages[index].userUID == chatViewModel.currentUID, url: memberImage(id: chatViewModel.messages[index].userUID))
                                         .id(index)
                                 }
                             }
@@ -122,7 +121,7 @@ struct ChatView: View {
                 .cornerRadius(50)
                 .padding()
             }
-            MemberList(meetingID: meetingID, members: members,hostUID: hostUID ,userUID:Auth.auth().currentUser!.uid)
+            MemberList(meetingID: meetingID, members: members, hostUID: hostUID ,userUID: chatViewModel.currentUID)
                            .slideOverView(isPresented: $showMemberList)
         }
         .onAppear{
@@ -175,7 +174,7 @@ struct MemberList: View {
             ScrollView {
                 LazyVStack {
                     ForEach(members) { member in
-                        MemberItemView(meetingID: meetingID, member: member,hostUID: hostUID, userUID: userUID)
+                        MemberItemView(meetingID: meetingID, member: member, hostUID: hostUID, userUID: userUID)
                     }
                 }
             }
@@ -225,7 +224,7 @@ struct MemberItemView: View {
                 Spacer()
             }
             .sheet(isPresented: $isShowMember){
-                MemberProfileView(member: member)
+                MemberProfileView(member: member, userUID: viewModel.currentUID)
             }
             .padding(.horizontal)
     }

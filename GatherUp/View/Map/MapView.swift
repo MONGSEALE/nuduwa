@@ -62,6 +62,9 @@ struct MapView: View {
                     viewModel.checkIfLocationServicesIsEnabled()
                     setupTimer()
                 }
+                .onDisappear{
+                    timer.suspend()
+                }
                 .onTapGesture { tapLocation in
                     if(showAnnotation==true){
                         let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)

@@ -19,6 +19,11 @@ class FirebaseViewModel: ObservableObject {
     let strMeetings = "Meetings"
     let strMembers = "Members"
     let strMessage = "Message"
+    let strChatters = "Chatters"
+    let strDMPeople = "DMPeople"
+    let strDM = "DM"
+    
+    /// Firestorage용 변수
     let strProfile_Images = "Profile_Images"
 
     /// 에러 처리 변수

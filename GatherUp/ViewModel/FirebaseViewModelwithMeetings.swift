@@ -33,17 +33,18 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
             let uid = member.memberUID
             dicMembers[uid] = member
             
-            if !dicMembersData.isEmpty{
-                if let memberData = dicMembersData[uid] {
-                    dicMembers[uid]?.memberName = memberData.memberName
-                    dicMembers[uid]?.memberImage = memberData.memberImage
-                }
-            }
+//            if !dicMembersData.isEmpty{
+//                if let memberData = dicMembersData[uid] {
+//                    dicMembers[uid]?.memberName = memberData.memberName
+//                    dicMembers[uid]?.memberImage = memberData.memberImage
+//                }
+//            }
         }
     }
     /// 모임맴버 가져오기
     func membersListener(meetingID: String){
         print("membersListener")
+        print("members:\(members)")
         Task{
             let doc = db.collection(strMeetings).document(meetingID).collection(strMembers)
             docListener = doc.addSnapshotListener { (querySnapshot, error) in
