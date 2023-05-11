@@ -46,7 +46,6 @@ struct MeetingCardView: View {
                     .textSelection(.enabled)
                     .padding(.vertical,8)
                     .foregroundColor(.black)
-                
             }
         }
         .hAlign(.leading)

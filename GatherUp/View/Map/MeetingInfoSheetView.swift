@@ -91,8 +91,8 @@ struct MeetingInfoSheetView: View {
                         
                         Spacer()
                         
-                        if viewModel.currentUID() != viewModel.meeting.hostUID{  // host가 아니면
-                            if viewModel.members.first(where: { $0.memberUID == viewModel.currentUID()}) == nil{  // members 배열에 user가 없으면
+                        if viewModel.currentUID != viewModel.meeting.hostUID{  // host가 아니면
+                            if viewModel.members.first(where: { $0.memberUID == viewModel.currentUID}) == nil{  // members 배열에 user가 없으면
                                 if viewModel.members.count<viewModel.meeting.numbersOfMembers {  // 모임에 자리가 있으면
                                     Button {
                                         viewModel.joinMeeting(meetingID: viewModel.meeting.id!, numbersOfMembers: viewModel.meeting.numbersOfMembers)

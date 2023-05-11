@@ -47,7 +47,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         }
         
         bigIconMeetings = [:]
-        let delta = latitudeDelta * 0.1   // 지도세로길이 * 0.1 이하로 가까이 있으면 중첩
+        let delta = latitudeDelta * 0.05   // 지도세로길이 * 0.1 이하로 가까이 있으면 중첩
         let copySet = setFetchedMeetings  // for문용으로 복사
         
         for index in copySet.indices {
@@ -84,6 +84,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         combineNewMeetings()
     }
     ///  지도 위치 체크해서 리스너 쿼리 변경
+    /*
     func checkedLocation(region: MKCoordinateRegion){
         print("checkedLocation")
         if let checkRegion {
@@ -95,6 +96,19 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                 (checkRegion.center.latitude < region.center.latitude - region.span.latitudeDelta) ||
                 (checkRegion.center.longitude > region.center.longitude + region.span.longitudeDelta) ||
                 (checkRegion.center.longitude < region.center.longitude - region.span.longitudeDelta) {
+                mapMeetingsListener(region: region)
+            }
+        }
+    }*/ // 예전코드 밑이 수정코드
+    func checkedLocation(region: MKCoordinateRegion) {
+        print("checkedLocation")
+        if let checkRegion = checkRegion {
+            let changedLatitude = abs(checkRegion.span.latitudeDelta - region.span.latitudeDelta) > region.span.latitudeDelta / 3
+            let changedLongitude = abs(checkRegion.span.longitudeDelta - region.span.longitudeDelta) > region.span.longitudeDelta / 3
+            let movedLatitude = abs(checkRegion.center.latitude - region.center.latitude) > region.span.latitudeDelta
+            let movedLongitude = abs(checkRegion.center.longitude - region.center.longitude) > region.span.longitudeDelta
+            
+            if changedLatitude || changedLongitude || movedLatitude || movedLongitude  {
                 mapMeetingsListener(region: region)
             }
         }
@@ -198,7 +212,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         
         Task{
             do{
-                let doc = db.collection(strMeetings).whereField("hostUID", isEqualTo: currentUID())
+                let doc = db.collection(strMeetings).whereField("hostUID", isEqualTo: currentUID)
                 doc.getDocuments(){ (query, err) in
                     if let err = err {
                         print("checkedOverlap 에러: \(err)")

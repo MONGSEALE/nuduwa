@@ -21,7 +21,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         isLoading = true
         Task{
             do{
-                docListener = db.collectionGroup(strMembers).whereField("memberUID", isEqualTo: currentUID() as Any)
+                docListener = db.collectionGroup(strMembers).whereField("memberUID", isEqualTo: currentUID as Any)
                     .addSnapshotListener { (querySnapshot, error) in
                         if let error = error {print("에러!meetingsListener:\(error)");return}
                         
@@ -43,9 +43,9 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                         dispatchGroup.notify(queue: .main) {        // 비동기 끝나면 실행
                             // 배열 정렬 host가 본인인경우 맨앞으로 그 다음에 meetingDate 날짜 순을 정렬
                             meetings.sort { (meeting1, meeting2) -> Bool in
-                                if meeting1.hostUID == self.currentUID() && meeting2.hostUID != self.currentUID() {
+                                if meeting1.hostUID == self.currentUID && meeting2.hostUID != self.currentUID {
                                     return true
-                                } else if meeting1.hostUID != self.currentUID() && meeting2.hostUID == self.currentUID() {
+                                } else if meeting1.hostUID != self.currentUID && meeting2.hostUID == self.currentUID {
                                     return false
                                 } else {
                                     return meeting1.meetingDate < meeting2.meetingDate

@@ -10,6 +10,7 @@
 import SwiftUI
 import MapKit
 import CoreLocationUI
+import Dispatch
 
 struct MapView: View {
     @StateObject private var viewModel = MapViewModel()
@@ -23,6 +24,9 @@ struct MapView: View {
     @State private var showSheet = false    /// 모임 제목, 내용 등 입력할 시트 띄우기
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
+    
+    /// 지도가 움직일때마다 서버에서 가져오는 데이터 변경 관련 변수
+    let timer = DispatchSource.makeTimerSource()
     
     var body: some View {
         ZStack(alignment:.bottom){
@@ -56,18 +60,7 @@ struct MapView: View {
                     serverViewModel.mapMeetingsListener(region: viewModel.region)              /// Map이 보여지는동안 Firebase와 실시간 연동
                     serverViewModel.checkedOverlap()    /// Map이 보여지는동안 실시간 중복확인
                     viewModel.checkIfLocationServicesIsEnabled()
-                }
-                .onChange(of: viewModel.region.center.latitude) { _ in
-                    serverViewModel.checkedLocation(region: viewModel.region)
-                }
-                .onChange(of: viewModel.region.center.longitude) { _ in
-                    serverViewModel.checkedLocation(region: viewModel.region)
-                }
-                .onChange(of: viewModel.region.span.latitudeDelta) { _ in
-                    serverViewModel.checkedLocation(region: viewModel.region)
-                }
-                .onChange(of: viewModel.region.span.longitudeDelta) { _ in
-                    serverViewModel.checkedLocation(region: viewModel.region)
+                    setupTimer()
                 }
                 .onTapGesture { tapLocation in
                     if(showAnnotation==true){
@@ -90,10 +83,10 @@ struct MapView: View {
                 HStack{
                     Spacer()
                     Button{
-                        /// 모임 중복 생성이면 if문 실행 - test 중 비활성화
-//                        if (serverViewModel.isOverlap==true){
-//                            showPopupMessage(message: "모임은 최대 한개만 생성할 수 있습니다!", duration: 2)
-//                        }else{
+//test 중 비활성화                        /// 모임 중복 생성이면 if문 실행
+//test 중 비활성화                        if (serverViewModel.isOverlap==true){
+//test 중 비활성화                            showPopupMessage(message: "모임은 최대 한개만 생성할 수 있습니다!", duration: 2)
+//test 중 비활성화                        }else{
                             /// 모임만들기 버튼 클릭할때마다 if문과 else문 번갈아 실행
                             if(showAnnotation==false){
                                 /// 모임만들기 버튼 클릭하면 "장소를 선택해주세요!" 메시지 출력
@@ -107,7 +100,7 @@ struct MapView: View {
                                 }
                                 serverViewModel.deleteMapAnnotation()     /// 취소 버튼 누르면 MapPin 삭제
                             }
-//                        }
+//test 중 비활성화                        }
                     }label: {
                         Group {
                             if showAnnotation {
@@ -210,6 +203,16 @@ struct MapView: View {
         let y = Double((frame.height - tapLocation.y) / frame.height) * region.span.latitudeDelta + region.center.latitude - region.span.latitudeDelta / 2
         print("tap:\(tapLocation)")
         return CLLocationCoordinate2D(latitude: y, longitude: x)
+    }
+    
+    func setupTimer() {
+        timer.schedule(deadline: .now(), repeating: 0.2)    //repeating(초단위)의 시간 간격으로 timer.setEventHandler 실행
+        timer.setEventHandler {
+            DispatchQueue.main.async {
+                serverViewModel.checkedLocation(region: viewModel.region)
+            }
+        }
+        timer.resume()
     }
 }
         
@@ -315,4 +318,13 @@ extension MKCoordinateRegion {
     }
 }
 
+/// MKCoordinateRegion 타입을 .onChange에서 사용가능하게 확장하는 코드. 현재 필요없어서 주석처리
+//extension MKCoordinateRegion: Equatable {
+//    public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
+//        return lhs.center.latitude == rhs.center.latitude &&
+//               lhs.center.longitude == rhs.center.longitude &&
+//               lhs.span.latitudeDelta == rhs.span.latitudeDelta &&
+//               lhs.span.longitudeDelta == rhs.span.longitudeDelta
+//    }
+//}
 

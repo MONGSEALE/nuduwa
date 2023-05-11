@@ -30,21 +30,13 @@ class FirebaseViewModel: ObservableObject {
     @Published var currentUser: User?
     @Published var user: User?
 
-    // @Published var currentUID: String{
-    //     get{
-    //         return Auth.auth().currentUser?.uid ?? ""
-    //     }
-    // }
+    var currentUID: String {
+       return Auth.auth().currentUser?.uid ?? ""
+    }
     
     deinit {
         removeListener()
     }
-    
-    func currentUID()->String{
-        let uid = Auth.auth().currentUser?.uid ?? ""
-        return uid
-    }
-
     /// 리스너 제거(리소스 확보, 단 자주 켰다껐다하면 리소스 더 들어감)
     func removeListener(){
         if let docListener{
@@ -72,7 +64,7 @@ class FirebaseViewModel: ObservableObject {
         print("userListener")
         isLoading = true
         Task{
-            let doc = db.collection(strUsers).document(currentUID())
+            let doc = db.collection(strUsers).document(currentUID)
             docListener = doc.addSnapshotListener { snapshot, error in
                 if let error = error{
                     self.firebaseError(error)
@@ -104,7 +96,7 @@ class FirebaseViewModel: ObservableObject {
         print("fetchUser")
         Task{
             do{
-                let user = try await db.collection(strUsers).document(currentUID()).getDocument(as: User.self)
+                let user = try await db.collection(strUsers).document(currentUID).getDocument(as: User.self)
 
                 await MainActor.run(body: {
                     self.currentUser = user
@@ -130,7 +122,7 @@ class FirebaseViewModel: ObservableObject {
     func fetchCurrentUserAsync()async{
         print("fetchUserAsync")
         do{
-            let user = try await db.collection(strUsers).document(currentUID()).getDocument(as: User.self)
+            let user = try await db.collection(strUsers).document(currentUID).getDocument(as: User.self)
 
             await MainActor.run(body: {
                 self.currentUser = user

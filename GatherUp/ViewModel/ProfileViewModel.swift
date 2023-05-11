@@ -34,10 +34,10 @@ class ProfileViewModel: FirebaseViewModel {
         Task{
             do{
                 // Step 1: First Deleting Profile Image From Storage
-                let reference = Storage.storage().reference().child(strProfile_Images).child(currentUID())
+                let reference = Storage.storage().reference().child(strProfile_Images).child(currentUID)
                 try await reference.delete()
                 // Step 2 : Deleting Firestore User Document
-                try await Firestore.firestore().collection(strUsers).document(currentUID()).delete()
+                try await Firestore.firestore().collection(strUsers).document(currentUID).delete()
                 // Final Step: Deleting Auth Account and Setting Log Status to False
                 try await Auth.auth().currentUser?.delete()
                 isLoading = false
@@ -58,7 +58,7 @@ class ProfileViewModel: FirebaseViewModel {
                 
                 if let userName = userName {
                     dispatchGroup.enter() // DispatchGroup에 진입
-                    db.collection(strUsers).document(currentUID()).updateData(["userName": userName]){ _ in
+                    db.collection(strUsers).document(currentUID).updateData(["userName": userName]){ _ in
                         changeRequest?.displayName = userName
                         changeRequest?.commitChanges()
                         print("userName 수정")
@@ -70,13 +70,13 @@ class ProfileViewModel: FirebaseViewModel {
                         print("에러 imageData")
                         return
                     }
-                    let storageRef = Storage.storage().reference().child("Profile_Images").child(currentUID())
+                    let storageRef = Storage.storage().reference().child("Profile_Images").child(currentUID)
                     storageRef.putData(imageData)
                     
                     let downloadURL = try await storageRef.downloadURL()
                     
                     dispatchGroup.enter() // DispatchGroup에 진입
-                    db.collection(strUsers).document(currentUID()).updateData(["userImage": downloadURL.absoluteString]){ _ in
+                    db.collection(strUsers).document(currentUID).updateData(["userImage": downloadURL.absoluteString]){ _ in
                         print("userImage 수정")
                         dispatchGroup.leave() // DispatchGroup에서 나옴
                     }

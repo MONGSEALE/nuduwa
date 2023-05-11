@@ -30,7 +30,7 @@ struct DetailMeetingView: View {
     }
   
     var body: some View {
-        let isHost = meeting.hostUID == viewModel.currentUID()
+        let isHost = meeting.hostUID == viewModel.currentUID
         NavigationStack{
             if viewModel.isLoading {
                 ProgressView()
@@ -108,7 +108,7 @@ struct DetailMeetingView: View {
                         }
                     } else {
                         Button(action: {
-                            viewModel.leaveMeeting(meetingID: viewModel.meeting.id!, memberUID: viewModel.currentUID())
+                            viewModel.leaveMeeting(meetingID: viewModel.meeting.id!, memberUID: viewModel.currentUID)
                             dismiss()
                         }){
                             CustomButtonText(text: "모임 나가기", backgroundColor: .red)
