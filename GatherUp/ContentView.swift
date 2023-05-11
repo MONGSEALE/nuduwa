@@ -20,7 +20,7 @@ struct ContentView: View {
             }else{
                 // 로그인변수가 false면 Login뷰로 이동
                 if loginViewModel.isLogin {
-                    ZStack{
+                    if !showDMView {
                         TabView{
                             MapView()
                                 .tabItem{
@@ -39,12 +39,11 @@ struct ContentView: View {
                                     Label("내 정보",systemImage:"person.crop.circle")
                                 }
                         }
-                        if showDMView {
-                            DMView(receiverID: selectedReceiverID, showDMView: $showDMView)
-                                .edgesIgnoringSafeArea(.all)
-                                .transition(.move(edge: .trailing))
-                                .animation(.easeInOut(duration: 0.3))
-                         }
+                    }else{
+                        DMView(receiverID: selectedReceiverID, showDMView: $showDMView)
+                            .edgesIgnoringSafeArea(.all)
+                            .transition(.move(edge: .trailing))
+                            .animation(.easeInOut(duration: 0.3))
                     }
                 } else {
                     Login()

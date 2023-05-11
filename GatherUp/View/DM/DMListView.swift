@@ -22,63 +22,53 @@ struct DMListView: View {
     
     var body: some View {
         
-        NavigationView{
-            VStack{
-                HStack(spacing:16){
-                    Spacer()
-                        .frame(width: 16)
-                    Text("채팅")
-                        .font(.system(size: 24,weight: .bold))
-                    Spacer()
-                    Button{
-                        
-                    } label: {
-                        Image(systemName: "gear")
-                    }
-                }
-                .padding()
-                
-                if viewModel.chattingRooms.isEmpty{
-                    /// 모임 배열이 비어있을때
-                    Text("채팅이 없습니다")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .padding(.top,30)
-                }else{
-                    ScrollView {
-                        ForEach(viewModel.chattingRooms) { chattingRoom in
-                            DMCardView(chattingRoom: chattingRoom)
-                                .onTapGesture {
-                                    selectedReceiverID = chattingRoom.chatterUID
-                                    showDMView = true
-                                }
+        NavigationStack{
+            if viewModel.isLoading{
+                /// 데이터 가져오는 중일때
+                ProgressView()
+                    .padding(.top,30)
+            } else {
+                VStack{
+                    HStack(spacing:16){
+                        Spacer()
+                            .frame(width: 16)
+                        Text("채팅")
+                            .font(.system(size: 24,weight: .bold))
+                        Spacer()
+                        Button{
                             
-                            /*
-                             VStack{
-                             NavigationLink(
-                             destination: EmptyView(),
-                             isActive: $showDMView
-                             ) {
-                             DMRowView(dm: dm, receiverID: receiverID)
-                             .onTapGesture {
-                             selectedReceiverID = receiverID
-                             showDMView = true
-                             }
-                             Divider()
-                             .padding(.vertical, 8)
-                             }
-                             }
-                             .contextMenu {
-                             Button(action: {
-                             //                                      viewModel.deleteRecentMessage(receiverID: receiverID)
-                             }) {
-                             Label("채팅방 나가기", systemImage: "trash")
-                             }
-                             }
-                             */
-                            
+                        } label: {
+                            Image(systemName: "gear")
                         }
-                        .padding(.horizontal)
+                    }
+                    .padding()
+                    ScrollView {
+                        if viewModel.chattingRooms.isEmpty{
+                            /// 모임 배열이 비어있을때
+                            Text("채팅이 없습니다")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                                .padding(.top,30)
+                        }else{
+                            
+                            ForEach(viewModel.chattingRooms) { chattingRoom in
+                                DMCardView(chattingRoom: chattingRoom)
+                                    .onTapGesture {
+                                        selectedReceiverID = chattingRoom.chatterUID
+                                        showDMView = true
+                                    }
+                                    .padding(.bottom,5)
+                                Divider()
+//                             .contextMenu {
+//                                 Button(action: {
+//                                          viewModel.deleteRecentMessage(receiverID: receiverID)
+//                                 }) {
+//                                 Label("채팅방 나가기", systemImage: "trash")
+//                                 }
+//                             }
+                            }
+                            .padding(.horizontal)
+                        }
                     }
                 }
             }

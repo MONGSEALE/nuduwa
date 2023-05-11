@@ -35,8 +35,8 @@ class FirebaseViewModel: ObservableObject {
     @Published var currentUser: User?
     @Published var user: User?
 
-    var currentUID: String {
-       return Auth.auth().currentUser?.uid ?? ""
+    var currentUID: String? {
+       return Auth.auth().currentUser?.uid
     }
     
     deinit {
@@ -69,6 +69,7 @@ class FirebaseViewModel: ObservableObject {
         print("userListener")
         isLoading = true
         Task{
+            guard let currentUID = currentUID else{return}
             let doc = db.collection(strUsers).document(currentUID)
             docListener = doc.addSnapshotListener { snapshot, error in
                 if let error = error{
@@ -83,10 +84,11 @@ class FirebaseViewModel: ObservableObject {
     }
     
     /// 유저 데이터 한번 가져오기
-    func fetchUser(userUID: String){
+    func fetchUser(userUID: String?){
         print("fetchUser")
         Task{
             do{
+                guard let userUID = userUID else{return}
                 let user = try await db.collection(strUsers).document(userUID).getDocument(as: User.self)
 
                 await MainActor.run(body: {
@@ -101,6 +103,7 @@ class FirebaseViewModel: ObservableObject {
         print("fetchUser")
         Task{
             do{
+                guard let currentUID = currentUID else{return}
                 let user = try await db.collection(strUsers).document(currentUID).getDocument(as: User.self)
 
                 await MainActor.run(body: {
@@ -127,6 +130,7 @@ class FirebaseViewModel: ObservableObject {
     func fetchCurrentUserAsync()async{
         print("fetchUserAsync")
         do{
+            guard let currentUID = currentUID else{return}
             let user = try await db.collection(strUsers).document(currentUID).getDocument(as: User.self)
 
             await MainActor.run(body: {

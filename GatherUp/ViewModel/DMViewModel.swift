@@ -18,7 +18,10 @@ class DMViewModel: FirebaseViewModel {
     @Published var isTabBarHidden: Bool = false
     @Published var userImageURLs: [String: User] = [:]
     
-    func sendDM(message: String, senderID: String, receiverID: String) {
+    func sendDM(message: String, receiverID: String) {
+        
+        guard let senderID = currentUID else{return}
+        if message == "" {return}
 
         let messageData: [String: Any] = [
             "message": message,
@@ -86,30 +89,31 @@ class DMViewModel: FirebaseViewModel {
        }
    }
     
-    func startListeningDM(senderID: String, receiverID: String) {
+    func startListeningDM(chatterUID: String) {
         print("startListeningDM")
-        let doc = Firestore.firestore().collection(strUsers).document(senderID).collection(strChatters)
+        guard let currentUID = currentUID else{return}
+        print("currentUID:\(currentUID)")
+        print("chatterUID:\(chatterUID)")
+        let doc = db.collection(strUsers).document(currentUID).collection(strChatters)
         var dmPeopleID: String?
         
-        doc.whereField("chatterUID", isEqualTo: receiverID).getDocuments{ querySnapshot, error in
+        doc.whereField("chatterUID", isEqualTo: chatterUID).getDocuments{ querySnapshot, error in
+            if let error = error {print("startListeningDM에러1\(error.localizedDescription)");return}
             if let querySnapshot = querySnapshot {
                 for document in querySnapshot.documents {
                     dmPeopleID = document.data()["DMPeopleID"] as? String ?? ""
                 }
-                
                 guard let dmPeopleID = dmPeopleID else{print("디엠피플오류");return}
                 print("dmPeopleID:\(dmPeopleID)")
                 // 두 유저 간의 DM 문서를 참조합니다.
-                let dmDocumentRef = Firestore.firestore().collection(self.strDMPeople).document(dmPeopleID)
-
-                // DM 문서 내의 DM 컬렉션을 참조합니다.
-                let dmCollectionRef = dmDocumentRef.collection(self.strDM)
+                let dmColletionRef = self.db.collection(self.strDMPeople).document(dmPeopleID).collection(self.strDM)
 
                 // DM 컬렉션에서 모든 DM을 시간순으로 가져오는 쿼리를 생성합니다.
-                let query = dmCollectionRef.order(by: "timestamp")
+                let query = dmColletionRef.order(by: "timestamp")
                 
                 // 쿼리의 결과에 대한 리스너를 추가합니다.
                 self.docListener = query.addSnapshotListener { querySnapshot, error in
+                    if let error = error {print("startListeningDM에러2");return}
                     print("dm리스너")
                     if let querySnapshot = querySnapshot {
                         // 쿼리 결과를 DM 객체의 배열로 변환하고, 이를 messages 배열에 저장합니다.
@@ -126,22 +130,30 @@ class DMViewModel: FirebaseViewModel {
     }
     
     func startListeningRecentMessages() {
+        guard let currentUID = currentUID else{return}
+        isLoading = true
+        print("startListeningRecentMessages,uid:\(currentUID)")
+        
         let chatterDoc = db.collection(strUsers).document(currentUID).collection(strChatters)
         
         chatterDoc.addSnapshotListener{ querySnapshot, error in
             if let error = error {
                 print("Error listening for DM updates: \(error.localizedDescription)")
+                self.isLoading = false
                 return
             }
             guard let documents = querySnapshot?.documents else {
                 print("mapMeetingsListener 에러1: \(String(describing: error))")
+                self.isLoading = false
                 return
             }
+            print("documents:\(documents)")
             self.chattingRooms = documents.compactMap{ documents -> Chatter? in
                 try? documents.data(as: Chatter.self)
             }
+            self.isLoading = false
+            print("Rooms:\(self.chattingRooms)")
         }
-        
 //        docListener = db.collection(strDMPeople)
 //            .order(by: "timestamp", descending: true)
 //            .addSnapshotListener { querySnapshot, error in

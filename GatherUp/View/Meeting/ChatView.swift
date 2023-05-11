@@ -121,7 +121,7 @@ struct ChatView: View {
                 .cornerRadius(50)
                 .padding()
             }
-            MemberList(meetingID: meetingID, members: members, hostUID: hostUID ,userUID: chatViewModel.currentUID)
+            MemberList(meetingID: meetingID, members: members, hostUID: hostUID ,userUID: chatViewModel.currentUID!)
                            .slideOverView(isPresented: $showMemberList)
         }
         .onAppear{
@@ -224,7 +224,7 @@ struct MemberItemView: View {
                 Spacer()
             }
             .sheet(isPresented: $isShowMember){
-                MemberProfileView(member: member, userUID: viewModel.currentUID)
+                MemberProfileView(member: member, userUID: viewModel.currentUID!)
             }
             .padding(.horizontal)
     }

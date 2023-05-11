@@ -16,87 +16,86 @@ struct DMView: View {
     
     @Environment(\.dismiss) private var dismiss
     @State private var messageText: String = ""
-    var receiverID: String
-    @State private var userImageURLs: [String: URL] = [:]
+    let receiverID: String
     @Binding var showDMView: Bool
     
     var body: some View {
         NavigationView{
-        VStack {
-            ScrollView{
-                ScrollViewReader { scrollViewProxy in
-                    VStack(alignment: .leading, spacing: 8) {
-                        ForEach(viewModel.messages.indices, id: \.self) { index in
-                            let message = viewModel.messages[index]
-                            let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
-                            
-                            if isNewDay(previousMessage: previousMessage, currentMessage: message) {
-                                Text(formatDate(message.timestamp))
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                                    .padding(.top)
-                                    .frame(maxWidth:.infinity)
+            VStack {
+                ScrollView{
+                    ScrollViewReader { scrollViewProxy in
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(viewModel.messages.indices, id: \.self) { index in
+                                let message = viewModel.messages[index]
+                                let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
+                                
+                                if isNewDay(previousMessage: previousMessage, currentMessage: message) {
+                                    Text(formatDate(message.timestamp))
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                        .padding(.top)
+                                        .frame(maxWidth:.infinity)
+                                }
+                                
+                                let isCurrentUser = message.senderID == viewModel.currentUID
+                                
+                                DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
                             }
-                            
-                            let isCurrentUser = message.senderID == viewModel.currentUID
-//                            let userImageURL = isCurrentUser ? receiverImage(id: receiverID) : receiverImage(id: senderID)
-                            
-                            DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
                         }
-                    }
-                    .onChange(of: viewModel.messages) { messages in
-                        if let lastMessageIndex = messages.indices.last {
-                            withAnimation {
-                                scrollViewProxy.scrollTo(lastMessageIndex, anchor: .bottom)
+                        .onChange(of: viewModel.messages) { messages in
+                            if let lastMessageIndex = messages.indices.last {
+                                withAnimation {
+                                    scrollViewProxy.scrollTo(lastMessageIndex, anchor: .bottom)
+                                }
                             }
                         }
                     }
                 }
+                Spacer()
+                HStack{
+                    CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $messageText)
+                    Button{
+                        viewModel.sendDM(message: messageText, receiverID: receiverID)
+                        messageText = ""
+                    }label: {
+                        Image(systemName: "paperplane.fill")
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(Color("lightblue"))
+                            .cornerRadius(50)
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.vertical,10)
+                .background(Color("gray"))
+                .cornerRadius(50)
+                .padding()
             }
-            Spacer()
-            HStack{
-                CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $messageText)
-                Button{
-                    viewModel.sendDM(message: messageText, senderID: viewModel.currentUID, receiverID: receiverID)
-                    messageText = ""
-                    
-                }label: {
-                    Image(systemName: "paperplane.fill")
-                        .foregroundColor(.white)
-                        .padding(10)
-                        .background(Color("lightblue"))
-                        .cornerRadius(50)
+            .navigationBarTitle("채팅방", displayMode: .inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        showDMView = false
+                        print("뒤로")
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.left")
+                            Text("뒤로")
+                        }
+                    }
                 }
             }
-            .padding(.horizontal)
-            .padding(.vertical,10)
-            .background(Color("gray"))
-            .cornerRadius(50)
-            .padding()
+            .onAppear {
+                viewModel.startListeningDM(chatterUID: receiverID)
+                viewModel.fetchUser(userUID: receiverID)
+            }
+            .onDisappear {
+                print("바이")
+                viewModel.removeListener()
+            }
+            
         }
-        .navigationBarTitle("채팅방", displayMode: .inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button(action: {
-                            showDMView = false
-                        }) {
-                            HStack {
-                                Image(systemName: "arrow.left")
-                                Text("뒤로")
-                            }
-                        }
-                    }
-                }
-                .onAppear {
-                      viewModel.startListeningDM(senderID: viewModel.currentUID, receiverID: receiverID)
-                    viewModel.fetchUser(userUID: viewModel.currentUID)
-                  }
-              .onDisappear {
-                  viewModel.removeListener()
-              }
-     }
     }
-
     func isNewDay(previousMessage: DM?, currentMessage: DM) -> Bool {
         guard let previousMessage = previousMessage else { return true }
         
@@ -113,8 +112,6 @@ struct DMView: View {
         let date = timestamp.dateValue()
         return dateFormatter.string(from: date)
     }
-    
-    
 }
 
 

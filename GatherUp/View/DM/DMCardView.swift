@@ -18,7 +18,6 @@ struct DMCardView: View {
     //    var onUpdate: (DM)->()
     
     var body: some View {
-//        Text("누르시오")
         HStack(spacing: 16) {
             WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
                 .resizable()
@@ -39,8 +38,10 @@ struct DMCardView: View {
         .buttonStyle(PlainButtonStyle())
         .onAppear{
             viewModel.fetchUser(userUID: chattingRoom.chatterUID)
-            viewModel.startListeningDM(senderID: viewModel.currentUID, receiverID: chattingRoom.chatterUID)
-
+            viewModel.startListeningDM(chatterUID: chattingRoom.DMPeopleID)
+        }
+        .onDisappear{
+            viewModel.removeListener()
         }
     }
 }

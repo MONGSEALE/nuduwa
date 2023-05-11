@@ -33,6 +33,7 @@ class ProfileViewModel: FirebaseViewModel {
         isLoading = true
         Task{
             do{
+                guard let currentUID = currentUID else{return}
                 // Step 1: First Deleting Profile Image From Storage
                 let reference = Storage.storage().reference().child(strProfile_Images).child(currentUID)
                 try await reference.delete()
@@ -53,6 +54,7 @@ class ProfileViewModel: FirebaseViewModel {
         Task{
             do{
                 let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
+                guard let currentUID = currentUID else{return}
                 
                 let dispatchGroup = DispatchGroup() // DispatchGroup 생성
                 

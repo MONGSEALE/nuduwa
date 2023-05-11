@@ -65,11 +65,12 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
 
     
     ///모임 나가기
-    func leaveMeeting(meetingID: String, memberUID: String) {
+    func leaveMeeting(meetingID: String, memberUID: String?) {
         print("leaveMeeting")
         isLoading = true
         Task{
             do{
+                guard let memberUID = memberUID else{return}
                 let doc = db.collection(strMeetings).document(meetingID)
 
                 await fetchUserAsync(userUID: memberUID)
