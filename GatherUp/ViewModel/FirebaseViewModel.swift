@@ -15,11 +15,15 @@ class FirebaseViewModel: ObservableObject {
     let db = Firestore.firestore()
     var docListener: ListenerRegistration?
     /// 콜렉션 이름
+    /// Users 콜렉션
     let strUsers = "Users"
+    let strChatters = "Chatters"
+    let strJoinMeetings = "JoinMeetings"
+    /// Meetings 콜렉션
     let strMeetings = "Meetings"
     let strMembers = "Members"
     let strMessage = "Message"
-    let strChatters = "Chatters"
+    /// DMPeople 콜렉션
     let strDMPeople = "DMPeople"
     let strDM = "DM"
     
@@ -50,6 +54,20 @@ class FirebaseViewModel: ObservableObject {
         }
     }
 
+    func fetchUserData(_ userUID: String)async -> UserData {
+        print("fetchUserData:\(userUID)")
+        do {
+            let document = try await db.collection(strUsers).document(userUID).getDocument()
+            let name = document.data()?["userName"] as? String ?? ""
+            let imageUrl = document.data()?["userImage"] as? String ?? ""
+            let image = URL(string: imageUrl)
+            return UserData(userName: name, userImage: image!)
+        } catch {
+            print("에러 fetchUserData: \(error)")
+            return UserData(userName: "name", userImage: URL(string:"image"))
+        }
+    }
+
     /// 유저 데이터 실시간 가져오기
     func userListener(userUID: String) {
         print("userListener")
@@ -57,7 +75,7 @@ class FirebaseViewModel: ObservableObject {
             let doc = db.collection(strUsers).document(userUID)
             docListener = doc.addSnapshotListener { snapshot, error in
                 if let error = error{
-                    self.firebaseError(error)
+                    self.handleErrorTask(error)
                     return
                 }
                 guard let document = snapshot else{print("No Users");return}
@@ -73,7 +91,7 @@ class FirebaseViewModel: ObservableObject {
             let doc = db.collection(strUsers).document(currentUID)
             docListener = doc.addSnapshotListener { snapshot, error in
                 if let error = error{
-                    self.firebaseError(error)
+                    self.handleErrorTask(error)
                     return
                 }
                 guard let document = snapshot else{print("No Users");return}
@@ -142,15 +160,26 @@ class FirebaseViewModel: ObservableObject {
     }
     
     /// 에러처리
-    func handleError(_ error: Error)async{
-        await MainActor.run(body: {
-            errorMessage = error.localizedDescription
-            showError.toggle()
+    func handleError(_ error: Error, isShowError = false) async {
+        print("에러: \(error.localizedDescription)")
+        await MainActor.run {
+            if isShowError {
+                errorMessage = error.localizedDescription
+                showError = true
+            }
             isLoading = false
-        })
+        }
     }
-    func firebaseError(_ error: Error){
-        print(error.localizedDescription)
-        isLoading = false
+    func handleErrorTask(_ error: Error, isShowError = false) {
+        print("에러: \(error.localizedDescription)")
+        Task{
+            await MainActor.run {
+                if isShowError {
+                    errorMessage = error.localizedDescription
+                    showError = true
+                }
+                isLoading = false
+            }
+        }
     }
 }

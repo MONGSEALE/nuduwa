@@ -16,8 +16,8 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     
     
     @Published var members: [Member] = []
-
     @Published var meetings: [Meeting] = []     // 모임 배열
+    @Published var joinMeetingIDs: [String] = []     // 가입모임ID 배열
 
     //나중에 하위 클래스로 이동
     @Published var meeting: Meeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: 0, longitude: 0, hostUID: "")
@@ -32,7 +32,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
             let doc = db.collection(strMeetings).document(meetingID).collection(strMembers)
             docListener = doc.addSnapshotListener { (querySnapshot, error) in
                 if let error = error{
-                    self.firebaseError(error)
+                    self.handleErrorTask(error)
                     return
                 }
                 guard let documents = querySnapshot?.documents else {return}
@@ -65,23 +65,27 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
         isLoading = true
         Task{
             do{
-                await fetchCurrentUserAsync()
-                guard let user = self.currentUser else{return}
-                let member = Member(memberUID: user.id!, memberName: user.userName, memberImage: user.userImage ?? URL(string: ""))
-                let doc = db.collection(strMeetings).document(meetingID)
+                guard let currentUID = currentUID else{return}
+                let userData = await fetchUserData(currentUID)
+                let member = Member(memberUID: currentUID)
+                let meetingsDoc = db.collection(strMeetings).document(meetingID)
+                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
                 
                 if members.count < numbersOfMembers {
-                    try doc.collection(strMembers).document().setData(from: member, completion: {error in
+                    try meetingsDoc.collection(strMembers).addDocument(from: member, completion: {error in
                         if let error = error{
-                            self.firebaseError(error)
-                            self.isLoading = false
+                            self.handleErrorTask(error)
                             return
                         }
                         print("모임 참가 완료")
-                        doc.collection(self.strMessage).addDocument(data: [
-                            "text": "\(user.userName)님이 채팅에 참가하셨습니다.",
-                            "userId": "SYSTEM",
-                            "userName": "SYSTEM",
+
+                        let joinMeeting = JoinMeeting(meetingID: meetingID)
+
+                        try joinMeetingsCol.addDocument(from: joinMeeting)
+                        
+                        meetingsDoc.collection(self.strMessage).addDocument(data: [
+                            "text": "\(userData.userName)님이 채팅에 참가하셨습니다.",
+                            "userUID": "SYSTEM",
                             "timestamp": Timestamp(),
                             "isSystemMessage": true
                         ])
@@ -90,14 +94,31 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
 
 
                 //참가 실패시 에러핸들 구현
-
-
-            
                 await MainActor.run(body: {
                     isLoading = false
                 })
             } catch {
-                await handleError(error)
+                handleErrorTask(error)
+            }
+        }
+    }
+
+    func joinMeetingsListener(){
+        guard let currentUID = currentUID else{return}
+
+        let col = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
+
+        col.addSnapshotListener { querySnapshot, error in
+            if let error = error{
+                self.handleErrorTask(error)
+                return
+            }
+            guard let querySnapshot = querySnapshot else{
+                self.handleErrorTask(error)
+                return
+            }
+            self.joinMeetingIDs = querySnapshot.documents.compactMap{ documents -> String? in
+                try? documents.data().data["meetingID"]
             }
         }
     }
