@@ -16,7 +16,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
     let userGoogleEmail: String?
     var userImage: URL?
 
-    var signUpDate: Date?
+    var signUpDate: Timestamp?
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any]) {
@@ -38,7 +38,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
     var firestoreData: [String: Any] {
         var data: [String: Any] = [
             "userName": userName,
-            "signUpDate": signUpDate
+            "signUpDate": signUpDate = FieldValue.serverTimestamp()
         ]
         
         // 값이 있을때만 Firestore에 저장

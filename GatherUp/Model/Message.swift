@@ -36,7 +36,7 @@ struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
         var data: [String: Any] = [
             "content": content,
             "senderUID": senderUID,
-            "timestamp" : timestamp
+            "timestamp" : timestamp = FieldValue.serverTimestamp()
         ]
         
         // isSystemMessage true일 때만 Firestore에 저장

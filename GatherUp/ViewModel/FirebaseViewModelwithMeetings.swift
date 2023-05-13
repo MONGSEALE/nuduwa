@@ -28,21 +28,22 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     /// 모임맴버 가져오기
     func membersListener(meetingID: String){
         print("membersListener")
-        Task{
-            let doc = db.collection(strMeetings).document(meetingID).collection(strMembers)
-            docListener = doc.addSnapshotListener { (querySnapshot, error) in
-                if let error = error{
-                    self.handleErrorTask(error)
-                    return
-                }
-                guard let documents = querySnapshot?.documents else {return}
-                self.members = documents.compactMap{ documents -> Member? in
-                    try? documents.data(as: Member.self)
-                }
-                self.convertMembers(meetingID: meetingID)
+        let colRef = db.collection(strMeetings).document(meetingID).collection(strMembers)
+
+        let listener = colRef.addSnapshotListener { (querySnapshot, error) in
+            if let error = error{
+                self.handleErrorTask(error)
+                return
             }
+            guard let documents = querySnapshot?.documents else {return}
+            self.members = documents.compactMap{ documents -> Member? in
+                try? documents.data(as: Member.self)
+            }
+            self.convertMembers(meetingID: meetingID)
         }
+        listeners[colRef.path] = listener
     }
+
 
     /// = 서버에서 수정된 모임 meetings 배열에서 수정하기
     func updateLocalMeetingDataFromServer(updatedMeeting: Meeting) {
@@ -60,6 +61,38 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     }
     
     /// 모임 참가하기
+        func joinMeeting(meetingID: String, numbersOfMembers: Int){
+        print("joinMeeting")
+        isLoading = true
+        Task{
+            do{
+                guard let currentUID = currentUID else{return}
+                let userData = await fetchUserData(currentUID)
+                let member = Member(memberUID: currentUID)
+                let meetingsDoc = db.collection(strMeetings).document(meetingID)
+                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
+                
+                if members.count < numbersOfMembers {
+                    try await meetingsDoc.collection(strMembers).addDocument(from: member.firestoreData)
+                    let joinMeeting = JoinMeeting(meetingID: meetingID)
+                    try await joinMeetingsCol.addDocument(from: joinMeeting.firestoreData)
+                    let message = Message(content: "\(userData.userName)님이 채팅에 참가하셨습니다.",
+                                        senderUID: "SYSTEM", 
+                                        timestamp: FieldValue.serverTimestamp(), 
+                                        isSystemMessage: true)
+                    try await meetingsDoc.collection(self.strMessage).addDocument(from: message)
+                }else{print("모임 참가 실패")}
+
+
+                //참가 실패시 에러핸들 구현
+               
+                isLoading = false
+            } catch {
+                handleErrorTask(error)
+            }
+        }
+    }
+    /*
     func joinMeeting(meetingID: String, numbersOfMembers: Int){
         print("joinMeeting")
         isLoading = true
@@ -102,13 +135,13 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
             }
         }
     }
-
+*/
     func joinMeetingsListener(){
         guard let currentUID = currentUID else{return}
 
-        let col = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
+        let colRef = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
 
-        col.addSnapshotListener { querySnapshot, error in
+        let listener = colRef.addSnapshotListener { querySnapshot, error in
             if let error = error{
                 self.handleErrorTask(error)
                 return
@@ -121,6 +154,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                 try? documents.data().data["meetingID"]
             }
         }
+        listeners[colRef.path] = listener
     }
 }
 

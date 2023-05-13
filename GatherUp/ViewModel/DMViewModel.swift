@@ -161,7 +161,7 @@ class DMViewModel: FirebaseViewModel {
         let query = db.collection(strDMPeople).document(dmPeopleID).collection(strDM)
                     .order(by: "timestamp")
 
-        docListener = query.addSnapshotListener { querySnapshot, error in
+        let listener = query.addSnapshotListener { querySnapshot, error in
                         if let error = error {self.handleErrorTask(error);return}
                         guard let querySnapshot = querySnapshot else{self.handleErrorTask(error);return}
                         // 쿼리 결과를 DM 객체의 배열로 변환하고, 이를 messages 배열에 저장합니다.
@@ -169,6 +169,7 @@ class DMViewModel: FirebaseViewModel {
                             try? document.data(as: DM.self)
                         }
                     }
+        listeners.append(listener)
     }
     
     func startListeningRecentMessages() {

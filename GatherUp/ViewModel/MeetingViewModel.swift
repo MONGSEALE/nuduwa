@@ -23,36 +23,67 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     /// 찾기쉽게 members 배열을 딕셔너리로 변환
     override func convertMembers(meetingID: String){
         print("convertMembers")
-        members.forEach { member in
+        fetchMemberData()
+        var membersUID: [String] = []
+        var keysToRemove: [String] = []
+
+        for member in members{
             let uid = member.memberUID
+            membersUID.append(uid)
             dicMembers[uid] = member
             
-            if dicMembersData[uid] == nil{
-                Task{
-                    dicMembersData[uid] = await fetchUserData(userUID: uid)
-                }
-            }
+            if dicMembersData[uid] == nil {continue}
+
             dicMembers[uid]?.memberName = dicMembersData[uid].userName
             dicMembers[uid]?.memberImage = dicMembersData[uid].userImage
         }
+       
+
+        // membersUID에 없는 키를 찾아서 keysToRemove 배열에 추가
+        for key in dicMembers.keys {
+            if !membersUID.contains(key) {
+                keysToRemove.append(key)
+            }
+        }
+
+        // keysToRemove 배열에 있는 키를 dicMembers에서 제거
+        for key in keysToRemove {
+            dicMembers.removeValue(forKey: key)
+        }
+        
     }
-    // override func fetchUserData(userUID: String)async -> UserData{
-    //     print("fetchUserData:\(userUID)")
-    //     do {
-    //         let document = try await db.collection(strUsers).document(userUID).getDocument()
-    //         let name = document.data()?["userName"] as? String ?? ""
-    //         let imageUrl = document.data()?["userImage"] as? String ?? ""
-    //         let image = URL(string: imageUrl)
-    //         self.dicMembersData[userUID] = UserData(userName: name, userImage: image!)
-    //         if dicMembers[userUID] != nil{
-    //             dicMembers[userUID]!.memberName = name
-    //             dicMembers[userUID]!.memberImage = image!
-    //         }
-    //     } catch {
-    //         print("에러 fetchUserData: \(error)")
-    //         return UserData(userName: "name", userImage: URL(string:"image"))
-    //     }
-    // }
+
+    func fetchMemberData() {
+        for member in members{
+            let uid = member.memberUID
+            if dicMembersData[uid] != nil {continue}
+            Task{
+                do{
+                    dicMembersData[uid] = try? await fetchUserData(uid)
+                    dicMembers[uid]?.memberName = dicMembersData[uid].userName
+                    dicMembers[uid]?.memberImage = dicMembersData[uid].userImage
+                }catch{}
+            }
+        }
+    }
+/*
+    func fetchMemberData() {
+        for member in members{
+            let uid = member.memberUID
+            if dicMembersData[uid] != nil {continue}
+            Task{
+                do{
+                    let doc = db.collection(strUsers).document(uid)
+                    let user = try await doc.getDocument(as: UserData.self)
+                    guard let user = user else{return}
+                    dicMembersData[uid] = user
+                    dicMembers[uid]?.memberName = dicMembersData[uid].userName
+                    dicMembers[uid]?.memberImage = dicMembersData[uid].userImage
+                }catch{}
+            }
+        }
+    }
+*/
     
     /// FireStore와 meetings 배열 실시간 연동
     func meetingsListener(){

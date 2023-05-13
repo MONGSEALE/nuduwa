@@ -14,7 +14,7 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
     let memberUID: String
     var memberName: String?
     var memberImage: URL?
-    var joinDate: Date = Date()
+    var joinDate: Timestamp
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any]) {
@@ -32,7 +32,7 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
     var firestoreData: [String: Any] {
         return [
             "memberUID": memberUID,
-            "joinDate": joinDate
+            "joinDate": joinDate = FieldValue.serverTimestamp()
         ]
     }
 }

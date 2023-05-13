@@ -10,7 +10,7 @@ import FirebaseFirestoreSwift
 import Foundation
 import CoreLocation
 
-struct Meeting : Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
+struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertible{
     @DocumentID var id: String?
     
     var title: String
@@ -22,7 +22,7 @@ struct Meeting : Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
     let longitude : Double
     var geoHash: String?
     
-    var publishedDate: Date
+    var publishedDate: Timestamp
     var meetingDate: Date
     
     var hostUID: String
@@ -83,7 +83,7 @@ struct Meeting : Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
             "longitude" : longitude,
             "geoHash": geoHash,
             
-            "publishedDate": publishedDate,
+            "publishedDate": publishedDate = FieldValue.serverTimestamp(),
             "meetingDate": meetingDate,
             
             "hostUID": hostUID

@@ -19,7 +19,7 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
     func messagesListener(meetingID: String) {
         isLoading = true
         Task{
-            docListener = db.collection(strMeetings).document(meetingID).collection(strMessage)
+            let listener = db.collection(strMeetings).document(meetingID).collection(strMessage)
             .order(by: "timestamp", descending: false)
             .addSnapshotListener { (querySnapshot, error) in
                 if let error = error {print("에러!messagesListener:\(error)");return}
@@ -37,6 +37,7 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
                     return ChatMessage(id: id, text: text, userUID: userId, timestamp: timestamp ,isSystemMessage:isSystemMessage)
                 }
             }
+            listeners.append(listener)
             isLoading = false
         }
     }
