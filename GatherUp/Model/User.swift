@@ -38,7 +38,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
     var firestoreData: [String: Any] {
         var data: [String: Any] = [
             "userName": userName,
-            "signUpDate": signUpDate = FieldValue.serverTimestamp()
+            "signUpDate": FieldValue.serverTimestamp()
         ]
         
         // 값이 있을때만 Firestore에 저장

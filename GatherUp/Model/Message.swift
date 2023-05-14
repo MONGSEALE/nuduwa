@@ -16,6 +16,16 @@ struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
     let timestamp: Timestamp
     var isSystemMessage: Bool
 
+    // system 메시지
+    static func systemMessage(_ content: String) -> [String: Any] {
+        return [
+            "content": content,
+            "senderUID": "SYSTEM",
+            "timestamp" : FieldValue.serverTimestamp(),
+            "isSystemMessage": true
+        ]
+    } 
+
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any]) {
         guard let id = data["id"] as? String,
@@ -36,7 +46,7 @@ struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
         var data: [String: Any] = [
             "content": content,
             "senderUID": senderUID,
-            "timestamp" : timestamp = FieldValue.serverTimestamp()
+            "timestamp" : FieldValue.serverTimestamp()
         ]
         
         // isSystemMessage true일 때만 Firestore에 저장

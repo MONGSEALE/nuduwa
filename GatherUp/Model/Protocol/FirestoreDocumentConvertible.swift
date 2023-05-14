@@ -2,6 +2,7 @@ import SwiftUI
 
 protocol FirestoreConvertible {
     init?(data: [String: Any])
+    var firestoreData: [String: Any] { get }
 }
 
 extension DocumentSnapshot {
