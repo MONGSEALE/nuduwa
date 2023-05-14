@@ -32,7 +32,7 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
     var firestoreData: [String: Any] {
         return [
             "memberUID": memberUID,
-            "joinDate": joinDate = FieldValue.serverTimestamp()
+            "joinDate": FieldValue.serverTimestamp()
         ]
     }
 }

@@ -32,7 +32,7 @@ struct JoinMeeting: Identifiable, Codable, FirestoreConvertible {
     var firestoreData: [String: Any] {
         var data: [String: Any] = [
             "meetingID": meetingID,
-            "joinDate": joinDate = FieldValue.serverTimestamp()
+            "joinDate": FieldValue.serverTimestamp()
         ]
         
         // isHost가 true일 때만 Firestore에 저장

@@ -33,7 +33,7 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         return [
             "chatterUID": chatterUID,
             "DMPeopleID": DMPeopleID,
-            "timestamp" : timestamp = FieldValue.serverTimestamp()
+            "timestamp" : FieldValue.serverTimestamp()
         ]
     }
 }

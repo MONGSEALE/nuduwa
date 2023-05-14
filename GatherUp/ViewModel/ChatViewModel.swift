@@ -65,13 +65,7 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
     }
     
     func sendSystemMessage(meetingID: String, text: String) {
-        db.collection(strMeetings).document(meetingID).collection(strMessage).addDocument(data: [
-            "text": text,
-            "userUID": "SYSTEM",
-            "userName": "SYSTEM",
-            "timestamp": Timestamp(),
-            "isSystemMessage": true
-        ])
+        db.collection(strMeetings).document(meetingID).collection(strMessage).addDocument(from: Message.systemMessage(text))
     }
 
     
