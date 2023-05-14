@@ -53,13 +53,13 @@ class ProfileViewModel: FirebaseViewModel {
         isLoading = true
         var isAnotherLoading: [String:Bool]= [:]
         func check(){
-            var check = false
-            for loading in isAnotherLoading{
+            var isAnyLoading = false
+            for loading in isAnotherLoading.values {
                 if loading {
-                    check = true
+                    isAnyLoading = true
                 }
             }
-            if !check {
+            if !isAnyLoading {
                 self.isLoading = false
             }
         }
