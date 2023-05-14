@@ -51,47 +51,92 @@ class ProfileViewModel: FirebaseViewModel {
     func editUser(userName: String?, userImage: PhotosPickerItem?){
         print("updateUser")
         isLoading = true
+        var isAnotherLoading: [String:Bool]= [:]
+        func check(){
+            var check = false
+            for loading in isAnotherLoading{
+                if loading {
+                    check = true
+                }
+            }
+            if !check {
+                self.isLoading = false
+            }
+        }
         Task{
             do{
                 let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
                 guard let currentUID = currentUID else{return}
                 
-                let dispatchGroup = DispatchGroup() // DispatchGroup 생성
-                
                 if let userName = userName {
-                    dispatchGroup.enter() // DispatchGroup에 진입
-                    db.collection(strUsers).document(currentUID).updateData(["userName": userName]){ _ in
-                        changeRequest?.displayName = userName
-                        changeRequest?.commitChanges()
-                        print("userName 수정")
-                        dispatchGroup.leave() // DispatchGroup에서 나옴
-                    }
+                    isAnotherLoading["userName"] = true
+                    try await db.collection(strUsers).document(currentUID).updateData(["userName": userName])
+                    changeRequest?.displayName = userName
+                    changeRequest?.commitChanges()
+                    isAnotherLoading["userName"] = false
+                    check()
+                    print("userName 수정")
                 }
                 if let userImage = userImage {
-                    guard let imageData = try await userImage.loadTransferable(type: Data.self) else{
-                        print("에러 imageData")
+                    isAnotherLoading["userImage"] = true
+                    let maxFileSize: Int = 100_000 // 최대 파일 크기 (예: 0.1MB)
+                    var compressionQuality: CGFloat = 1.0 // 초기 압축 품질
+
+                    let image = userImage.image
+                    var jpegImage: UIImage?
+                    var imageData: Data?
+
+                    if let uiImage = UIImage(data: image) {
+                        jpegImage = uiImage
+                    } else if let pngData = UIImage(data: image)?.pngData() {
+                        if let uiImage = UIImage(data: pngData) {
+                            jpegImage = uiImage
+                        }
+                    } else {
+                        isAnotherLoading["userImage"] = false
+                        check()
                         return
                     }
-                    let storageRef = Storage.storage().reference().child("Profile_Images").child(currentUID)
-                    storageRef.putData(imageData)
-                    
-                    let downloadURL = try await storageRef.downloadURL()
-                    
-                    dispatchGroup.enter() // DispatchGroup에 진입
-                    db.collection(strUsers).document(currentUID).updateData(["userImage": downloadURL.absoluteString]){ _ in
-                        print("userImage 수정")
-                        dispatchGroup.leave() // DispatchGroup에서 나옴
+
+                    if let jpegData = jpegImage?.jpegData(compressionQuality: compressionQuality), jpegData.count > maxFileSize {
+                        imageData = jpegData
+                        while imageData.count > maxFileSize && compressionQuality > 0.1 {
+                            compressionQuality -= 0.1
+                            imageData = uiImage.jpegData(compressionQuality: compressionQuality) ?? Data()
+                        }
+                    } else {
+                        isAnotherLoading["userImage"] = false
+                        check()
+                        return
                     }
-                }
-                dispatchGroup.notify(queue: .main) { // DispatchGroup에 속한 모든 작업이 끝났을 때 호출됨
-                    self.isLoading = false
+                    
+                    // Firebase Storage에 이미지 업로드를 위해 해당 이미지 데이터를 사용합니다.
+                    if let imageData = imageData {
+                        let storageRef = Storage.storage().reference().child("Profile_Images").child(currentUID)
+
+                        try await storageRef.putData(imageData)
+                        let downloadURL = try await storageRef.downloadURL()
+                        
+                        try await db.collection(strUsers).document(currentUID).updateData(["userImage": downloadURL.absoluteString])
+                        isAnotherLoading["userImage"] = false
+                        check()
+                    } else {
+                        isAnotherLoading["userImage"] = false
+                        check()
+                        return
+                    }
                 }
             }catch{
                 await handleError(error)
             }
-            
         }
     }
+
+
+                    // guard let imageData = try await userImage.loadTransferable(type: Data.self) else{
+                    //     print("에러 imageData")
+                    //     return
+                    // }
 
 //    func imageChaged(photoItem: PhotosPickerItem) {
 //        print("imageChaged")
