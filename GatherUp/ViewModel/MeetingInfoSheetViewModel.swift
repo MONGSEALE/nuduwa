@@ -13,12 +13,6 @@ import FirebaseFirestore
 class MeetingInfoSheetViewModel: FirebaseViewModelwithMeetings {
 
     @Published var isDelete: Bool = false
-    
-    private var meetingListener: ListenerRegistration?
-
-    deinit {
-        removeMeetingListener()
-    }
 
     /// 모임 데이터 가져오기
     func meetingListner(meetingID: String){

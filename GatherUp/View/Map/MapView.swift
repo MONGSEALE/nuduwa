@@ -168,7 +168,6 @@ struct MapView: View {
                                 serverViewModel.newMeeting = nil
                                 serverViewModel.isOverlap = true
                             }
-                            .environmentObject(viewModel)
                         }
                     }
             }

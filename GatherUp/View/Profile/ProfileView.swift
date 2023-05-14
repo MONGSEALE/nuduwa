@@ -61,7 +61,7 @@ struct ProfileView: View {
             }
         }
         .onAppear{
-            viewModel.currentUserListener()
+            viewModel.userListener(viewModel.currentUID)
         }
     }
 }

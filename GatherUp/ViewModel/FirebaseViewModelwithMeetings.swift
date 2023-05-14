@@ -20,7 +20,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     @Published var joinMeetingIDs: [String] = []     // 가입모임ID 배열
 
     //나중에 하위 클래스로 이동
-    @Published var meeting: Meeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: 0, longitude: 0, hostUID: "")
+    @Published var meeting: Meeting?
 
     /// 자식Class MeetingViewModel에서 쓸 함수
     func convertMembers(meetingID: String) { }
@@ -28,9 +28,9 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     /// 모임맴버 가져오기
     func membersListener(meetingID: String){
         print("membersListener")
-        let colRef = db.collection(strMeetings).document(meetingID).collection(strMembers)
+        let col = db.collection(strMeetings).document(meetingID).collection(strMembers)
 
-        let listener = colRef.addSnapshotListener { (querySnapshot, error) in
+        let listener = col.addSnapshotListener { querySnapshot, error in
             if let error = error{
                 self.handleErrorTask(error)
                 return
@@ -41,7 +41,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
             }
             self.convertMembers(meetingID: meetingID)
         }
-        listeners[colRef.path] = listener
+        listeners[col.path] = listener
     }
 
 
@@ -61,13 +61,13 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     }
     
     /// 모임 참가하기
-        func joinMeeting(meetingID: String, numbersOfMembers: Int){
+    func joinMeeting(meetingID: String, numbersOfMembers: Int){
         print("joinMeeting")
         isLoading = true
         Task{
             do{
                 guard let currentUID = currentUID else{return}
-                let userData = await fetchUserData(currentUID)
+                let userData = try await getUserData(currentUID)
                 let member = Member(memberUID: currentUID)
                 let meetingsDoc = db.collection(strMeetings).document(meetingID)
                 let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
@@ -76,12 +76,14 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                     try await meetingsDoc.collection(strMembers).addDocument(from: member.firestoreData)
                     let joinMeeting = JoinMeeting(meetingID: meetingID)
                     try await joinMeetingsCol.addDocument(from: joinMeeting.firestoreData)
-                    let message = Message(content: "\(userData.userName)님이 채팅에 참가하셨습니다.",
+                    let message = Message(text: "\(userData.userName)님이 채팅에 참가하셨습니다.",
                                         senderUID: "SYSTEM", 
                                         timestamp: FieldValue.serverTimestamp(), 
                                         isSystemMessage: true)
                     try await meetingsDoc.collection(self.strMessage).addDocument(from: message)
-                }else{print("모임 참가 실패")}
+                }else{
+                    print("모임 참가 실패")
+                }
 
 
                 //참가 실패시 에러핸들 구현
@@ -139,9 +141,9 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     func joinMeetingsListener(){
         guard let currentUID = currentUID else{return}
 
-        let colRef = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
+        let col = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
 
-        let listener = colRef.addSnapshotListener { querySnapshot, error in
+        let listener = col.addSnapshotListener { querySnapshot, error in
             if let error = error{
                 self.handleErrorTask(error)
                 return
@@ -154,7 +156,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                 try? documents.data().data["meetingID"]
             }
         }
-        listeners[colRef.path] = listener
+        listeners[col.path] = listener
     }
 }
 

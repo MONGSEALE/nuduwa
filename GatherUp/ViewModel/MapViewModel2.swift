@@ -10,7 +10,7 @@ import Firebase
 import FirebaseAuth
 import FirebaseFirestore
 import CoreLocation
-import GeoFireUtils
+import GeoFireUtils  //삭제해도 되면 삭제
 
 class MapViewModel2: FirebaseViewModelwithMeetings {
 
@@ -144,7 +144,8 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
     /// 모임 추가시(서버 저장전)
     func addMapAnnotation(newMapAnnotation: CLLocationCoordinate2D){
         print("addMapAnnotation")
-        newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: newMapAnnotation.latitude, longitude: newMapAnnotation.longitude, hostUID: "", type: .new)
+        // newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: newMapAnnotation.latitude, longitude: newMapAnnotation.longitude, hostUID: "", type: .new)
+        newMeeting = Meeting.createMapAnnotation(newMapAnnotation)
         combineNewMeetings()
     }
     /// 모임 추가 취소 또는 모임 서버 저장했을때 newMeeting 초기화
@@ -162,16 +163,17 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
             do{
                 /// - Firestore에 저장
                 print("firebase save")
-                await fetchCurrentUserAsync()
-                var meeting = meeting
-                guard let user = currentUser else{return}
-                meeting.hostUID = user.id!
+                // await fetchCurrentUserAsync()
+                // var meeting = meeting
+                // guard let currentUID = currentUID else{return}
+                // meeting.hostUID = currentUID
                 
-                let location = CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude)
-                let geoHash = GFUtils.geoHash(forLocation: location)
-                meeting.geoHash = geoHash
+                // let location = CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude)
+                // let geoHash = GFUtils.geoHash(forLocation: meeting.location)
+                // geoHash 구조체에 넣을수 있나??
+                // meeting.geoHash = geoHash
                 
-                let document = try await db.collection(strMeetings).addDocument(from: meeting)
+                let document = try await db.collection(strMeetings).addDocument(data: meeting.firestoreData)
                 let meetingID = document.documentID
                 self.joinMeeting(meetingID: meetingID)
                 
@@ -188,25 +190,27 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         Task{
             do{
                 guard let currentUID = currentUID else{return}
-                let userData = await fetchUserData(currentUID)
+                let userData = try await getUserData(currentUID)
 
                 let member = Member(memberUID: currentUID)
                 let joinMeeting = JoinMeeting(meetingID: meetingID, isHost: true)
-                let message = ChatMessage(
-                    text: "\(userData.userName)님이 채팅에 참가하셨습니다.",
-                    userUID: "SYSTEM",
-                    timestamp: Timestamp(),
-                    isSystemMessage: true
-                )
+
+                let text = "\(userData.userName)님이 채팅에 참가하셨습니다."
+                // let message = ChatMessage(
+                //     text: "\(userData.userName)님이 채팅에 참가하셨습니다.",
+                //     userUID: "SYSTEM",
+                //     timestamp: Timestamp(),
+                //     isSystemMessage: true
+                // )
 
                 let meetingsDoc = db.collection(strMeetings).document(meetingID)
                 let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
                 
-                try meetingsDoc.collection(strMembers).addDocument(from: member)
+                try meetingsDoc.collection(strMembers).addDocument(data: member.firestoreData)
 
-                try joinMeetingsCol.addDocument(from: joinMeeting)
+                try joinMeetingsCol.addDocument(data: joinMeeting.firestoreData)
                 
-                try meetingsDoc.collection(self.strMessage).addDocumentt(from: message)
+                try meetingsDoc.collection(self.strMessage).addDocumentt(data: Message.systemMessage(text))
                 
                 isLoading = false
             } catch {

@@ -55,13 +55,50 @@ class FirebaseViewModel: ObservableObject {
             listeners.removeAll()
         }
     }
-    
-    func fetchUserData(_ userUID: String?) async throws -> UserData {
-        print("fetchUser")
+
+    // 유저 이름과 이미지만 가져오기
+    func fetchUserData(_ userUID: String?) {
+        print("fetchUserData")
+        Task{
+            do{
+                let userData = try await getUserData(userUID)
+                user.convertUserData(userData)
+            }catch{
+                handleErrorTask(error)
+            }
+        }
+    }
+    func getUserData(_ userUID: String?) async throws -> UserData {
+        print("getUserData")
         do{
             guard let userUID = userUID else{throw}
             let doc = db.collection(strUsers).document(userUID)
-            let user: UserData? = try await doc.getDocument(as: UserData.self)
+            let userData: UserData? = try await doc.getDocument(as: UserData.self)
+            guard let userData = userData else{throw}
+            return userData
+        }catch{
+            throw error
+        }
+    }
+
+    /// 유저 데이터 한번 가져오기
+    func fetchUser(_ userUID: String?) {
+        print("fetchUser")
+        Task{
+            do{
+                let user = try await getUser(userUID)
+                self.user = user
+            }catch{
+                await handleError(error)
+            }
+        }
+    }
+    func getUser(_ userUID: String?) async throws -> User {
+        print("getUserData")
+        do{
+            guard let userUID = userUID else{throw}
+            let doc = db.collection(strUsers).document(userUID)
+            let user: User? = try await doc.getDocument(as: User.self)
             guard let user = user else{throw}
             return user
         }catch{
@@ -85,78 +122,6 @@ class FirebaseViewModel: ObservableObject {
             listeners[doc.path] = listener
         }
     }
-    func currentUserListener() {
-        print("userListener")
-        isLoading = true
-        Task{
-            guard let currentUID = currentUID else{return}
-            let doc = db.collection(strUsers).document(currentUID)
-            let listener = doc.addSnapshotListener { snapshot, error in
-                if let error = error{
-                    self.handleErrorTask(error)
-                    return
-                }
-                guard let document = snapshot else{print("No Users");return}
-                self.currentUser = try? document.data(as: User.self)
-                self.isLoading = false
-            }
-            listeners[doc.path] = listener
-        }
-    }
-    
-    /// 유저 데이터 한번 가져오기
-    func fetchUser(userUID: String?){
-        print("fetchUser")
-        Task{
-            do{
-                guard let userUID = userUID else{return}
-                let user = try await db.collection(strUsers).document(userUID).getDocument(as: User.self)
-
-                self.user = user
-            }catch{
-                await handleError(error)
-            }
-        }
-    }
-    func fetchCurrentUser(){
-        print("fetchUser")
-        Task{
-            do{
-                guard let currentUID = currentUID else{return}
-                let user = try await db.collection(strUsers).document(currentUID).getDocument(as: User.self)
-
-                self.currentUser = user
-            }catch{
-                await handleError(error)
-            }
-        }
-    }
-    
-    func fetchUserAsync(userUID: String)async{
-        print("fetchUserAsync")
-        do{
-            let user = try await db.collection(strUsers).document(userUID).getDocument(as: User.self)
-
-            await MainActor.run(body: {
-                self.user = user
-            })
-        }catch{
-            await handleError(error)
-        }
-    }
-    func fetchCurrentUserAsync()async{
-        print("fetchUserAsync")
-        do{
-            guard let currentUID = currentUID else{return}
-            let user = try await db.collection(strUsers).document(currentUID).getDocument(as: User.self)
-
-            await MainActor.run(body: {
-                self.currentUser = user
-            })
-        }catch{
-            await handleError(error)
-        }
-    }
     
     /// 에러처리
     func handleError(_ error: Error, isShowError = false) async {
@@ -178,6 +143,8 @@ class FirebaseViewModel: ObservableObject {
         isLoading = false
     }
 }
+
+
 /*
 func fetchUserData(_ userUID: String)async throws -> UserData {
         print("fetchUserData:\(userUID)")

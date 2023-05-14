@@ -24,8 +24,6 @@ struct MeetingSetSheetView: View {
     @State private var showError = false
     @State private var showPlacePopUp = false
     @State private var noMorePlacePopUp = false
-    
-//    @StateObject private var viewModel: MapViewModel2 = .init()
    
     let currentdate = Date()
     
@@ -119,7 +117,9 @@ struct MeetingSetSheetView: View {
                             showErrorMessage(duration: 2)
                         }
                         else{
-                            let newMeeting = Meeting(title: title, description: description, place:place, numbersOfMembers:selection+2, latitude:coordinateCreated.latitude, longitude: coordinateCreated.longitude, geoHash: "", meetingDate:meetingDate, hostUID: "")
+                            let newMeeting = Meeting.createNewMeeting(title: title, description: description, place: place, numbersOfMembers: selection+2, location: coordinateCreated, meetingDate: meetingDate)
+                            
+                            // Meeting(title: title, description: description, place:place, numbersOfMembers:selection+2, latitude:coordinateCreated.latitude, longitude: coordinateCreated.longitude, geoHash: "", meetingDate:meetingDate, hostUID: "")
                             onCreate(newMeeting)
                         }
                     }label: {

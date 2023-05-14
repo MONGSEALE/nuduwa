@@ -121,8 +121,8 @@ class LoginViewModel: FirebaseViewModel {
                 
                 try await Auth.auth().signIn(with: credential)
                 
-                await fetchCurrentUserAsync()
-                if self.user == nil{
+                let currentUser = try? await getUser(currentUID)
+                if currentUser == nil{
                     registerUser()
                 }
                 

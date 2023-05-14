@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 import FirebaseFirestoreSwift
 import Foundation
 import CoreLocation
+import GeoFireUtils
 
 struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertible{
     @DocumentID var id: String?
@@ -24,7 +26,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     var publishedDate: Timestamp
     var meetingDate: Date
     
-    var hostUID: String
+    let hostUID: String
 
     var type: MeetingType
     
@@ -33,26 +35,6 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         case new
         case piled
     }
-
-    // 모임 만들기로 지도 클릭시 생성되는 Meeting구조체
-    static func createMapAnnotation(location: CLLocationCoordinate2D) -> Meeting {
-        var title: String = ""
-        var description: String = ""
-        var place : String = ""
-        var numbersOfMembers : Int = 0
-    
-        let location = location
-        var geoHash: String? = nil
-        
-        var publishedDate: Timestamp = Timestamp(date: Date())
-        var meetingDate: Date = Date()
-        
-        var hostUID: String = " "
-
-        var type: MeetingType = .new
-
-        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, hostUID: hostUID, type: type)
-    } 
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any]) {
@@ -104,9 +86,50 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
             "publishedDate": FieldValue.serverTimestamp(),
             "meetingDate": meetingDate,
             
-            "hostUID": hostUID
+            //nil이면 오류나게 수정!!
+            "hostUID": Auth.auth().currentUser?.uid
         ]
     }
+
+    // 모임 만들기로 지도 클릭시 생성되는 Meeting구조체
+    static func createMapAnnotation(location: CLLocationCoordinate2D) -> Meeting {
+        var title: String = ""
+        var description: String = ""
+        var place : String = ""
+        var numbersOfMembers : Int = 0
+    
+        let location = location
+        var geoHash: String? = nil
+        
+        var publishedDate: Timestamp = Timestamp(date: Date())
+        var meetingDate: Date = Date()
+        
+        var hostUID: String = ""
+
+        var type: MeetingType = .new
+
+        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, hostUID: hostUID, type: type)
+    } 
+
+    // 새로운 모임 만들기
+    static func createNewMeeting(title: String, description: String, place: String, numbersOfMembers: Int, location: CLLocationCoordinate2D, meetingDate: Date) -> Meeting {
+        var title: String = title
+        var description: String = description
+        var place : String = place
+        var numbersOfMembers : Int = numbersOfMembers
+    
+        let location = location
+        var geoHash: String? = GFUtils.geoHash(forLocation: location)
+        
+        var publishedDate: Timestamp = Timestamp(date: Date())
+        var meetingDate: Date = meetingDate
+        
+        var hostUID: String = ""
+
+        var type: MeetingType = .new
+
+        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, hostUID: hostUID, type: type)
+    } 
 
     // 모임 수정용 Meeting구조체
     static func updateMeeting(title: String = "", description: String = "", place: String = "", numbersOfMembers: Int = 0, meetingDate: Date = Date(timeIntervalSince1970:0)) -> Meeting {

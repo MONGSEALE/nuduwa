@@ -55,6 +55,12 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         return data
     }
     
+    func convertUserData(_ userData: UserData) {
+        self.id = userData.id
+        self.userName = userData.userName
+        self.userImage = userData.userImage
+    }
+
     /*
     enum CodingKeys: CodingKey {
         case id

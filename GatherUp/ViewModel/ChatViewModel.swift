@@ -12,32 +12,33 @@ import FirebaseFirestore
 
 class ChatViewModel: FirebaseViewModelwithMeetings {
 
-    @Published var messages: [ChatMessage] = []
-    @Published  var lastMessageId: String = ""
+    @Published var messages: [Message] = []
+    @Published var lastMessageId: String = ""
     
     ///채팅구현
     func messagesListener(meetingID: String) {
         isLoading = true
         Task{
-            let listener = db.collection(strMeetings).document(meetingID).collection(strMessage)
+            let query = db.collection(strMeetings).document(meetingID).collection(strMessage)
             .order(by: "timestamp", descending: false)
-            .addSnapshotListener { (querySnapshot, error) in
+            let listener = query.addSnapshotListener { querySnapshot, error in
                 if let error = error {print("에러!messagesListener:\(error)");return}
                 guard let documents = querySnapshot?.documents else {return}
                 
-                self.messages = documents.compactMap { document -> ChatMessage? in
-                    let data = document.data()
-                    let id = document.documentID
-                    let text = data["text"] as? String ?? ""
-                    let userId = data["userUID"] as? String ?? ""
-                    let userName = data["userName"] as? String ?? ""
-                    let timestamp = data["timestamp"] as? Timestamp ?? Timestamp()
-                    let isSystemMessage = data["isSystemMessage"] as? Bool ?? false
+                self.messages = documents.compactMap { document -> Message? in
+                    document.data(as: Message.self)
+                    // let data = document.data()
+                    // let id = document.documentID
+                    // let text = data["text"] as? String ?? ""
+                    // let userId = data["userUID"] as? String ?? ""
+                    // let userName = data["userName"] as? String ?? ""
+                    // let timestamp = data["timestamp"] as? Timestamp ?? Timestamp()
+                    // let isSystemMessage = data["isSystemMessage"] as? Bool ?? false
                     
-                    return ChatMessage(id: id, text: text, userUID: userId, timestamp: timestamp ,isSystemMessage:isSystemMessage)
+                    // return ChatMessage(id: id, text: text, userUID: userId, timestamp: timestamp ,isSystemMessage:isSystemMessage)
                 }
             }
-            listeners.append(listener)
+            listeners[query.path] = listener
             isLoading = false
         }
     }
@@ -46,12 +47,15 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
         isLoading = true
         Task{
             do{
-                await fetchCurrentUserAsync()
-                try await db.collection(strMeetings).document(meetingID).collection(strMessage).addDocument(data: [
-                    "text": text,
-                    "userUID": currentUID as Any,
-                    "timestamp": Timestamp()
-                ])
+                guard let currentUID = currentUID else{return}
+                let message = Message(text, uid: currentUID)
+                let col = db.collection(strMeetings).document(meetingID).collection(strMessage)
+                try await col.addDocument(data: message.firestoreData)
+                // try await col.addDocument(data: [
+                //     "text": text,
+                //     "userUID": currentUID as Any,
+                //     "timestamp": Timestamp()
+                // ])
                 isLoading = false
             }catch{
                 await handleError(error)
@@ -65,7 +69,8 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
     }
     
     func sendSystemMessage(meetingID: String, text: String) {
-        db.collection(strMeetings).document(meetingID).collection(strMessage).addDocument(data: Message.systemMessage(text))
+        let col = db.collection(strMeetings).document(meetingID).collection(strMessage)
+        col.addDocument(data: Message.systemMessage(text))
     }
 
     
