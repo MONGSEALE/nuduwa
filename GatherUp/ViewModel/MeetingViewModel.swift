@@ -74,7 +74,8 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     }
 
     func sortMeeting(_ meetings: [Meeting]){
-        self.meetings.sort { (meeting1, meeting2) -> Bool in
+        var sortMeeings = meetings
+        sortMeeings.sort { (meeting1, meeting2) -> Bool in
             if meeting1.hostUID == self.currentUID && meeting2.hostUID != self.currentUID {
                 return true
             } else if meeting1.hostUID != self.currentUID && meeting2.hostUID == self.currentUID {
@@ -83,7 +84,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                 return meeting1.meetingDate < meeting2.meetingDate
             }
         }
-        self.meetings = meetings
+        self.meetings = sortMeeings
     }
     
     /// FireStore와 meetings 배열 실시간 연동
@@ -92,41 +93,44 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         isLoading = true
         Task{
             do{
+                guard let currentUID = currentUID else{return}
                 let query = db.collectionGroup(strMembers).whereField("memberUID", isEqualTo: currentUID)
                 let listener = query.addSnapshotListener { querySnapshot, error in
-                        if let error = error {print("에러!meetingsListener:\(error)");return}
-                        
-                        var meetings: [Meeting] = []
+                    if let error = error {print("에러!meetingsListener:\(error)");return}
+                    
+                    var meetings: [Meeting] = []
 
-                        guard let querySnapshot = querySnapshot else{return}
-                        for diff in querySnapshot.documentChanges{
-                            if (diff.type == .modified) {
-                                let meetingID = diff.document.reference.parent.parent?.documentID
-                                guard let meetingID = meetingID else{continue}
-                                self.fetchMeeting(meetingID)
-                            }
-                            if (diff.type == .removed) {
-                                print("Removed city: \(diff.document.data())")
-                            }
+                    guard let querySnapshot = querySnapshot else{return}
+                    for diff in querySnapshot.documentChanges{
+                        if (diff.type == .modified) {
+                            let meetingID = diff.document.reference.parent.parent?.documentID
+                            guard let meetingID = meetingID else{continue}
+                            self.fetchMeeting(meetingID)
                         }
-                        
+                        if (diff.type == .removed) {
+                            print("Removed city: \(diff.document.data())")
+                        }
+                    }
+                    
 //                        guard let documents = querySnapshot.documents else{return}
-                    Task{
-                        for document in querySnapshot.documents {
-                            if let meetingDocument = document.reference.parent.parent {
-                                do {
-                                    let meetingSnapshot = try await meetingDocument.getDocument()
-                                    if let meeting = try meetingSnapshot.data(as: Meeting.self) {
+                    for document in querySnapshot.documents {
+                        if let meetingDocument = document.reference.parent.parent {
+                            do {
+                                try meetingDocument.getDocument{ meetingSnapshot, error in
+                                    if let meeting = try? meetingSnapshot!.data(as: Meeting.self) {
                                         meetings.append(meeting)
                                     }
+                                    print("모임:\(meetings)")
                                     self.sortMeeting(meetings)
                                     self.isLoading = false
-                                } catch {
-                                    print("meetingDocument 데이터 가져오기 오류:", error)
-                                    self.isLoading = false
                                 }
+                                
+                            } catch {
+                                print("meetingDocument 데이터 가져오기 오류:", error)
+                                self.isLoading = false
                             }
                         }
+                        
                     }
                         
 

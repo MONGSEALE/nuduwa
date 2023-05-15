@@ -59,9 +59,8 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
-    init?(data: [String: Any]) {
-        guard let id = data["id"] as? String,
-              let title = data["title"] as? String,
+    init?(data: [String: Any], id: String) {
+        guard let title = data["title"] as? String,
               let description = data["description"] as? String,
               let place = data["place"] as?  String,
               let numbersOfMembers = data["numbersOfMembers"] as? Int,
@@ -71,10 +70,10 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
               let geoHash = data["geoHash"] as? String? ?? nil,
             
               let publishedDate = data["publishedDate"] as? Timestamp,
-              let meetingDate = data["meetingDate"] as? Date,
+              let meetingDate = data["meetingDate"] as? Timestamp,
 
               let hostUID = data["hostUID"] as? String
-        else { return nil }
+        else { print("아이디:\(id)");return nil }
         
         self.id = id
         self.title = title
@@ -87,7 +86,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         self.geoHash = geoHash
         
         self.publishedDate = publishedDate.dateValue()
-        self.meetingDate = meetingDate
+        self.meetingDate = meetingDate.dateValue()
 
         self.hostUID = hostUID
         

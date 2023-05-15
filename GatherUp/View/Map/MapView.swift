@@ -57,11 +57,11 @@ struct MapView: View {
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))
                 .onAppear{
-                    serverViewModel.mapMeetingsListener(region: viewModel.region)              /// Map이 보여지는동안 Firebase와 실시간 연동
+//                    serverViewModel.mapMeetingsListener(region: viewModel.region)              /// Map이 보여지는동안 Firebase와 실시간 연동
                     serverViewModel.checkedOverlap()    /// Map이 보여지는동안 실시간 중복확인
                     viewModel.checkIfLocationServicesIsEnabled()
                     setupTimer()
-                    serverViewModel.joinMeetingsListener()
+//                    serverViewModel.joinMeetingsListener()
                 }
                 .onDisappear{
                     timer.suspend()

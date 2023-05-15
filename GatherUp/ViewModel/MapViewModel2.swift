@@ -230,10 +230,15 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                 let query = try? await doc.getDocuments()
                 
                 if let query = query, !query.isEmpty {
-                    self.isOverlap = true
-                    print("작성자 중복!")
+                    await MainActor.run{
+                        self.isOverlap = true
+                        print("작성자 중복!")
+                    }
                 } else {
-                    self.isOverlap = false
+                    await MainActor.run{
+                        self.isOverlap = false
+                        print("작성자 중복!")
+                    }
                 }
                 
             }catch{

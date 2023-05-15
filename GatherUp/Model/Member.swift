@@ -21,9 +21,8 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
 //
 //    }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
-    init?(data: [String: Any]) {
-        guard let id = data["id"] as? String,
-              let memberUID = data["memberUID"] as? String,
+    init?(data: [String: Any], id: String) {
+        guard let memberUID = data["memberUID"] as? String,
               let joinDate = data["joinDate"] as? Timestamp
         else { return nil }
         

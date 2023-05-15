@@ -36,7 +36,6 @@ class FirebaseViewModel: ObservableObject {
     /// 데이터 가져오는 동안 로딩뷰 보여줄 변수
     @Published var isLoading: Bool = false
 
-    @Published var currentUser: User?
     @Published var user: User?
 
     var currentUID: String? {
@@ -111,9 +110,13 @@ class FirebaseViewModel: ObservableObject {
     }
 
     /// 유저 데이터 실시간 가져오기
-    func userListener(_ userUID: String) {
+    func userListener(_ userUID: String?) {
         print("userListener")
         Task{
+            guard let userUID = userUID else{
+                print("유저아이디 없음")
+                return
+            }
             let doc = db.collection(strUsers).document(userUID)
             let listener = doc.addSnapshotListener { snapshot, error in
                 if let error = error{
@@ -122,6 +125,7 @@ class FirebaseViewModel: ObservableObject {
                 }
                 guard let document = snapshot else{print("No Users");return}
                 self.user = try? document.data(as: User.self)
+                print("유저\(self.user)")
             }
             listeners[doc.path] = listener
         }
