@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Firebase
 import FirebaseFirestoreSwift
 
 struct User: Identifiable, Codable, FirestoreConvertible {
@@ -22,7 +23,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
     init?(data: [String: Any]) {
         guard let id = data["id"] as? String,
             let userName = data["userName"] as? String,
-            let signUpDate = data["signUpDate"] as? Date
+            let signUpDate = data["signUpDate"] as? Timestamp
         else { return nil }
         
         self.id = id
@@ -36,6 +37,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
     
     // Firestore에 저장할 필드
     var firestoreData: [String: Any] {
+        guard let userName = userName else{return [:]}
         var data: [String: Any] = [
             "userName": userName,
             "signUpDate": FieldValue.serverTimestamp()
@@ -55,7 +57,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         return data
     }
     
-    func convertUserData(_ userData: UserData) {
+    mutating func convertUserData(_ userData: UserData) {
         self.id = userData.id
         self.userName = userData.userName
         self.userImage = userData.userImage
@@ -73,7 +75,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
      */
 }
 
-struct UserData: Identifiable, Codable, FirestoreConvertible {
+struct UserData: Identifiable, Codable {
     @DocumentID var id: String?
 
     var userName: String

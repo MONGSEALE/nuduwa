@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Firebase
 import FirebaseFirestoreSwift
 
 struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
@@ -20,7 +21,7 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
     init?(data: [String: Any]) {
         guard let id = data["id"] as? String,
               let memberUID = data["memberUID"] as? String,
-              let joinDate = data["joinDate"] as? Date
+              let joinDate = data["joinDate"] as? Timestamp
         else { return nil }
         
         self.id = id

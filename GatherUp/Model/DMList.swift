@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Firebase
 import FirebaseFirestoreSwift
 
 struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
@@ -18,7 +19,7 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
     init?(data: [String: Any]) {
         guard let id = data["id"] as? String,
               let chatterUID = data["chatterUID"] as? String,
-              let DMPeopleID = data["DMPeopleID"] as? String
+              let DMPeopleID = data["DMPeopleID"] as? String,
               let timestamp = data["timestamp"] as? Timestamp
         else { return nil }
         
@@ -37,4 +38,3 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         ]
     }
 }
-

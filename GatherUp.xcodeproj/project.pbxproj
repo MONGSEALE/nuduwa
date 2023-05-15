@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0FAE23A629E640F000A826C8 /* Splash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FAE23A529E640F000A826C8 /* Splash.swift */; };
-		335DF2D629E546060051B602 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335DF2D529E546060051B602 /* ChatMessage.swift */; };
 		339A101229D3E9C100B4DD98 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101129D3E9C000B4DD98 /* LoginViewModel.swift */; };
 		339A101529D3E9F400B4DD98 /* Login.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101429D3E9F400B4DD98 /* Login.swift */; };
 		339A101829D3EAE500B4DD98 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101729D3EAE500B4DD98 /* User.swift */; };
@@ -43,8 +42,10 @@
 		33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13B29D667E500352451 /* MeetingCardView.swift */; };
 		33ADDF7B2A035D8F003FE79B /* PiledMeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADDF7A2A035D8F003FE79B /* PiledMeetingCardView.swift */; };
 		33ADDF7D2A036AFE003FE79B /* MemberProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */; };
-		33AF5AB62A0C7E950060427E /* Chatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5AB52A0C7E950060427E /* Chatter.swift */; };
-		33AF5AB82A0C7F090060427E /* DM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5AB72A0C7F090060427E /* DM.swift */; };
+		33AEB88F2A11B7D40048A8C7 /* FirestoreConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEB88E2A11B7D40048A8C7 /* FirestoreConvertible.swift */; };
+		33AEB8912A11B80D0048A8C7 /* DMList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEB8902A11B80D0048A8C7 /* DMList.swift */; };
+		33AEB8932A11B8B00048A8C7 /* JoinMeeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEB8922A11B8B00048A8C7 /* JoinMeeting.swift */; };
+		33AEB8952A11B8E40048A8C7 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEB8942A11B8E40048A8C7 /* Message.swift */; };
 		33AF5ABA2A0C7F270060427E /* DMPeople.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5AB92A0C7F270060427E /* DMPeople.swift */; };
 		33AF5ABD2A0C7F770060427E /* DMListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5ABC2A0C7F770060427E /* DMListView.swift */; };
 		33AF5ABF2A0C7F7F0060427E /* DMView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5ABE2A0C7F7F0060427E /* DMView.swift */; };
@@ -67,7 +68,6 @@
 
 /* Begin PBXFileReference section */
 		0FAE23A529E640F000A826C8 /* Splash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Splash.swift; sourceTree = "<group>"; };
-		335DF2D529E546060051B602 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		339A101129D3E9C000B4DD98 /* LoginViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		339A101429D3E9F400B4DD98 /* Login.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Login.swift; sourceTree = "<group>"; };
 		339A101729D3EAE500B4DD98 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -93,8 +93,10 @@
 		33ADB13B29D667E500352451 /* MeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCardView.swift; sourceTree = "<group>"; };
 		33ADDF7A2A035D8F003FE79B /* PiledMeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiledMeetingCardView.swift; sourceTree = "<group>"; };
 		33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberProfileView.swift; sourceTree = "<group>"; };
-		33AF5AB52A0C7E950060427E /* Chatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chatter.swift; sourceTree = "<group>"; };
-		33AF5AB72A0C7F090060427E /* DM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DM.swift; sourceTree = "<group>"; };
+		33AEB88E2A11B7D40048A8C7 /* FirestoreConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreConvertible.swift; sourceTree = "<group>"; };
+		33AEB8902A11B80D0048A8C7 /* DMList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMList.swift; sourceTree = "<group>"; };
+		33AEB8922A11B8B00048A8C7 /* JoinMeeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinMeeting.swift; sourceTree = "<group>"; };
+		33AEB8942A11B8E40048A8C7 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		33AF5AB92A0C7F270060427E /* DMPeople.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMPeople.swift; sourceTree = "<group>"; };
 		33AF5ABC2A0C7F770060427E /* DMListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMListView.swift; sourceTree = "<group>"; };
 		33AF5ABE2A0C7F7F0060427E /* DMView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMView.swift; sourceTree = "<group>"; };
@@ -187,11 +189,11 @@
 			children = (
 				339A101729D3EAE500B4DD98 /* User.swift */,
 				33ADB13729D6610900352451 /* Meeting.swift */,
-				335DF2D529E546060051B602 /* ChatMessage.swift */,
 				33A9111F29ED0AFF00C36FA2 /* Member.swift */,
-				33AF5AB52A0C7E950060427E /* Chatter.swift */,
-				33AF5AB72A0C7F090060427E /* DM.swift */,
 				33AF5AB92A0C7F270060427E /* DMPeople.swift */,
+				33AEB8902A11B80D0048A8C7 /* DMList.swift */,
+				33AEB8922A11B8B00048A8C7 /* JoinMeeting.swift */,
+				33AEB8942A11B8E40048A8C7 /* Message.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -245,6 +247,14 @@
 			path = Map;
 			sourceTree = "<group>";
 		};
+		33AEB88D2A11B7B20048A8C7 /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				33AEB88E2A11B7D40048A8C7 /* FirestoreConvertible.swift */,
+			);
+			path = Protocol;
+			sourceTree = "<group>";
+		};
 		33AF5ABB2A0C7F690060427E /* DM */ = {
 			isa = PBXGroup;
 			children = (
@@ -274,6 +284,7 @@
 		429515CD29C4A744006DD4B3 /* GatherUp */ = {
 			isa = PBXGroup;
 			children = (
+				33AEB88D2A11B7B20048A8C7 /* Protocol */,
 				339A101629D3EA0600B4DD98 /* Model */,
 				339A101329D3E9E900B4DD98 /* View */,
 				339A101029D3E9C000B4DD98 /* ViewModel */,
@@ -386,7 +397,6 @@
 				33AF5AC32A0C974D0060427E /* DMCardView.swift in Sources */,
 				33ADDF7D2A036AFE003FE79B /* MemberProfileView.swift in Sources */,
 				33AD61BF2A0A318800CD908D /* SearchUserView.swift in Sources */,
-				33AF5AB62A0C7E950060427E /* Chatter.swift in Sources */,
 				4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */,
 				429515DF29C4A776006DD4B3 /* ProfileView.swift in Sources */,
 				33ADB13829D6610900352451 /* Meeting.swift in Sources */,
@@ -395,10 +405,10 @@
 				33ADDF7B2A035D8F003FE79B /* PiledMeetingCardView.swift in Sources */,
 				33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */,
 				33AF5ABD2A0C7F770060427E /* DMListView.swift in Sources */,
+				33AEB8952A11B8E40048A8C7 /* Message.swift in Sources */,
 				33A9112029ED0B0000C36FA2 /* Member.swift in Sources */,
+				33AEB8932A11B8B00048A8C7 /* JoinMeeting.swift in Sources */,
 				339A101229D3E9C100B4DD98 /* LoginViewModel.swift in Sources */,
-				335DF2D629E546060051B602 /* ChatMessage.swift in Sources */,
-				33AF5AB82A0C7F090060427E /* DM.swift in Sources */,
 				33AF5ABA2A0C7F270060427E /* DMPeople.swift in Sources */,
 				33AD61C52A0A320F00CD908D /* MeetingInfoSheetViewModel.swift in Sources */,
 				33AD61C32A0A31D300CD908D /* FirebaseViewModelwithMeetings.swift in Sources */,
@@ -408,7 +418,9 @@
 				0FAE23A629E640F000A826C8 /* Splash.swift in Sources */,
 				33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */,
 				429515DD29C4A766006DD4B3 /* MapView.swift in Sources */,
+				33AEB8912A11B80D0048A8C7 /* DMList.swift in Sources */,
 				339A101D29D3EBBF00B4DD98 /* LoadingView.swift in Sources */,
+				33AEB88F2A11B7D40048A8C7 /* FirestoreConvertible.swift in Sources */,
 				339A101C29D3EBBF00B4DD98 /* ViewExtensions.swift in Sources */,
 				428C040329E8E6F3003443BA /* MeetingInfoSheetView.swift in Sources */,
 				33ABB70429DD421E0049D482 /* ProfileViewModel.swift in Sources */,

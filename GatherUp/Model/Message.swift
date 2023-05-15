@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Firebase
 import FirebaseFirestoreSwift
 
 struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
@@ -20,7 +21,7 @@ struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
         self.text = text
         self.senderUID = uid
         self.timestamp = Timestamp(date: Date())
-        self.isSystemMessage= false
+        self.isSystemMessage = false
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -62,6 +63,5 @@ struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
             "timestamp" : FieldValue.serverTimestamp(),
             "isSystemMessage": true
         ]
-    } 
+    }
 }
-

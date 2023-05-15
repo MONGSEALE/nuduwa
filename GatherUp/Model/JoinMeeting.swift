@@ -1,17 +1,18 @@
 //
-//  User.swift
-//  Nudowa
+//  JoinMeeting.swift
+//  GatherUp
 //
-//  Created by DaelimCI00007 on 2023/05/12.
+//  Created by DaelimCI00007 on 2023/05/15.
 //
 
 import SwiftUI
+import Firebase
 import FirebaseFirestoreSwift
 
 struct JoinMeeting: Identifiable, Codable, FirestoreConvertible {
     @DocumentID var id: String?
 
-    let meetingID: string
+    let meetingID: String
     var joinDate: Date = Date()
     let isHost: Bool
 
@@ -19,7 +20,7 @@ struct JoinMeeting: Identifiable, Codable, FirestoreConvertible {
     init?(data: [String: Any]) {
         guard let id = data["id"] as? String,
               let meetingID = data["meetingID"] as? String,
-              let joinDate = data["joinDate"] as? Date,
+              let joinDate = data["joinDate"] as? Date
         else { return nil }
         
         self.id = id

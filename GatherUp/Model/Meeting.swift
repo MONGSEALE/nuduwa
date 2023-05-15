@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Firebase
 import FirebaseAuth
 import FirebaseFirestoreSwift
 import Foundation
@@ -20,7 +21,9 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     var place : String
     var numbersOfMembers : Int
   
-    let location: CLLocationCoordinate2D
+    var latitude: Double
+    var longitude: Double
+    
     var geoHash: String?
     
     var publishedDate: Timestamp
@@ -30,10 +33,29 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
 
     var type: MeetingType
     
-    enum MeetingType: Codable {
+    enum MeetingType: String, Codable {
         case basic
         case new
         case piled
+    }
+    
+    init(id: String? = nil, title: String, description: String, place : String, numbersOfMembers : Int, location: CLLocationCoordinate2D, geoHash: String? = nil, publishedDate: Timestamp? = nil, meetingDate: Date, hostUID: String? = nil, type: MeetingType) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.place = place
+        self.numbersOfMembers = numbersOfMembers
+    
+        self.latitude = location.latitude
+        self.latitude = location.longitude
+        self.geoHash = geoHash
+        
+        self.publishedDate = publishedDate ?? Timestamp(date: Date())
+        self.meetingDate = meetingDate
+
+        self.hostUID = hostUID ?? ""
+        
+        self.type = type
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -48,7 +70,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
               let longitude = data["longitude"] as? Double,
               let geoHash = data["geoHash"] as? String? ?? nil,
             
-              let publishedDate = data["publishedDate"] as? Date,
+              let publishedDate = data["publishedDate"] as? Timestamp,
               let meetingDate = data["meetingDate"] as? Date,
 
               let hostUID = data["hostUID"] as? String
@@ -60,7 +82,8 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         self.place = place
         self.numbersOfMembers = numbersOfMembers
     
-        self.location = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        self.latitude = latitude
+        self.latitude = longitude
         self.geoHash = geoHash
         
         self.publishedDate = publishedDate
@@ -73,21 +96,22 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     
     // Firestore에 저장할 필드
     var firestoreData: [String: Any] {
+        guard let uid = Auth.auth().currentUser?.uid else{return [:]}
         return [
             "title": title,
             "description": description,
             "place" : place,
             "numbersOfMembers" : numbersOfMembers,
         
-            "latitude" : location.latitude,
-            "longitude" : location.longitude,
-            "geoHash": geoHash,
+            "latitude" : latitude,
+            "longitude" : longitude,
+            "geoHash": GFUtils.geoHash(forLocation: CLLocationCoordinate2D(latitude: latitude, longitude: longitude)),
             
             "publishedDate": FieldValue.serverTimestamp(),
             "meetingDate": meetingDate,
             
             //nil이면 오류나게 수정!!
-            "hostUID": Auth.auth().currentUser?.uid
+            "hostUID": uid
         ]
     }
 
@@ -103,12 +127,10 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         
         var publishedDate: Timestamp = Timestamp(date: Date())
         var meetingDate: Date = Date()
-        
-        var hostUID: String = ""
 
         var type: MeetingType = .new
 
-        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, hostUID: hostUID, type: type)
+        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
     } 
 
     // 새로운 모임 만들기
@@ -123,12 +145,10 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         
         var publishedDate: Timestamp = Timestamp(date: Date())
         var meetingDate: Date = meetingDate
-        
-        var hostUID: String = ""
 
         var type: MeetingType = .new
 
-        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, hostUID: hostUID, type: type)
+        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
     } 
 
     // 모임 수정용 Meeting구조체
@@ -152,7 +172,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, hostUID: hostUID, type: type)
     }
     var firestoreUpdate: [String: Any] {
-        var data: [String: Any] = []
+        var data: [String: Any] = [:]
         
         // 바뀐값만 Firestore에 Update
         if title != "" {
