@@ -15,6 +15,7 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
     let DMPeopleID: String
     let timestamp: Timestamp
 
+    // 기본 생성자
     init(id: String? = nil, chatterUID: String, DMPeopleID: String, timestamp: Timestamp? = nil) {
         self.id = id
         self.chatterUID = chatterUID

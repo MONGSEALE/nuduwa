@@ -65,7 +65,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
             // meeting1과 가까이 있는 모임 있으면 meeting1도 bigIconMeetings에 저장후 원래 Meetings에선 삭제하고 type.piled Meeting 저장
             if !nearbyMeetings.isEmpty {
                 bigIconMeetings[meeting1.id!, default: []] = [meeting1] + nearbyMeetings
-                let meeting = Meeting.piled(id: meeting1.id!, location: meeting1.location, geoHash: meeting1.geoHash)
+                let meeting = Meeting.piledMapAnnotation(id: meeting1.id!, location: meeting1.location, geoHash: meeting1.geoHash)
 //                let meeting = Meeting(id: meeting1.id, title: "", description: "", place: "", numbersOfMembers: 0, latitude: meeting1.latitude, longitude: meeting1.longitude, hostUID: "", type: .piled)
                 setFetchedMeetings.remove(meeting1)
                 setFetchedMeetings.insert(meeting)

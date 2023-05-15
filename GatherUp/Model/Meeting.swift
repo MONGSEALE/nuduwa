@@ -30,6 +30,8 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     var meetingDate: Date
     
     let hostUID: String
+    var hostName: String? = nil
+    var hostImage: URL? = nil
 
     var type: MeetingType
     
@@ -38,7 +40,13 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         case new
         case piled
     }
+
+    // CLLocationCoordinate2D타입으로 location 가져오기
+    var location: CLLocationCoordinate2D {
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
     
+    // 기본 생성자
     init(id: String? = nil, title: String, description: String, place : String, numbersOfMembers : Int, location: CLLocationCoordinate2D, geoHash: String? = nil, publishedDate: Date? = nil, meetingDate: Date, hostUID: String? = nil, type: MeetingType? = nil) {
         self.id = id
         self.title = title
@@ -95,6 +103,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     
     // Firestore에 저장할 필드
     var firestoreData: [String: Any] {
+        // Auth.auth().currentUser?.uid 값이 없으면 빈값 반환
         guard let uid = Auth.auth().currentUser?.uid else{return [:]}
         return [
             "title": title,
@@ -109,14 +118,10 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
             "publishedDate": FieldValue.serverTimestamp(),
             "meetingDate": meetingDate,
             
-            //nil이면 오류나게 수정!!
             "hostUID": uid
         ]
     }
     
-    var location: CLLocationCoordinate2D {
-        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-    }
 
     // 모임 만들기로 지도 클릭시 생성되는 Meeting구조체
     static func createMapAnnotation(_ location: CLLocationCoordinate2D) -> Meeting {
@@ -135,8 +140,8 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
 
         return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
     }
-    // 중첩 모임
-    static func piled(id: String, location: CLLocationCoordinate2D, geoHash: String?) -> Meeting {
+    // 모임 위치가 겹쳤을 경우 MapAnnotation용 구조체
+    static func piledMapAnnotation(id: String, location: CLLocationCoordinate2D, geoHash: String?) -> Meeting {
         let id = id
         let title: String = ""
         let description: String = ""
@@ -192,6 +197,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
 
         return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, hostUID: hostUID, type: type)
     }
+    // 수정 모임 firestore에 업데이트
     var firestoreUpdate: [String: Any] {
         var data: [String: Any] = [:]
         
@@ -213,5 +219,33 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         }
 
         return data
+    }
+    // 수정 모임 업데이트 - 객체 안만들고 Firestore 바로 저장하기
+    static func firestoreUpdateMeeting(title: String? = nil, description: String? = nil, place: String? = nil, numbersOfMembers: Int? = nil, meetingDate: Date? = nil) -> [String: Any] {
+        var data: [String: Any] = [:]
+
+        if let title {
+            data["title"] = title
+        }
+        if let description {
+            data["description"] = description
+        }
+        if let place {
+            data["place"] = place
+        }
+        if let numbersOfMembers {
+            data["numbersOfMembers"] = numbersOfMembers
+        }
+        if let meetingDate {
+            data["meetingDate"] = meetingDate
+        }
+
+        return data
+    }
+
+    var firestoreCancle: [String: Any] {
+        return [
+            "geoHash": nil
+        ]
     }
 }

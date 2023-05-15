@@ -280,14 +280,14 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     }
     
     /// - 모임 수정하기
-    func editMeeting(title: String, description: String, meetingDate: Date){
+    func editMeeting(title: String, description: String, place: String, numbersOfMembers: Int, meetingDate: Date){
         print("updateMeeting:\(title)")
         isLoading = true
         Task{
             do{
                 guard let meeting = meeting else{return}
                 guard let meetingID = meeting.id else{return}
-                
+                /*
                 if title != meeting.title {
                     try await
                     db.collection(strMeetings).document(meetingID).updateData(["title": title])
@@ -305,6 +305,9 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                     db.collection(strMeetings).document(meetingID).updateData(["meetingDate": meetingDate])
                     print("meetingDate 수정")
                 }
+                */
+                let doc = db.collection(strMeetings).document(meetingID)
+                try await doc.updateData(Meeting.firestoreUpdateMeeting(title, description, place, numbersOfMembers, meetingDate))
 
                 await MainActor.run(body: {
                     isLoading = false

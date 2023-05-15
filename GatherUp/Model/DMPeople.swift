@@ -13,6 +13,7 @@ struct DMPeople : Identifiable, Codable, Equatable, FirestoreConvertible {
     
     var chattersUID: [String]
 
+    // 기본 생성자
     init(id: String? = nil, chattersUID: [String]) {
         self.id = id
         self.chattersUID = chattersUID
