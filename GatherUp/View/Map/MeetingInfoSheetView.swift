@@ -12,13 +12,13 @@ import SDWebImageSwiftUI
 struct MeetingInfoSheetView: View {
     
     @Environment(\.dismiss) private var dismiss
-    @StateObject var viewModel: MeetingInfoSheetViewModel = .init()
+    @StateObject var viewModel: MeetingViewModel = .init()
     @State var showMessage = false
 
-    let meetingID: String
-    let hostUID: String
+    let meeting: Meeting
 
     var body: some View {
+        let meeting = viewModel.meeting ?? meeting
         GeometryReader { geometry in
             if viewModel.isLoading {
                 ProgressView()
@@ -43,7 +43,7 @@ struct MeetingInfoSheetView: View {
                         VStack(alignment: .leading) {
                             Text(viewModel.user?.userName ?? "")
                                 .font(.system(size:20))
-                            Text("\(viewModel.meeting.publishedDate.formatted(.dateTime.hour().minute()))에 생성됨")
+                            Text("\(meeting.publishedDate.formatted(.dateTime.hour().minute()))에 생성됨")
                                 .font(.caption2)
                         }
                         .padding(.leading,20)
@@ -52,7 +52,7 @@ struct MeetingInfoSheetView: View {
                     .padding()
                     Spacer()
                     HStack{
-                        Text(viewModel.meeting.title)
+                        Text(meeting.title)
                             .padding(.bottom, geometry.size.height <= 200 ? 0 : 8)
                             .font(.system(size:24))
                     }
@@ -61,7 +61,7 @@ struct MeetingInfoSheetView: View {
                         HStack {
                             Image(systemName: "mappin.and.ellipse")
                                 .padding(.leading,30)
-                            Text(viewModel.meeting.place)
+                            Text(meeting.place)
                             
                             Spacer()
                         }
@@ -69,7 +69,7 @@ struct MeetingInfoSheetView: View {
                         HStack {
                             Image(systemName: "highlighter")
                                 .padding(.leading,30)
-                            Text(viewModel.meeting.description)
+                            Text(meeting.description)
                             
                             Spacer()
                         }
@@ -77,7 +77,7 @@ struct MeetingInfoSheetView: View {
                         HStack{
                             Image(systemName: "calendar")
                                 .padding(.leading,30)
-                            Text("\(viewModel.meeting.meetingDate.formatted(.dateTime.month().day().hour().minute()))에 만날꺼에요!")
+                            Text("\(meeting.meetingDate.formatted(.dateTime.month().day().hour().minute()))에 만날꺼에요!")
                             Spacer()
                         }
                         
@@ -85,26 +85,35 @@ struct MeetingInfoSheetView: View {
                         HStack{
                             Image(systemName: "person.2")
                                 .padding(.leading,30)
-                            Text("참여인원  \(viewModel.members.count)/\(viewModel.meeting.numbersOfMembers)")
+                            Text("참여인원 ")
+                            if let numbersOfMembers = viewModel.meeting?.numbersOfMembers{
+                                Text("\(viewModel.members.count)/\(numbersOfMembers)")
+                            }else{
+                                ProgressView()
+                            }
                             Spacer()
                         }
                         
                         Spacer()
                         
-                        if viewModel.currentUID != viewModel.meeting.hostUID{  // host가 아니면
-                            if viewModel.members.first(where: { $0.memberUID == viewModel.currentUID}) == nil{  // members 배열에 user가 없으면
-                                if viewModel.members.count<viewModel.meeting.numbersOfMembers {  // 모임에 자리가 있으면
-                                    Button {
-                                        viewModel.joinMeeting(meetingID: viewModel.meeting.id!, numbersOfMembers: viewModel.meeting.numbersOfMembers)
-                                    } label: {
-                                        Text("참여하기")
+                        if let numbersOfMembers = viewModel.meeting?.numbersOfMembers{
+                            if viewModel.currentUID != meeting.hostUID{  // host가 아니면
+                                if viewModel.members.first(where: { $0.memberUID == viewModel.currentUID}) == nil{  // members 배열에 user가 없으면
+                                    if viewModel.members.count<numbersOfMembers {  // 모임에 자리가 있으면
+                                        Button {
+                                            viewModel.joinMeeting(meetingID: meeting.id!, numbersOfMembers: numbersOfMembers)
+                                        } label: {
+                                            Text("참여하기")
+                                        }
+                                    } else {  // 모임에 자리가 없으면
+                                        Text("참여불가")
                                     }
-                                } else {  // 모임에 자리가 없으면
-                                    Text("참여불가")
+                                } else {  // members 배열에 user가 있으면
+                                    Text("참여중")
                                 }
-                            } else {  // members 배열에 user가 있으면
-                                Text("참여중")
                             }
+                        } else {
+                            ProgressView()
                         }
                         
                     }
@@ -113,13 +122,12 @@ struct MeetingInfoSheetView: View {
             
         }
         .onAppear {
-            viewModel.fetchUser(userUID: hostUID)
-            viewModel.meetingListner(meetingID: meetingID)
-            viewModel.membersListener(meetingID: meetingID)
+            viewModel.fetchUserData(meeting.hostUID)
+            viewModel.meetingListner(meetingID: meeting.id!)
+            viewModel.membersListener(meetingID: meeting.id!)
         }
         .onDisappear{
-            viewModel.removeListener()
-            viewModel.removeMeetingListener()
+            viewModel.removeListeners()
         }
         .onChange(of: viewModel.isDelete) { isDelete in
             if isDelete {

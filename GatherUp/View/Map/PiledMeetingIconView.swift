@@ -32,7 +32,7 @@ struct PiledMeetingIconView: View {
                     .padding(6)
                     .background(Color(.blue))
                     .clipShape(Circle())
-                Text(meetings.count)
+                Text("\(meetings.count)")
             }
             
             Image(systemName: "triangle.fill")
@@ -81,7 +81,7 @@ struct PiledMeetingsListView: View {
                 Divider()
             }
             .navigationDestination(for: Meeting.self) { meeting in
-                MeetingInfoSheetView(meetingID: meeting.id!, hostUID: meeting.hostUID)
+                MeetingInfoSheetView(meeting: meeting)
                     .navigationBarBackButtonHidden(true)
             }
         }

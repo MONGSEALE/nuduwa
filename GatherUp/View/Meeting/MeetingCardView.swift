@@ -52,15 +52,17 @@ struct MeetingCardView: View {
         
         .onAppear {
             viewModel.meeting = meeting
-            viewModel.fetchUser(userUID: meeting.hostUID)
+            viewModel.fetchUserData(meeting.hostUID)
             viewModel.meetingListener(meetingID: meeting.id!)
         }
         .onDisappear {
-            viewModel.removeListener()
+            viewModel.removeListeners()
         }
         .onChange(of: viewModel.meeting) { updatedMeeting in
-            if updatedMeeting.hostUID != "" {
-                onUpdate(updatedMeeting)
+            if let updatedMeeting {
+                if updatedMeeting.hostUID != "" {
+                    onUpdate(updatedMeeting)
+                }
             }
         }
         .onChange(of: viewModel.deletedMeeting) { _ in

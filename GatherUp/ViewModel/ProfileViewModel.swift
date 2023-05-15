@@ -51,20 +51,21 @@ class ProfileViewModel: FirebaseViewModel {
     func editUser(userName: String?, userImage: PhotosPickerItem?){
         print("updateUser")
         isLoading = true
-        var isAnotherLoading: [String:Bool]= [:]
-        func check(){
-            var isAnyLoading = false
-            for loading in isAnotherLoading.values {
-                if loading {
-                    isAnyLoading = true
-                }
-            }
-            if !isAnyLoading {
-                self.isLoading = false
-            }
-        }
+        
         Task{
             do{
+                func check(){
+                    var isAnyLoading = false
+                    for loading in isAnotherLoading.values {
+                        if loading {
+                            isAnyLoading = true
+                        }
+                    }
+                    if !isAnyLoading {
+                        self.isLoading = false
+                    }
+                }
+                var isAnotherLoading: [String:Bool] = [:]
                 let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
                 guard let currentUID = currentUID else{return}
                 
@@ -72,7 +73,7 @@ class ProfileViewModel: FirebaseViewModel {
                     isAnotherLoading["userName"] = true
                     try await db.collection(strUsers).document(currentUID).updateData(["userName": userName])
                     changeRequest?.displayName = userName
-                    changeRequest?.commitChanges()
+                    try await changeRequest?.commitChanges()
                     isAnotherLoading["userName"] = false
                     check()
                     print("userName 수정")
@@ -82,7 +83,7 @@ class ProfileViewModel: FirebaseViewModel {
                     let maxFileSize: Int = 100_000 // 최대 파일 크기 (예: 0.1MB)
                     var compressionQuality: CGFloat = 1.0 // 초기 압축 품질
 
-                    let image = userImage.image
+                    guard let image = try await userImage.loadTransferable(type: Data.self) else{return}
                     var jpegImage: UIImage?
                     var imageData: Data?
 
@@ -100,9 +101,9 @@ class ProfileViewModel: FirebaseViewModel {
 
                     if let jpegData = jpegImage?.jpegData(compressionQuality: compressionQuality), jpegData.count > maxFileSize {
                         imageData = jpegData
-                        while imageData.count > maxFileSize && compressionQuality > 0.1 {
+                        while imageData!.count > maxFileSize && compressionQuality > 0.1 {
                             compressionQuality -= 0.1
-                            imageData = uiImage.jpegData(compressionQuality: compressionQuality) ?? Data()
+                            imageData = jpegImage?.jpegData(compressionQuality: compressionQuality)
                         }
                     } else {
                         isAnotherLoading["userImage"] = false
@@ -114,7 +115,7 @@ class ProfileViewModel: FirebaseViewModel {
                     if let imageData = imageData {
                         let storageRef = Storage.storage().reference().child("Profile_Images").child(currentUID)
 
-                        try await storageRef.putData(imageData)
+                        storageRef.putData(imageData)
                         let downloadURL = try await storageRef.downloadURL()
                         
                         try await db.collection(strUsers).document(currentUID).updateData(["userImage": downloadURL.absoluteString])

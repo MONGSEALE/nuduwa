@@ -65,7 +65,8 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
             // meeting1과 가까이 있는 모임 있으면 meeting1도 bigIconMeetings에 저장후 원래 Meetings에선 삭제하고 type.piled Meeting 저장
             if !nearbyMeetings.isEmpty {
                 bigIconMeetings[meeting1.id!, default: []] = [meeting1] + nearbyMeetings
-                let meeting = Meeting(id: meeting1.id, title: "", description: "", place: "", numbersOfMembers: 0, latitude: meeting1.latitude, longitude: meeting1.longitude, hostUID: "", type: .piled)
+                let meeting = Meeting.piled(id: meeting1.id!, location: meeting1.location, geoHash: meeting1.geoHash)
+//                let meeting = Meeting(id: meeting1.id, title: "", description: "", place: "", numbersOfMembers: 0, latitude: meeting1.latitude, longitude: meeting1.longitude, hostUID: "", type: .piled)
                 setFetchedMeetings.remove(meeting1)
                 setFetchedMeetings.insert(meeting)
             }
@@ -115,7 +116,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                 for key in removedKeys {
                     listeners[key]?.remove()
                     listeners.removeValue(forKey: key)
-                    filteredMeetings.removeValue(forKey: key)
+                    fetchedMeetings.removeValue(forKey: key)
                 }
                 // let filteredMeetings = fetchedMeetings.filter { !queries.keys.contains($0.key) }
                 // fetchedMeetings = filteredMeetings
@@ -133,7 +134,8 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                         }
                         self.mergeMeetings(latitudeDelta: region.span.latitudeDelta)
                     }
-                    listeners[query.path] = listener
+                    listeners[query.description] = listener
+                    print("쿼리:\(query.description)")
                 }
             }catch{
                 await handleError(error)
@@ -184,7 +186,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
             }
         }
     }
-    override func joinMeeting(meetingID: String){
+    override func joinMeeting(meetingID: String, numbersOfMembers: Int = 0){
         print("joinMeeting")
         isLoading = true
         Task{
@@ -192,8 +194,8 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                 guard let currentUID = currentUID else{return}
                 let userData = try await getUserData(currentUID)
 
-                let member = Member(memberUID: currentUID)
-                let joinMeeting = JoinMeeting(meetingID: meetingID, isHost: true)
+//                let member = Member(memberUID: currentUID)
+//                let joinMeeting = JoinMeeting(meetingID: meetingID, isHost: true)
 
                 let text = "\(userData.userName)님이 채팅에 참가하셨습니다."
                 // let message = ChatMessage(
@@ -206,11 +208,11 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                 let meetingsDoc = db.collection(strMeetings).document(meetingID)
                 let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
                 
-                try meetingsDoc.collection(strMembers).addDocument(data: member.firestoreData)
+                try await meetingsDoc.collection(strMembers).addDocument(data: Member.member(currentUID))
 
-                try joinMeetingsCol.addDocument(data: joinMeeting.firestoreData)
+                try await joinMeetingsCol.addDocument(data: JoinMeeting.host(meetingID))
                 
-                try meetingsDoc.collection(self.strMessage).addDocumentt(data: Message.systemMessage(text))
+                try await meetingsDoc.collection(self.strMessage).addDocument(data: Message.systemMessage(text))
                 
                 isLoading = false
             } catch {
@@ -225,7 +227,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         Task{
             do{
                 let doc = db.collection(strMeetings).whereField("hostUID", isEqualTo: currentUID)
-                let query = try await doc.getDocuments()
+                let query = try? await doc.getDocuments()
                 
                 if let query = query, !query.isEmpty {
                     self.isOverlap = true

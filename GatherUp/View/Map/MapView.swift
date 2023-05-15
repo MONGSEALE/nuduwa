@@ -37,7 +37,7 @@ struct MapView: View {
                         /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
                         switch item.type {
                         case .basic:
-                            MeetingIconView(showAnnotation: $showAnnotation, meeting: item, isJoin: serverViewModel.joinMeetingIDs.contains(item.id)) { locate in
+                            MeetingIconView(showAnnotation: $showAnnotation, isJoin: serverViewModel.joinMeetingIDs.contains(item.id!), meeting: item) { locate in
                                 withAnimation(.easeInOut(duration: 0.25)){
                                     viewModel.region.center = locate
                                 }

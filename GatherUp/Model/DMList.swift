@@ -15,6 +15,12 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
     let DMPeopleID: String
     let timestamp: Timestamp
 
+    init(id: String? = nil, chatterUID: String, DMPeopleID: String, timestamp: Timestamp? = nil) {
+        self.id = id
+        self.chatterUID = chatterUID
+        self.DMPeopleID = DMPeopleID
+        self.timestamp = timestamp ?? Timestamp(date: Date())
+    }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any]) {
         guard let id = data["id"] as? String,

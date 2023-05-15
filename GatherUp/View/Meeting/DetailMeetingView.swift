@@ -31,6 +31,7 @@ struct DetailMeetingView: View {
   
     var body: some View {
         let isHost = meeting.hostUID == viewModel.currentUID
+        let meeting = viewModel.meeting ?? meeting
         NavigationStack{
             if viewModel.isLoading {
                 ProgressView()
@@ -46,18 +47,18 @@ struct DetailMeetingView: View {
                                 .clipShape(Circle())
                             
                             VStack(alignment: .leading, spacing: 6){
-                                EditText(text: viewModel.meeting.title, editText: $title, item: "모임 제목",isEditable: isEdit)
+                                EditText(text: meeting.title, editText: $title, item: "모임 제목",isEditable: isEdit)
                                     .font(.title3)
                                     .fontWeight(.semibold)
                                 Text(viewModel.user?.userName ?? "")
                                     .font(.callout)
-                                Text(viewModel.meeting.meetingDate.formatted(date: .numeric, time: .shortened))
+                                Text(meeting.meetingDate.formatted(date: .numeric, time: .shortened))
                                     .font(.caption2)
                                     .foregroundColor(.gray)
                             }
                             .hAlign(.leading)
                         }
-                        EditText(text: viewModel.meeting.description, editText: $description, item: "모임 내용", isEditable: isEdit)
+                        EditText(text: meeting.description, editText: $description, item: "모임 내용", isEditable: isEdit)
                             .textSelection(.enabled)
                             .padding(.vertical,8)
                             .hAlign(.leading)
@@ -100,17 +101,19 @@ struct DetailMeetingView: View {
                 Group{
                     if isHost {
                         EditButtonStack(isEdit: $isEdit) {
-                            viewModel.editMeeting(title: title, description: description, meetingDate: meetingDate)
+                            if viewModel.meeting != nil{
+                                viewModel.editMeeting(title: title, description: description, meetingDate: meetingDate)
+                            }
                         } onCancle: {
-                            title = viewModel.meeting.title
-                            description = viewModel.meeting.description
-                            meetingDate = viewModel.meeting.meetingDate
+                            title = meeting.title
+                            description = meeting.description
+                            meetingDate = meeting.meetingDate
                         } onDelete: {
-                            viewModel.deleteMeeting(meetingID: viewModel.meeting.id!)
+                            viewModel.deleteMeeting(meetingID: meeting.id!)
                         }
                     } else {
                         Button(action: {
-                            viewModel.leaveMeeting(meetingID: viewModel.meeting.id!, memberUID: viewModel.currentUID)
+                            viewModel.leaveMeeting(meetingID: meeting.id!, memberUID: viewModel.currentUID)
                             dismiss()
                         }){
                             CustomButtonText(text: "모임 나가기", backgroundColor: .red)
@@ -122,12 +125,12 @@ struct DetailMeetingView: View {
         }
         .onAppear{
             meetingDate = meeting.meetingDate
-            viewModel.fetchUser(userUID: meeting.hostUID)
+            viewModel.fetchUserData(meeting.hostUID)
             viewModel.meetingListener(meetingID: meeting.id!)
             viewModel.membersListener(meetingID: meeting.id!)
         }
         .onDisappear{
-            viewModel.removeListener()
+            viewModel.removeListeners()
         }
         .onChange(of: viewModel.deletedMeeting) { _ in
             dismiss()

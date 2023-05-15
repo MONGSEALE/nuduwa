@@ -43,5 +43,22 @@ struct JoinMeeting: Identifiable, Codable, FirestoreConvertible {
         
         return data
     }
+    
+    // member가 가입
+    static func member(_ meetingID: String) -> [String: Any] {
+        return [
+            "meetingID": meetingID,
+            "joinDate": FieldValue.serverTimestamp()
+        ]
+    }
+    
+    // 모임 새로 만들어서 host가 가입시
+    static func host(_ meetingID: String) -> [String: Any] {
+        return [
+            "meetingID": meetingID,
+            "joinDate": FieldValue.serverTimestamp(),
+            "isHost" : true
+        ]
+    }
 }
 

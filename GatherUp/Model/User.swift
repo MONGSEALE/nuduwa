@@ -13,11 +13,22 @@ struct User: Identifiable, Codable, FirestoreConvertible {
     @DocumentID var id: String?
 
     var userName: String?
+    let userEmail: String?
     let userGoogleIDCode: Int?
     let userGoogleEmail: String?
     var userImage: URL?
 
     var signUpDate: Timestamp?
+    
+    init(id: String? = nil, userName: String? = nil, userEmail: String? = nil, userGoogleIDCode: Int? = nil, userGoogleEmail: String? = nil, userImage: URL? = nil, signUpDate: Timestamp? = nil){
+        self.id = id
+        self.userName = userName
+        self.userEmail = userEmail
+        self.userGoogleIDCode = userGoogleIDCode
+        self.userGoogleEmail = userGoogleEmail
+        self.userImage = userImage
+        self.signUpDate = signUpDate
+    }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any]) {
@@ -28,6 +39,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         
         self.id = id
         self.userName = userName
+        self.userEmail = data["userEmail"] as? String? ?? nil
         self.userGoogleIDCode = data["userGoogleIDCode"] as? Int? ?? nil
         self.userGoogleEmail = data["userGoogleEmail"] as? String? ?? nil
         self.userImage = data["userImage"] as? URL? ?? nil
@@ -48,6 +60,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
             data["userGoogleIDCode"] = userGoogleIDCode
         }
         if let userGoogleEmail = userGoogleEmail {
+            data["userEmail"] = userGoogleEmail
             data["userGoogleEmail"] = userGoogleEmail
         }
         if let userImage = userImage {
@@ -57,10 +70,30 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         return data
     }
     
-    mutating func convertUserData(_ userData: UserData) {
-        self.id = userData.id
-        self.userName = userData.userName
-        self.userImage = userData.userImage
+    static func convertUserData(_ userData: UserData) -> User {
+        return User(id: userData.id, userName: userData.userName, userImage: userData.userImage)
+    }
+    
+    static func newGoogleUser(userName: String, userGoogleIDCode: String, userGoogleEmail: String, userImage: URL) -> [String: Any] {
+        return [
+            "userName": userName,
+            "userEmail": userGoogleEmail,
+            "userGoogleIDCode": userGoogleIDCode,
+            "userGoogleEmail": userGoogleEmail,
+            "userImage": userImage,
+            "signUpDate": FieldValue.serverTimestamp()
+        
+        ]
+    }
+    
+    // system 메시지
+    static func systemMessage(_ text: String) -> [String: Any] {
+        return [
+            "text": text,
+            "senderUID": "SYSTEM",
+            "timestamp" : FieldValue.serverTimestamp(),
+            "isSystemMessage": true
+        ]
     }
 
     /*

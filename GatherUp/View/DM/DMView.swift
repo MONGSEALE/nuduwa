@@ -37,7 +37,7 @@ struct DMView: View {
                                         .frame(maxWidth:.infinity)
                                 }
                                 
-                                let isCurrentUser = message.senderID == viewModel.currentUID
+                                let isCurrentUser = message.senderUID == viewModel.currentUID
                                 
                                 DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
                             }
@@ -87,16 +87,16 @@ struct DMView: View {
             }
             .onAppear {
                 viewModel.startListeningDM(chatterUID: receiverID)
-                viewModel.fetchUser(userUID: receiverID)
+                viewModel.fetchUserData(receiverID)
             }
             .onDisappear {
                 print("바이")
-                viewModel.removeListener()
+                viewModel.removeListeners()
             }
             
         }
     }
-    func isNewDay(previousMessage: DM?, currentMessage: DM) -> Bool {
+    func isNewDay(previousMessage: Message?, currentMessage: Message) -> Bool {
         guard let previousMessage = previousMessage else { return true }
         
         let calendar = Calendar.current
@@ -119,7 +119,7 @@ struct DMView: View {
 
 struct DMMessageRow: View {
   
-    @State var message : DM
+    @State var message : Message
     @State var identifying:Bool
     let name: String?
     let image: URL?
@@ -137,7 +137,7 @@ struct DMMessageRow: View {
                     NickName(name: name ?? "")
                         .padding(.leading, 10)
                     ZStack {
-                        Text(message.message)
+                        Text(message.text)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
                             .padding()
@@ -158,7 +158,7 @@ struct DMMessageRow: View {
                 Spacer()
                 VStack(alignment: .trailing){
                     ZStack{
-                        Text(message.message)
+                        Text(message.text)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
                             .padding()

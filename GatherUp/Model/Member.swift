@@ -17,6 +17,9 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
     var memberImage: URL?
     var joinDate: Timestamp
 
+//    init(id: String? = nil, memberUID: String, joinDate: Timestamp) {
+//
+//    }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any]) {
         guard let id = data["id"] as? String,
@@ -31,6 +34,14 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
     
     // Firestore에 저장할 필드
     var firestoreData: [String: Any] {
+        return [
+            "memberUID": memberUID,
+            "joinDate": FieldValue.serverTimestamp()
+        ]
+    }
+    
+    // 객체 안만들고 Firestore 바로 저장하기
+    static func member(_ memberUID: String) -> [String: Any] {
         return [
             "memberUID": memberUID,
             "joinDate": FieldValue.serverTimestamp()

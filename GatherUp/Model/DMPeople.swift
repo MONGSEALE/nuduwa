@@ -13,6 +13,10 @@ struct DMPeople : Identifiable, Codable, Equatable, FirestoreConvertible {
     
     var chattersUID: [String]
 
+    init(id: String? = nil, chattersUID: [String]) {
+        self.id = id
+        self.chattersUID = chattersUID
+    }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any]) {
         guard let id = data["id"] as? String,

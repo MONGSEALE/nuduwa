@@ -42,6 +42,10 @@ class FirebaseViewModel: ObservableObject {
     var currentUID: String? {
        return Auth.auth().currentUser?.uid
     }
+    enum SomeError: Error {
+        case miss
+        case error
+    }
     
     deinit {
         removeListeners()
@@ -62,7 +66,7 @@ class FirebaseViewModel: ObservableObject {
         Task{
             do{
                 let userData = try await getUserData(userUID)
-                user.convertUserData(userData)
+                self.user = User.convertUserData(userData)
             }catch{
                 handleErrorTask(error)
             }
@@ -71,10 +75,10 @@ class FirebaseViewModel: ObservableObject {
     func getUserData(_ userUID: String?) async throws -> UserData {
         print("getUserData")
         do{
-            guard let userUID = userUID else{throw}
+            guard let userUID = userUID else{throw SomeError.miss}
             let doc = db.collection(strUsers).document(userUID)
             let userData: UserData? = try await doc.getDocument(as: UserData.self)
-            guard let userData = userData else{throw}
+            guard let userData = userData else{throw SomeError.miss}
             return userData
         }catch{
             throw error
@@ -96,10 +100,10 @@ class FirebaseViewModel: ObservableObject {
     func getUser(_ userUID: String?) async throws -> User {
         print("getUserData")
         do{
-            guard let userUID = userUID else{throw}
+            guard let userUID = userUID else{throw SomeError.miss}
             let doc = db.collection(strUsers).document(userUID)
             let user: User? = try await doc.getDocument(as: User.self)
-            guard let user = user else{throw}
+            guard let user = user else{throw SomeError.miss}
             return user
         }catch{
             throw error
@@ -124,7 +128,7 @@ class FirebaseViewModel: ObservableObject {
     }
     
     /// 에러처리
-    func handleError(_ error: Error, isShowError = false) async {
+    func handleError(_ error: Error, isShowError: Bool = false) async {
         print("에러: \(error.localizedDescription)")
         await MainActor.run {
             if isShowError {
@@ -134,7 +138,7 @@ class FirebaseViewModel: ObservableObject {
             isLoading = false
         }
     }
-    func handleErrorTask(_ error: Error, isShowError = false) {
+    func handleErrorTask(_ error: Error, isShowError: Bool = false) {
         print("에러: \(error.localizedDescription)")
         if isShowError {
             errorMessage = error.localizedDescription

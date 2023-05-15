@@ -13,8 +13,8 @@ import FirebaseFirestore
 
 class DMViewModel: FirebaseViewModel {
     
-    @Published var messages: [DM] = []
-    @Published var chattingRooms: [Chatter] = []
+    @Published var messages: [Message] = []
+    @Published var chattingRooms: [DMList] = []
     @Published var isTabBarHidden: Bool = false
     @Published var userImageURLs: [String: User] = [:]
     
@@ -31,7 +31,7 @@ class DMViewModel: FirebaseViewModel {
             "participants": [senderID, receiverID]
         ]
 
-        let users: DMPeople = DMPeople(users: [senderID,receiverID])
+        let users: DMPeople = DMPeople(chattersUID: [senderID,receiverID])
 
         let doc = db.collection(strUsers).document(senderID).collection(strChatters)
             
@@ -43,7 +43,7 @@ class DMViewModel: FirebaseViewModel {
                     let documentRef = try? self.db.collection(self.strDMPeople).addDocument(from: users)
                     guard let documentRef = documentRef else{return}
                     let documentID = documentRef.documentID
-                    let chatter = Chatter(chatterUID: receiverID, DMPeopleID: documentID)
+                    let chatter = DMList(chatterUID: receiverID, DMPeopleID: documentID)
                     try? doc.addDocument(from: chatter){ _ in
                         self.db.collection(self.strDMPeople).document(documentID).collection(self.strDM).addDocument(data: messageData)
                     }
@@ -54,7 +54,7 @@ class DMViewModel: FirebaseViewModel {
                             print("Error getting documents: \(err)")
                         } else {
                             if querySnapshot!.documents.isEmpty {
-                                let chatter = Chatter(chatterUID: senderID, DMPeopleID: documentID)
+                                let chatter = DMList(chatterUID: senderID, DMPeopleID: documentID)
                                 try? receiverDoc.addDocument(from: chatter)
                             }
                         }
@@ -99,19 +99,20 @@ class DMViewModel: FirebaseViewModel {
                     }
                 }
 
-                guard let dmPeopleID = dmPeopleID else {handleErrorTask(error);return}
+                guard let dmPeopleID = dmPeopleID else {return}
 
                 let dmDoc = dmPeopleDoc.document(dmPeopleID).collection(self.strDM)
                 let query = dmDoc.order(by: "timestamp")
 
-                self.docListener = try await query.addSnapshotListener { querySnapshot, error in
+                let listener = query.addSnapshotListener { querySnapshot, error in
                     if let error = error {self.handleErrorTask(error);return}
-                    guard let querySnapshot = querySnapshot else {self.handleErrorTask(error);return}
+                    guard let querySnapshot = querySnapshot else {return}
 
-                    self.messages = querySnapshot.documents.compactMap { document -> DM? in
-                        try? document.data(as: DM.self)
+                    self.messages = querySnapshot.documents.compactMap { document -> Message? in
+                        try? document.data(as: Message.self)
                     }
                 }
+                listeners[query.description] = listener
             } catch {
                 handleErrorTask(error)
             }
@@ -163,13 +164,13 @@ class DMViewModel: FirebaseViewModel {
 
         let listener = query.addSnapshotListener { querySnapshot, error in
                         if let error = error {self.handleErrorTask(error);return}
-                        guard let querySnapshot = querySnapshot else{self.handleErrorTask(error);return}
+                        guard let querySnapshot = querySnapshot else{return}
                         // 쿼리 결과를 DM 객체의 배열로 변환하고, 이를 messages 배열에 저장합니다.
-                        self.messages = querySnapshot.documents.compactMap { document -> DM? in
-                            try? document.data(as: DM.self)
+                        self.messages = querySnapshot.documents.compactMap { document -> Message? in
+                            try? document.data(as: Message.self)
                         }
                     }
-        listeners.append(listener)
+        listeners[query.description] = listener
     }
     
     func startListeningRecentMessages() {
@@ -191,8 +192,8 @@ class DMViewModel: FirebaseViewModel {
                 return
             }
             print("documents:\(documents)")
-            self.chattingRooms = documents.compactMap{ documents -> Chatter? in
-                try? documents.data(as: Chatter.self)
+            self.chattingRooms = documents.compactMap{ documents -> DMList? in
+                try? documents.data(as: DMList.self)
             }
             self.isLoading = false
             print("Rooms:\(self.chattingRooms)")
@@ -204,26 +205,27 @@ class DMViewModel: FirebaseViewModel {
     }
     
     func deleteRecentMessage(receiverID: String) {
-        isLoading = true
-        let query= = db.collection(strUsers).document(currentUID).collection(strChatters)
-                    whereField("chatterUID", isEqualTo: receiverID)
+//        isLoading = true
+        guard let currentUID = currentUID else{return}
+        let query = db.collection(strUsers).document(currentUID).collection(strChatters)
+            .whereField("chatterUID", isEqualTo: receiverID)
         query.getDocuments{ querySnapshot, error in
             if let error = error {
-               handleErrorTask(error)
+                return
             } else {
                 guard let documents = querySnapshot?.documents else {
-                    handleErrorTask(error)
+                    
                     return
                 }
 
                 for document in documents {
-                    document.delete(){ error in
+                    document.reference.delete(){ error in
                         guard let error = error else{
-                            handleErrorTask(error, isShowError: true)
-                        } else {
-                            print("DM나가기 완료")
-                            self.isLoading = false
+                            return
                         }
+                        print("DM나가기 완료")
+                        self.isLoading = false
+                        
                     }
                 }
             }

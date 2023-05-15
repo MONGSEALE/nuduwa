@@ -12,7 +12,7 @@ struct DMCardView: View {
     
     @StateObject var viewModel: DMViewModel = .init()
     
-    let chattingRoom: Chatter
+    let chattingRoom: DMList
     
     /// - Callbacks
     //    var onUpdate: (DM)->()
@@ -29,7 +29,7 @@ struct DMCardView: View {
             VStack(alignment: .leading) {
                 Text(viewModel.user?.userName ?? "")
                     .font(.system(size: 16, weight: .bold))
-                Text(viewModel.messages.last?.message ?? "")
+                Text(viewModel.messages.last?.text ?? "")
                     .font(.system(size: 14))
                     .foregroundColor(Color(.lightGray))
             }
@@ -37,11 +37,11 @@ struct DMCardView: View {
         }
         .buttonStyle(PlainButtonStyle())
         .onAppear{
-            viewModel.fetchUser(userUID: chattingRoom.chatterUID)
+            viewModel.fetchUserData(chattingRoom.chatterUID)
             viewModel.dmListener(dmPeopleID: chattingRoom.DMPeopleID)
         }
         .onDisappear{
-            viewModel.removeListener()
+            viewModel.removeListeners()
         }
     }
 }

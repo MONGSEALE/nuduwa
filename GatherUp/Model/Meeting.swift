@@ -26,7 +26,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     
     var geoHash: String?
     
-    var publishedDate: Timestamp
+    var publishedDate: Date
     var meetingDate: Date
     
     let hostUID: String
@@ -39,7 +39,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         case piled
     }
     
-    init(id: String? = nil, title: String, description: String, place : String, numbersOfMembers : Int, location: CLLocationCoordinate2D, geoHash: String? = nil, publishedDate: Timestamp? = nil, meetingDate: Date, hostUID: String? = nil, type: MeetingType) {
+    init(id: String? = nil, title: String, description: String, place : String, numbersOfMembers : Int, location: CLLocationCoordinate2D, geoHash: String? = nil, publishedDate: Date? = nil, meetingDate: Date, hostUID: String? = nil, type: MeetingType? = nil) {
         self.id = id
         self.title = title
         self.description = description
@@ -47,15 +47,15 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         self.numbersOfMembers = numbersOfMembers
     
         self.latitude = location.latitude
-        self.latitude = location.longitude
+        self.longitude = location.longitude
         self.geoHash = geoHash
         
-        self.publishedDate = publishedDate ?? Timestamp(date: Date())
+        self.publishedDate = publishedDate ?? Date()
         self.meetingDate = meetingDate
 
         self.hostUID = hostUID ?? ""
         
-        self.type = type
+        self.type = type ?? .basic
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -83,10 +83,10 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         self.numbersOfMembers = numbersOfMembers
     
         self.latitude = latitude
-        self.latitude = longitude
+        self.longitude = longitude
         self.geoHash = geoHash
         
-        self.publishedDate = publishedDate
+        self.publishedDate = publishedDate.dateValue()
         self.meetingDate = meetingDate
 
         self.hostUID = hostUID
@@ -114,9 +114,13 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
             "hostUID": uid
         ]
     }
+    
+    var location: CLLocationCoordinate2D {
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
 
     // 모임 만들기로 지도 클릭시 생성되는 Meeting구조체
-    static func createMapAnnotation(location: CLLocationCoordinate2D) -> Meeting {
+    static func createMapAnnotation(_ location: CLLocationCoordinate2D) -> Meeting {
         var title: String = ""
         var description: String = ""
         var place : String = ""
@@ -125,13 +129,31 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         let location = location
         var geoHash: String? = nil
         
-        var publishedDate: Timestamp = Timestamp(date: Date())
+        var publishedDate: Date = Date()
         var meetingDate: Date = Date()
 
         var type: MeetingType = .new
 
         return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
-    } 
+    }
+    // 중첩 모임
+    static func piled(id: String, location: CLLocationCoordinate2D, geoHash: String?) -> Meeting {
+        let id = id
+        let title: String = ""
+        let description: String = ""
+        let place : String = ""
+        let numbersOfMembers : Int = 0
+    
+        let location: CLLocationCoordinate2D = location
+        let geoHash: String? = geoHash
+        
+        let publishedDate: Date = Date()
+        let meetingDate: Date = Date()
+
+        let type: MeetingType = .piled
+
+        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
+    }
 
     // 새로운 모임 만들기
     static func createNewMeeting(title: String, description: String, place: String, numbersOfMembers: Int, location: CLLocationCoordinate2D, meetingDate: Date) -> Meeting {
@@ -143,7 +165,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         let location = location
         var geoHash: String? = GFUtils.geoHash(forLocation: location)
         
-        var publishedDate: Timestamp = Timestamp(date: Date())
+        var publishedDate: Date = Date()
         var meetingDate: Date = meetingDate
 
         var type: MeetingType = .new
@@ -162,7 +184,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         let location = CLLocationCoordinate2D(latitude: 0, longitude: 0)
         var geoHash: String? = nil
         
-        var publishedDate: Timestamp = Timestamp(date: Date())
+        var publishedDate: Date = Date()
         var meetingDate: Date = meetingDate 
         
         var hostUID: String = " "

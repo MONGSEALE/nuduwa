@@ -38,7 +38,8 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
                     // return ChatMessage(id: id, text: text, userUID: userId, timestamp: timestamp ,isSystemMessage:isSystemMessage)
                 }
             }
-            listeners[query.path] = listener
+            listeners[query.description] = listener
+            print("경로:\(query.description)")
             isLoading = false
         }
     }

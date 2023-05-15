@@ -36,8 +36,8 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
             
             if dicMembersData[uid] == nil {continue}
 
-            dicMembers[uid]?.memberName = dicMembersData[uid].userName
-            dicMembers[uid]?.memberImage = dicMembersData[uid].userImage
+            dicMembers[uid]?.memberName = dicMembersData[uid]?.userName
+            dicMembers[uid]?.memberImage = dicMembersData[uid]?.userImage
         }
 
         // membersUID에 없는 키를 찾아서 keysToRemove 배열에 추가
@@ -63,8 +63,9 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
             Task{
                 do{
                     dicMembersData[uid] = try await getUserData(uid)
-                    dicMembers[uid]?.memberName = dicMembersData[uid].userName
-                    dicMembers[uid]?.memberImage = dicMembersData[uid].userImage
+//                    guard let memberData = dicMembersData[uid] else{return}
+                    dicMembers[uid]?.memberName = dicMembersData[uid]?.userName
+                    dicMembers[uid]?.memberImage = dicMembersData[uid]?.userImage
                 }catch{
                     print("오류!dicMembersData.UID:\(uid)")
                 }
@@ -73,7 +74,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     }
 
     func sortMeeting(_ meetings: [Meeting]){
-        meetings.sort { (meeting1, meeting2) -> Bool in
+        self.meetings.sort { (meeting1, meeting2) -> Bool in
             if meeting1.hostUID == self.currentUID && meeting2.hostUID != self.currentUID {
                 return true
             } else if meeting1.hostUID != self.currentUID && meeting2.hostUID == self.currentUID {
@@ -100,23 +101,25 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                         guard let querySnapshot = querySnapshot else{return}
                         for diff in querySnapshot.documentChanges{
                             if (diff.type == .modified) {
-                                let meetingID = diff.document.reference.parent.parent.documentID
-                                fetchMeeting(meetingID)
+                                let meetingID = diff.document.reference.parent.parent?.documentID
+                                guard let meetingID = meetingID else{continue}
+                                self.fetchMeeting(meetingID)
                             }
                             if (diff.type == .removed) {
                                 print("Removed city: \(diff.document.data())")
                             }
                         }
                         
-                        guard let documents = querySnapshot.documents else{return}
-                        for document in documents {
+//                        guard let documents = querySnapshot.documents else{return}
+                    Task{
+                        for document in querySnapshot.documents {
                             if let meetingDocument = document.reference.parent.parent {
                                 do {
                                     let meetingSnapshot = try await meetingDocument.getDocument()
                                     if let meeting = try meetingSnapshot.data(as: Meeting.self) {
                                         meetings.append(meeting)
                                     }
-                                    sortMeeting(meetings)
+                                    self.sortMeeting(meetings)
                                     self.isLoading = false
                                 } catch {
                                     print("meetingDocument 데이터 가져오기 오류:", error)
@@ -124,6 +127,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                                 }
                             }
                         }
+                    }
                         
 
 
@@ -157,7 +161,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                         //     self.meetings = meetings
                         // }
                     }
-                    listeners[query.path] = listener
+                    listeners[query.description] = listener
             }catch{
                 await handleError(error)
             }
@@ -219,13 +223,13 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                 let query = doc.collection(strMembers)
                             .whereField("memberUID", isEqualTo: memberUID)
 
-                let member = try await getUserData(userUID: memberUID)
+                let member = try await getUserData(memberUID)
 
                 let querySnapshot = try await query.getDocuments()
 
-                guard let documents = querySnapshot?.documents else { return }
+//                guard let documents = querySnapshot.documents else { return }
 
-                for document in documents {
+                for document in querySnapshot.documents {
                     try await doc.collection(strMembers).document(document.documentID).delete()
                 }
 
@@ -304,6 +308,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         isLoading = true
         Task{
             do{
+                guard let meeting = meeting else{return}
                 guard let meetingID = meeting.id else{return}
                 
                 if title != meeting.title {
@@ -337,7 +342,8 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     func meetingListener(meetingID: String){
         print("meetingListener")
         isLoading = true
-        docListener = db.collection(strMeetings).document(meetingID).addSnapshotListener({ snapshot, error in
+        let doc = db.collection(strMeetings).document(meetingID)
+        let listener = doc.addSnapshotListener({ snapshot, error in
             guard let snapshot = snapshot else{
                 print("모임삭제")
                 self.deletedMeeting = true
@@ -349,6 +355,8 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
             self.isLoading = false
             print("모임수정")
         })
+        listeners[doc.description] = listener
+        print("쿼리:\(doc.description)")
     }
 }
 

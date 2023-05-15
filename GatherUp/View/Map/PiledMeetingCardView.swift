@@ -15,8 +15,8 @@ struct PiledMeetingCardView: View {
     var meeting: Meeting
     
     var body: some View {
-        ZStack(spacing: 12){
-            HStack{
+        ZStack{
+            HStack(spacing: 12){
                 WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -52,7 +52,7 @@ struct PiledMeetingCardView: View {
             }
         }
         .onAppear{
-            viewModel.fetchUser(userUID: meeting.hostUID)
+            viewModel.fetchUserData(meeting.hostUID)
         }
     }
 }

@@ -63,7 +63,7 @@ struct ReusableProfileContent: View {
                         
                         
                         VStack(alignment: .leading, spacing: 6){
-                            EditText(text: user.userName, editText: $editName, item: "닉네임을 입력해주세요", isEditable: isEdit)
+                            EditText(text: user.userName ?? "", editText: $editName, item: "닉네임을 입력해주세요", isEditable: isEdit)
                                 .font(.title3)
                                 .fontWeight(.semibold)
                             Text(user.userEmail ?? "")

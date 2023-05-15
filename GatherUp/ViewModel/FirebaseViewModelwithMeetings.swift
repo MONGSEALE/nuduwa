@@ -68,19 +68,14 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
             do{
                 guard let currentUID = currentUID else{return}
                 let userData = try await getUserData(currentUID)
-                let member = Member(memberUID: currentUID)
                 let meetingsDoc = db.collection(strMeetings).document(meetingID)
                 let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
                 
                 if members.count < numbersOfMembers {
-                    try await meetingsDoc.collection(strMembers).addDocument(from: member.firestoreData)
-                    let joinMeeting = JoinMeeting(meetingID: meetingID)
-                    try await joinMeetingsCol.addDocument(from: joinMeeting.firestoreData)
-                    let message = Message(text: "\(userData.userName)님이 채팅에 참가하셨습니다.",
-                                        senderUID: "SYSTEM", 
-                                        timestamp: FieldValue.serverTimestamp(), 
-                                        isSystemMessage: true)
-                    try await meetingsDoc.collection(self.strMessage).addDocument(from: message)
+                    try await meetingsDoc.collection(strMembers).addDocument(data: Member.member(currentUID))
+                    try await joinMeetingsCol.addDocument(data: JoinMeeting.member(meetingID))
+                    let text = "\(userData.userName)님이 채팅에 참가하셨습니다."
+                    try await meetingsDoc.collection(self.strMessage).addDocument(data: Message.systemMessage(text))
                 }else{
                     print("모임 참가 실패")
                 }
@@ -149,11 +144,10 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                 return
             }
             guard let querySnapshot = querySnapshot else{
-                self.handleErrorTask(error)
                 return
             }
             self.joinMeetingIDs = querySnapshot.documents.compactMap{ documents -> String? in
-                try? documents.data().data["meetingID"]
+                try? documents.data()["meetingID"] as? String
             }
         }
         listeners[col.path] = listener

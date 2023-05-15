@@ -140,14 +140,16 @@ class LoginViewModel: FirebaseViewModel {
         print("registerUser")
         Task{
             do{
-                let userData = Auth.auth().currentUser?.providerData[0]
+                guard let userData = Auth.auth().currentUser?.providerData[0] else{return}
                 // Uploading Profile Photo Into Firebase Storage
-                guard let userUID = Auth.auth().currentUser?.uid else{return}
+                
+                guard let currentUID = currentUID else{return}
                 
                 // Creating a User Firestore Object
-                let user = User(userName: (userData?.displayName)!, userUID: userUID, userSNSID: userData?.uid, userEmail: userData?.email, userImage: userData?.photoURL)
+                let newUser = User.newGoogleUser(userName: userData.displayName!, userGoogleIDCode: userData.uid, userGoogleEmail: userData.email!, userImage: userData.photoURL!)
                 // Saving User Doc into Firestore Database
-                try db.collection(strUsers).document(userUID).setData(from: user, completion: {
+                let doc = db.collection(strUsers).document(currentUID)
+                try doc.setData(newUser, completion: {
                     error in
                     if error == nil{
                         print("Saved Successfully")
