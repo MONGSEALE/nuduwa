@@ -132,40 +132,8 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                         }
                         
                     }
-                        
-
-
-                        // var meetings: [Meeting] = []
-                        // let dispatchGroup = DispatchGroup()         // 비동기 작업 객체
-                        
-                        // querySnapshot?.documents.forEach { document in
-                        //     dispatchGroup.enter()                   // 비동기 시작
-                        //     document.reference.parent.parent?.getDocument { (meetingDocument, meetingError) in
-                        //         defer { dispatchGroup.leave();}     // 이 블록이 끝나면 비동기 끝
-                                
-                        //         if let meetingError = meetingError {print("에러!meetingsListener2:\(meetingError)");return}
-                                
-                        //         if let meetingDocument = meetingDocument, let meeting = try? meetingDocument.data(as: Meeting.self) {
-                        //             meetings.append(meeting)
-                        //         }
-                        //     }
-                        // }
-                        // dispatchGroup.notify(queue: .main) {        // 비동기 끝나면 실행
-                        //     // 배열 정렬 host가 본인인경우 맨앞으로 그 다음에 meetingDate 날짜 순을 정렬
-                        //     meetings.sort { (meeting1, meeting2) -> Bool in
-                        //         if meeting1.hostUID == self.currentUID && meeting2.hostUID != self.currentUID {
-                        //             return true
-                        //         } else if meeting1.hostUID != self.currentUID && meeting2.hostUID == self.currentUID {
-                        //             return false
-                        //         } else {
-                        //             return meeting1.meetingDate < meeting2.meetingDate
-                        //         }
-                        //     }
-                        //     self.isLoading = false
-                        //     self.meetings = meetings
-                        // }
-                    }
-                    listeners[query.description] = listener
+                }
+                listeners[query.description] = listener
             }catch{
                 await handleError(error)
             }
@@ -191,27 +159,32 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     }
 
     /// 모임 데이터 가져오기
-    func meetingListner(meetingID: String){
-        print("meetingListner")
-        isLoading = true
-        Task{
-            let doc = db.collection(strMeetings).document(meetingID)
-            let listener = doc.addSnapshotListener{ snapshot, error in
-                if let snapshot {
-                    if snapshot.exists{
-                        if let updatedMeeting = try? snapshot.data(as: Meeting.self){
-                            self.meeting = updatedMeeting
-                        }
-                    }else{
-                        self.isDelete = true
-                    }
-                }
-                self.isLoading = false
-            }
-
-            listeners[doc.path] = listener
-        }
-    }
+//    func meetingListner(meetingID: String){
+//        print("meetingListner")
+//        isLoading = true
+//        Task{
+//            let doc = db.collection(strMeetings).document(meetingID)
+//
+//            let listener = doc.addSnapshotListener{ snapshot, error in
+//                if let error = error {
+//                    self.handleErrorTask(error)
+//                    return
+//                }
+//                if let snapshot {
+//                    if snapshot.exists{
+//                        if let updatedMeeting = try? snapshot.data(as: Meeting.self){
+//                            self.meeting = updatedMeeting
+//                        }
+//                    }else{
+//                        self.isDelete = true
+//                    }
+//                }
+//                self.isLoading = false
+//            }
+//
+//            listeners[doc.path] = listener
+//        }
+//    }
     
 
     
@@ -347,20 +320,27 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         print("meetingListener")
         isLoading = true
         let doc = db.collection(strMeetings).document(meetingID)
+        
         let listener = doc.addSnapshotListener({ snapshot, error in
+            if let error = error {
+                self.handleErrorTask(error)
+                return
+            }
             guard let snapshot = snapshot else{
                 print("모임삭제")
                 self.deletedMeeting = true
                 self.isLoading = false
                 return
             }
-            guard let data = try? snapshot.data(as: Meeting.self)else{return}
+            guard let data = try? snapshot.data(as: Meeting.self) else{
+                print("오류")
+                return
+            }
             self.meeting = data
             self.isLoading = false
             print("모임수정")
         })
         listeners[doc.description] = listener
-        print("쿼리:\(doc.description)")
     }
 }
 

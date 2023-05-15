@@ -26,6 +26,7 @@ struct MeetingIconView: View {
     var onLocate: (CLLocationCoordinate2D)->()
     
     var body: some View {
+        let isHost = meeting.hostUID == viewModel.currentUID
         VStack(spacing:0){
             WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
                 .resizable()
@@ -34,12 +35,12 @@ struct MeetingIconView: View {
                 .cornerRadius(60)
                 .clipShape(Circle())
                 .padding(4) // Adjust the padding value to increase or decrease the size of the blue circle
-                .background(Circle().fill(Color.blue))
+                .background(Circle().fill(isHost ? .red : isJoin ? .green : .blue))
             
             Image(systemName: "triangle.fill")
                 .resizable()
                 .scaledToFit()
-                .foregroundColor(isJoin ? .green : .blue)
+                .foregroundColor(isHost ? .red : isJoin ? .green : .blue)
                 .frame(width: 15,height: 15)
                 .rotationEffect(Angle(degrees: 180))
                 .offset( y : -3)

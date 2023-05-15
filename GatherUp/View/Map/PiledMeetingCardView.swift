@@ -12,9 +12,11 @@ struct PiledMeetingCardView: View {
     
     @StateObject var viewModel: FirebaseViewModel = .init()
 
-    var meeting: Meeting
+    let meeting: Meeting
+    let isJoin: Bool
     
     var body: some View {
+        let isHost = meeting.hostUID == viewModel.currentUID
         ZStack{
             HStack(spacing: 12){
                 WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
@@ -22,6 +24,8 @@ struct PiledMeetingCardView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 50, height: 50)
                     .clipShape(Circle())
+                    .padding(4)
+                    .background(Circle().fill(isHost ? .red : isJoin ? .green : .blue))
                 
                 Text(meeting.title)
                     .font(.callout)
@@ -32,9 +36,13 @@ struct PiledMeetingCardView: View {
                     
                 
                 VStack(alignment: .leading){
-                    Text(viewModel.user?.userName ?? "")
-                        .lineLimit(1)
-                        .foregroundColor(.black)
+                    if let userName = viewModel.user?.userName {
+                        Text(userName)
+                            .lineLimit(1)
+                            .foregroundColor(.black)
+                    } else {
+                        ProgressView()
+                    }
                     Text(meeting.meetingDate.formatted(.dateTime.month().day().hour().minute()))
                         .font(.caption2)
                         .foregroundColor(.gray)
@@ -45,11 +53,6 @@ struct PiledMeetingCardView: View {
                     .lineLimit(3)
             }
             .hAlign(.leading)
-            if meeting.hostUID == viewModel.currentUID!{
-                VStack(){
-                    Text("MINE")
-                }
-            }
         }
         .onAppear{
             viewModel.fetchUserData(meeting.hostUID)

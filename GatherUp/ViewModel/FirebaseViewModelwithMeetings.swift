@@ -32,14 +32,18 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
 
         let listener = col.addSnapshotListener { querySnapshot, error in
             if let error = error{
+                print("에러")
                 self.handleErrorTask(error)
                 return
             }
+            print("1")
             guard let documents = querySnapshot?.documents else {return}
+            print("2")
             self.members = documents.compactMap{ documents -> Member? in
                 try? documents.data(as: Member.self)
             }
-            self.convertMembers(meetingID: meetingID)
+            print("3")
+//            self.convertMembers(meetingID: meetingID)
         }
         listeners[col.path] = listener
     }

@@ -123,7 +123,7 @@ struct MeetingInfoSheetView: View {
         }
         .onAppear {
             viewModel.fetchUserData(meeting.hostUID)
-            viewModel.meetingListner(meetingID: meeting.id!)
+            viewModel.meetingListener(meetingID: meeting.id!)
             viewModel.membersListener(meetingID: meeting.id!)
         }
         .onDisappear{

@@ -120,18 +120,18 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
 
     // 모임 만들기로 지도 클릭시 생성되는 Meeting구조체
     static func createMapAnnotation(_ location: CLLocationCoordinate2D) -> Meeting {
-        var title: String = ""
-        var description: String = ""
-        var place : String = ""
-        var numbersOfMembers : Int = 0
+        let title: String = ""
+        let description: String = ""
+        let place : String = ""
+        let numbersOfMembers : Int = 0
     
         let location = location
-        var geoHash: String? = nil
+        let geoHash: String? = nil
         
-        var publishedDate: Date = Date()
-        var meetingDate: Date = Date()
+        let publishedDate: Date = Date()
+        let meetingDate: Date = Date()
 
-        var type: MeetingType = .new
+        let type: MeetingType = .new
 
         return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
     }
@@ -151,23 +151,23 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
 
         let type: MeetingType = .piled
 
-        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
+        return Meeting(id: id, title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
     }
 
     // 새로운 모임 만들기
     static func createNewMeeting(title: String, description: String, place: String, numbersOfMembers: Int, location: CLLocationCoordinate2D, meetingDate: Date) -> Meeting {
-        var title: String = title
-        var description: String = description
-        var place : String = place
-        var numbersOfMembers : Int = numbersOfMembers
+        let title: String = title
+        let description: String = description
+        let place : String = place
+        let numbersOfMembers : Int = numbersOfMembers
     
         let location = location
-        var geoHash: String? = GFUtils.geoHash(forLocation: location)
+        let geoHash: String? = GFUtils.geoHash(forLocation: location)
         
-        var publishedDate: Date = Date()
-        var meetingDate: Date = meetingDate
+        let publishedDate: Date = Date()
+        let meetingDate: Date = meetingDate
 
-        var type: MeetingType = .new
+        let type: MeetingType = .new
 
         return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
     } 
@@ -175,20 +175,20 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     // 모임 수정용 Meeting구조체
     static func updateMeeting(title: String = "", description: String = "", place: String = "", numbersOfMembers: Int = 0, meetingDate: Date = Date(timeIntervalSince1970:0)) -> Meeting {
 
-        var title: String = title
-        var description: String = description
-        var place : String = place
-        var numbersOfMembers : Int = numbersOfMembers
+        let title: String = title
+        let description: String = description
+        let place : String = place
+        let numbersOfMembers : Int = numbersOfMembers
     
         let location = CLLocationCoordinate2D(latitude: 0, longitude: 0)
-        var geoHash: String? = nil
+        let geoHash: String? = nil
         
-        var publishedDate: Date = Date()
-        var meetingDate: Date = meetingDate 
+        let publishedDate: Date = Date()
+        let meetingDate: Date = meetingDate
         
-        var hostUID: String = " "
+        let hostUID: String = " "
 
-        var type: MeetingType = .basic
+        let type: MeetingType = .basic
 
         return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, hostUID: hostUID, type: type)
     }

@@ -47,6 +47,21 @@ struct MeetingCardView: View {
                     .padding(.vertical,8)
                     .foregroundColor(.black)
             }
+            
+            if meeting.hostUID == viewModel.currentUID!{
+                VStack(){
+                    Text("MINE")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(Color.red)
+                        )
+                        .foregroundColor(.white)
+                }
+            }
         }
         .hAlign(.leading)
         
