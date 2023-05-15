@@ -13,18 +13,26 @@ struct JoinMeeting: Identifiable, Codable, FirestoreConvertible {
     @DocumentID var id: String?
 
     let meetingID: String
-    var joinDate: Date = Date()
+    var joinDate: Date
     let isHost: Bool
+
+    // 기본 생성자
+    init(id: String? = nil, meetingID: String, joinDate: String = Date(), isHost: Bool = false) {
+        self.id = id
+        self.meetingID = meetingID
+        self.joinDate = joinDate
+        self.isHost = isHost
+    }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any], id: String) {
         guard let meetingID = data["meetingID"] as? String,
-              let joinDate = data["joinDate"] as? Date
+              let joinDate = data["joinDate"] as? Timestamp
         else { return nil }
         
         self.id = id
         self.meetingID = meetingID
-        self.joinDate = joinDate
+        self.joinDate = joinDate.dateValue()
         self.isHost = data["isHost"] as? Bool ?? false
     }
     

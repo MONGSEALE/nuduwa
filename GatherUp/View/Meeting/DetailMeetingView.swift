@@ -15,9 +15,11 @@ struct DetailMeetingView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var isEdit: Bool = false
-    @State private var title: String = ""
-    @State private var description: String = ""
-    @State var meetingDate: Date = Date()
+    @State private var editTitle: String? = nil
+    @State private var editDescription: String? = nil
+    @State private var editPlace: String? = nil
+    @State private var editNumbersOfMembers: Int? = nil
+    @State private var editMeetingDate: Date? = nil
     
     @State private var toChatView: Bool = false
     
@@ -32,6 +34,7 @@ struct DetailMeetingView: View {
     var body: some View {
         let isHost = meeting.hostUID == viewModel.currentUID
         let meeting = viewModel.meeting ?? meeting
+
         NavigationStack{
             if viewModel.isLoading {
                 ProgressView()
@@ -40,7 +43,7 @@ struct DetailMeetingView: View {
                 ScrollView(.vertical, showsIndicators: false){
                     LazyVStack{
                         HStack(spacing: 12){
-                            WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
+                            WebImage(url: viewModel.user?.userImage ?? meeting.hostImage).placeholder{ProgressView()}
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: 100, height: 100)
@@ -50,7 +53,7 @@ struct DetailMeetingView: View {
                                 EditText(text: meeting.title, editText: $title, item: "모임 제목",isEditable: isEdit)
                                     .font(.title3)
                                     .fontWeight(.semibold)
-                                Text(viewModel.user?.userName ?? "")
+                                Text(viewModel.user?.userName ?? meeting.hostName ?? "")
                                     .font(.callout)
                                 Text(meeting.meetingDate.formatted(date: .numeric, time: .shortened))
                                     .font(.caption2)
@@ -102,7 +105,7 @@ struct DetailMeetingView: View {
                     if isHost {
                         EditButtonStack(isEdit: $isEdit) {
                             if viewModel.meeting != nil{
-                                viewModel.editMeeting(title: title, description: description, meetingDate: meetingDate)
+                                viewModel.editMeeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, meetingDate: meetingDate)
                             }
                         } onCancle: {
                             title = meeting.title
@@ -151,6 +154,11 @@ struct EditText: View {
               .padding()
               .onAppear{
                   editText = text
+              }
+              .onDisappear{
+                if editText == text{
+                    editText = nil
+                }
               }
       } else {
           Text(text)
