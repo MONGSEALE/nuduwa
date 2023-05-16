@@ -165,8 +165,59 @@ class DMViewModel: FirebaseViewModel {
         }
     }
 
-    func uniqueChatDocumentID(senderID: String, receiverID: String) -> String {
-        return senderID < receiverID ? "\(senderID)_\(receiverID)" : "\(receiverID)_\(senderID)"
+    func leaveChatroom(chatroom: Chatter) {
+        guard let currentUID = currentUID else { return }
+        let docRef = db.collection(strUsers).document(currentUID).collection(strChatters).document(chatroom.id ?? "")
+        docRef.delete() { err in
+            if let err = err {
+                print("Error removing document: \(err)")
+            } else {
+                print("Document successfully removed!")
+            }
+        }
+    }
+    /// 서버에 안 읽은 메시지 +1 저장
+    func incrementUnreadMessages(receiverID: String, chatRoomID: String) {
+        let docRef = self.db.collection("Users").document(receiverID).collection("Chatters").document(chatRoomID)
+       
+        docRef.updateData([
+            "unreadMessages": FieldValue.increment(Int64(1))
+        ]) { err in
+            if let err = err {
+                print("Error updating document: \(err)")
+            } else {
+                print("Document successfully updated")
+                print("성공적으로 됬당께")
+            }
+        }
+    }
+    
+    func resetUnreadMessages(userID: String, chatRoomID: String) {
+        let docRef = Firestore.firestore().collection("Users").document(userID).collection("Chatters").document(chatRoomID)
+
+        docRef.updateData([
+            "unreadMessages": 0
+        ]) { err in
+            if let err = err {
+                print("Error updating document: \(err)")
+            } else {
+                print("Document successfully updated")
+            }
+        }
+    }
+    
+    func fetchChatRoomID(receiverID: String, completion: @escaping (String) -> Void) {
+        let userUID = Auth.auth().currentUser?.uid ?? ""
+        db.collection("Users").document(userUID).collection("Chatters").whereField("chatterUID", isEqualTo: receiverID).getDocuments { (snapshot, error) in
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+
+            if let document = snapshot?.documents.first {
+                completion(document.documentID)
+            }
+        }
     }
     
     func deleteRecentMessage(receiverID: String) {

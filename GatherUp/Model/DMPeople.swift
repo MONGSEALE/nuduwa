@@ -32,9 +32,4 @@ struct DMPeople : Identifiable, Codable, Equatable, FirestoreConvertible {
             "chattersUID": chattersUID
         ]
     }
-
-    // 배열 안만들고 손쉽게 생성
-    static func create(_ chatterUID1: String, _ chatterUID2: String) -> DMPeople {
-        return DMPeople(chattersUID: [chatterUID1, chatterUID2])
-    }
 }

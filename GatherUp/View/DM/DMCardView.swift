@@ -38,15 +38,23 @@ struct DMCardView: View {
             Spacer()
         }
         .buttonStyle(PlainButtonStyle())
+        .onTapGesture {
+            showDM = true
+        }
+        .contextMenu { // 길게 눌렀을 때 표시할 메뉴
+            Button(action: {
+                viewModel.leaveChatroom(chatroom: chattingRoom) // 채팅방 나가기 메뉴 선택 시 처리
+            }) {
+                Text("채팅방 나가기")
+                Image(systemName: "trash")
+            }
+        }
         .onAppear{
             viewModel.fetchUserData(chattingRoom.chatterUID)
             viewModel.dmListener(dmPeopleID: chattingRoom.DMPeopleID)
         }
         .onDisappear{
             viewModel.removeListeners()
-        }
-        .onTapGesture {
-            showDM = true
         }
         .fullScreenCover(isPresented: $showDM){
             DMView(receiverID: chattingRoom.chatterUID, : $showDM)

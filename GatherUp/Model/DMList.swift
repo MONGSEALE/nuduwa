@@ -13,6 +13,8 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
     @DocumentID var id: String
     let chatterUID: String
     let DMPeopleID: String
+    var unreadMessages: Int
+
     let timestamp: Timestamp
 
     // 기본 생성자
@@ -26,12 +28,14 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
     init?(data: [String: Any], id: String) {
         guard let chatterUID = data["chatterUID"] as? String,
               let DMPeopleID = data["DMPeopleID"] as? String,
+              let unreadMessages = data["unreadMessages"] as? Int,
               let timestamp = data["timestamp"] as? Timestamp
         else { return nil }
         
         self.id = id
         self.chatterUID = chatterUID
         self.DMPeopleID = DMPeopleID
+        self.unreadMessages = unreadMessages
         self.timestamp = timestamp
     }
     
@@ -40,6 +44,7 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         return [
             "chatterUID": chatterUID,
             "DMPeopleID": DMPeopleID,
+            "unreadMessages" : unreadMessages
             "timestamp" : FieldValue.serverTimestamp()
         ]
     }
