@@ -210,7 +210,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                 
                 try await meetingsDoc.collection(strMembers).addDocument(data: Member.member(currentUID))
 
-                try await joinMeetingsCol.addDocument(data: JoinMeeting.host(meetingID))
+                try await joinMeetingsCol.addDocument(data: MeetingList.host(meetingID))
                 
                 try await meetingsDoc.collection(self.strMessage).addDocument(data: Message.systemMessage(text))
                 

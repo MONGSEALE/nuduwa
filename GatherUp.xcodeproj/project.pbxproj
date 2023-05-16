@@ -44,7 +44,7 @@
 		33ADDF7D2A036AFE003FE79B /* MemberProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */; };
 		33AEB88F2A11B7D40048A8C7 /* FirestoreConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEB88E2A11B7D40048A8C7 /* FirestoreConvertible.swift */; };
 		33AEB8912A11B80D0048A8C7 /* DMList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEB8902A11B80D0048A8C7 /* DMList.swift */; };
-		33AEB8932A11B8B00048A8C7 /* JoinMeeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEB8922A11B8B00048A8C7 /* JoinMeeting.swift */; };
+		33AEB8932A11B8B00048A8C7 /* MeetingList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEB8922A11B8B00048A8C7 /* MeetingList.swift */; };
 		33AEB8952A11B8E40048A8C7 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEB8942A11B8E40048A8C7 /* Message.swift */; };
 		33AF5ABA2A0C7F270060427E /* DMPeople.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5AB92A0C7F270060427E /* DMPeople.swift */; };
 		33AF5ABD2A0C7F770060427E /* DMListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5ABC2A0C7F770060427E /* DMListView.swift */; };
@@ -95,7 +95,7 @@
 		33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberProfileView.swift; sourceTree = "<group>"; };
 		33AEB88E2A11B7D40048A8C7 /* FirestoreConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreConvertible.swift; sourceTree = "<group>"; };
 		33AEB8902A11B80D0048A8C7 /* DMList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMList.swift; sourceTree = "<group>"; };
-		33AEB8922A11B8B00048A8C7 /* JoinMeeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinMeeting.swift; sourceTree = "<group>"; };
+		33AEB8922A11B8B00048A8C7 /* MeetingList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingList.swift; sourceTree = "<group>"; };
 		33AEB8942A11B8E40048A8C7 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		33AF5AB92A0C7F270060427E /* DMPeople.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMPeople.swift; sourceTree = "<group>"; };
 		33AF5ABC2A0C7F770060427E /* DMListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMListView.swift; sourceTree = "<group>"; };
@@ -192,7 +192,7 @@
 				33A9111F29ED0AFF00C36FA2 /* Member.swift */,
 				33AF5AB92A0C7F270060427E /* DMPeople.swift */,
 				33AEB8902A11B80D0048A8C7 /* DMList.swift */,
-				33AEB8922A11B8B00048A8C7 /* JoinMeeting.swift */,
+				33AEB8922A11B8B00048A8C7 /* MeetingList.swift */,
 				33AEB8942A11B8E40048A8C7 /* Message.swift */,
 			);
 			path = Model;
@@ -407,7 +407,7 @@
 				33AF5ABD2A0C7F770060427E /* DMListView.swift in Sources */,
 				33AEB8952A11B8E40048A8C7 /* Message.swift in Sources */,
 				33A9112029ED0B0000C36FA2 /* Member.swift in Sources */,
-				33AEB8932A11B8B00048A8C7 /* JoinMeeting.swift in Sources */,
+				33AEB8932A11B8B00048A8C7 /* MeetingList.swift in Sources */,
 				339A101229D3E9C100B4DD98 /* LoginViewModel.swift in Sources */,
 				33AF5ABA2A0C7F270060427E /* DMPeople.swift in Sources */,
 				33AD61C52A0A320F00CD908D /* MeetingInfoSheetViewModel.swift in Sources */,

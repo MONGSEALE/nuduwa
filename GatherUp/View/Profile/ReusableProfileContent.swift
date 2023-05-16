@@ -14,7 +14,7 @@ struct ReusableProfileContent: View {
     @State private var imageData: Data? = nil
     @State var showImagePicker: Bool = false
     @State var isBool = true
-    @State var editName: String = ""
+    @State var editName: String?
     
     @Binding var isEdit: Bool
     

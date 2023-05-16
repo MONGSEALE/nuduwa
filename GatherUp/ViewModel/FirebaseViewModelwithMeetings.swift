@@ -42,8 +42,9 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
             self.members = documents.compactMap{ documents -> Member? in
                 try? documents.data(as: Member.self)
             }
-            print("3")
-//            self.convertMembers(meetingID: meetingID)
+            print("member:\(self.members)")
+            print("4")
+            self.convertMembers(meetingID: meetingID)
         }
         listeners[col.path] = listener
     }
@@ -77,7 +78,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                 
                 if members.count < numbersOfMembers {
                     try await meetingsDoc.collection(strMembers).addDocument(data: Member.member(currentUID))
-                    try await joinMeetingsCol.addDocument(data: JoinMeeting.member(meetingID))
+                    try await joinMeetingsCol.addDocument(data: MeetingList.member(meetingID))
                     let text = "\(userData.userName)님이 채팅에 참가하셨습니다."
                     try await meetingsDoc.collection(self.strMessage).addDocument(data: Message.systemMessage(text))
                 }else{

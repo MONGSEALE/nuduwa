@@ -61,20 +61,22 @@ class FirebaseViewModel: ObservableObject {
 
     // 유저 이름과 이미지만 가져오기
     func fetchUserData(_ userUID: String?) {
-        print("fetchUserData")
+        print("fetchUserData:\(userUID)")
         Task{
             do{
                 let userData = try await getUserData(userUID)
-                self.user = User.convertUserData(userData)
+                await MainActor.run{
+                    self.user = User.convertUserData(userData)
+                }
             }catch{
                 handleErrorTask(error)
             }
         }
     }
     func getUserData(_ userUID: String?) async throws -> UserData {
-        print("getUserData")
+        print("getUserData:\(userUID)")
         do{
-            guard let userUID = userUID else{throw SomeError.miss}
+            guard let userUID = userUID else{print("리턴");throw SomeError.miss}
             let doc = db.collection(strUsers).document(userUID)
             let userData: UserData? = try await doc.getDocument(as: UserData.self)
             guard let userData = userData else{throw SomeError.miss}
@@ -86,7 +88,7 @@ class FirebaseViewModel: ObservableObject {
 
     /// 유저 데이터 한번 가져오기
     func fetchUser(_ userUID: String?) {
-        print("fetchUser")
+        print("fetchUser:\(userUID)")
         Task{
             do{
                 let user = try await getUser(userUID)

@@ -9,7 +9,7 @@ import SwiftUI
 import Firebase
 import FirebaseFirestoreSwift
 
-struct JoinMeeting: Identifiable, Codable, FirestoreConvertible {
+struct MeetingList: Identifiable, Codable, FirestoreConvertible {
     @DocumentID var id: String?
 
     let meetingID: String
@@ -17,7 +17,7 @@ struct JoinMeeting: Identifiable, Codable, FirestoreConvertible {
     let isHost: Bool
 
     // 기본 생성자
-    init(id: String? = nil, meetingID: String, joinDate: String = Date(), isHost: Bool = false) {
+    init(id: String? = nil, meetingID: String, joinDate: Date = Date(), isHost: Bool = false) {
         self.id = id
         self.meetingID = meetingID
         self.joinDate = joinDate

@@ -50,7 +50,7 @@ struct DetailMeetingView: View {
                                 .clipShape(Circle())
                             
                             VStack(alignment: .leading, spacing: 6){
-                                EditText(text: meeting.title, editText: $title, item: "모임 제목",isEditable: isEdit)
+                                EditText(text: meeting.title, editText: $editTitle, item: "모임 제목",isEditable: isEdit)
                                     .font(.title3)
                                     .fontWeight(.semibold)
                                 Text(viewModel.user?.userName ?? meeting.hostName ?? "")
@@ -61,20 +61,23 @@ struct DetailMeetingView: View {
                             }
                             .hAlign(.leading)
                         }
-                        EditText(text: meeting.description, editText: $description, item: "모임 내용", isEditable: isEdit)
+                        EditText(text: meeting.description, editText: $editDescription, item: "모임 내용", isEditable: isEdit)
                             .textSelection(.enabled)
                             .padding(.vertical,8)
                             .hAlign(.leading)
                         if isHost && isEdit {
                             Section(header:Text("시간 설정")){
-                                DatePicker("",selection: $meetingDate, in:dateRange)
+                                DatePicker("",selection: Binding<Date>(
+                                    get: { self.editMeetingDate ?? meeting.meetingDate },
+                                    set: { self.editMeetingDate = $0 }
+                                ), in:dateRange)
                                     .datePickerStyle(GraphicalDatePickerStyle())
                             }
                         }
                         HStack{
                             Text("참여자:")
                                 .font(.caption2)
-                            ForEach(viewModel.members){ member in
+                            ForEach(Array(viewModel.dicMembers.values)){ member in
                                 WebImage(url: member.memberImage).placeholder{ProgressView()}
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
@@ -105,12 +108,12 @@ struct DetailMeetingView: View {
                     if isHost {
                         EditButtonStack(isEdit: $isEdit) {
                             if viewModel.meeting != nil{
-                                viewModel.editMeeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, meetingDate: meetingDate)
+                                viewModel.editMeeting(title: editTitle, description: editDescription, place: editPlace, numbersOfMembers: editNumbersOfMembers, meetingDate: editMeetingDate)
                             }
                         } onCancle: {
-                            title = meeting.title
-                            description = meeting.description
-                            meetingDate = meeting.meetingDate
+                            editTitle = meeting.title
+                            editDescription = meeting.description
+                            editMeetingDate = meeting.meetingDate
                         } onDelete: {
                             viewModel.deleteMeeting(meetingID: meeting.id!)
                         }
@@ -123,11 +126,12 @@ struct DetailMeetingView: View {
                         }
                     }
                 }
-                
+                .padding(.bottom, 15)
             }
+            
         }
         .onAppear{
-            meetingDate = meeting.meetingDate
+            editMeetingDate = meeting.meetingDate
             viewModel.fetchUserData(meeting.hostUID)
             viewModel.meetingListener(meetingID: meeting.id!)
             viewModel.membersListener(meetingID: meeting.id!)
@@ -143,13 +147,16 @@ struct DetailMeetingView: View {
 
 struct EditText: View {
     let text: String
-    @Binding var editText: String
+    @Binding var editText: String?
     let item: String
     let isEditable: Bool
     
     var body: some View {
       if isEditable {
-          TextField(item, text: $editText)
+          TextField(item, text: Binding<String>(
+                            get: { self.text },
+                            set: { self.editText = $0.isEmpty ? nil : $0 }
+                        ))
               .textFieldStyle(RoundedBorderTextFieldStyle())
               .padding()
               .onAppear{
@@ -168,6 +175,7 @@ struct EditText: View {
       }
     }
 }
+
 struct EditButtonStack: View {
     
     @Binding var isEdit: Bool

@@ -65,40 +65,39 @@ struct ChatView: View {
                 .background(Color("lightpink"))
                 ScrollView{
                     ScrollViewReader { scrollViewProxy in
-//                        VStack {
-//                            ForEach(chatViewModel.messages.indices, id: \.self) { index in
-//                                let currentMessage = chatViewModel.messages[index]
-//                                let previousMessage = index > 0 ? chatViewModel.messages[index - 1] : nil
-//                                
-//                                if isNewDay(previousMessage: previousMessage, currentMessage: currentMessage) {
-//                                    Text(formatDate(currentMessage.timestamp))
-//                                        .font(.caption2)
-//                                        .foregroundColor(.gray)
-//                                        .frame(maxWidth: .infinity)
-//                                        .padding(.vertical, 8)
-//                                        .id("system-\(index)")
-//                                }
-//                                if currentMessage.isSystemMessage {
-//                                    Text(currentMessage.text)
-//                                        .font(.caption2)
-//                                        .foregroundColor(.gray)
-//                                        .frame(maxWidth: .infinity)
-//                                        .padding(.vertical, 8)
-//                                        .id("system-\(index)")
-//                                }
-//                                else{
-//                                    MessageRow(message: chatViewModel.messages[index], member: members[currentMessage.userUID]!, identifying: chatViewModel.messages[index].userUID == chatViewModel.currentUID)
-//                                        .id(index)
-//                                }
-//                            }
-//                        }
-//                        .onChange(of: chatViewModel.messages) { messages in
-//                            if let lastMessageIndex = messages.indices.last {
-//                                withAnimation {
-//                                    scrollViewProxy.scrollTo(lastMessageIndex, anchor: .bottom)
-//                                }
-//                            }
-//                        }
+                        VStack {
+                            ForEach(chatViewModel.messages.indices, id: \.self) { index in
+                                let currentMessage = chatViewModel.messages[index]
+                                let previousMessage = index > 0 ? chatViewModel.messages[index - 1] : nil
+
+                                if isNewDay(previousMessage: previousMessage, currentMessage: currentMessage) {
+                                    Text(formatDate(currentMessage.timestamp))
+                                        .font(.caption2)
+                                        .foregroundColor(.gray)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 8)
+                                        .id("system-\(index)")
+                                }
+                                if currentMessage.isSystemMessage {
+                                    Text(currentMessage.text)
+                                        .font(.caption2)
+                                        .foregroundColor(.gray)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 8)
+                                        .id("system-\(index)")
+                                }
+                                else{
+                                    MessageRow(message: currentMessage, member: members[currentMessage.senderUID]! , identifying: currentMessage.senderUID == chatViewModel.currentUID)
+                                }
+                            }
+                        }
+                        .onChange(of: chatViewModel.messages) { messages in
+                            if let lastMessageIndex = messages.indices.last {
+                                withAnimation {
+                                    scrollViewProxy.scrollTo(lastMessageIndex, anchor: .bottom)
+                                }
+                            }
+                        }
                     }
                 }
                 Spacer()

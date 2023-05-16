@@ -14,6 +14,7 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
 
     @Published var messages: [Message] = []
     @Published var lastMessageId: String = ""
+    @Published var nonMembers: [String: Member] = [:]
     
     ///채팅구현
     func messagesListener(meetingID: String) {
@@ -27,20 +28,12 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
                 
                 self.messages = documents.compactMap { document -> Message? in
                     document.data(as: Message.self)
-                    // let data = document.data()
-                    // let id = document.documentID
-                    // let text = data["text"] as? String ?? ""
-                    // let userId = data["userUID"] as? String ?? ""
-                    // let userName = data["userName"] as? String ?? ""
-                    // let timestamp = data["timestamp"] as? Timestamp ?? Timestamp()
-                    // let isSystemMessage = data["isSystemMessage"] as? Bool ?? false
-                    
-                    // return ChatMessage(id: id, text: text, userUID: userId, timestamp: timestamp ,isSystemMessage:isSystemMessage)
                 }
             }
             listeners[query.description] = listener
-            print("경로:\(query.description)")
-            isLoading = false
+            await MainActor.run{
+                isLoading = false
+            }
         }
     }
     

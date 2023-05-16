@@ -245,7 +245,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
 
     var firestoreCancle: [String: Any] {
         return [
-            "geoHash": nil
+            "geoHash": geoHash as Any
         ]
     }
 }

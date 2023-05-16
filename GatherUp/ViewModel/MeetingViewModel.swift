@@ -57,15 +57,19 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
 
     // 오류 생기면 Task를 for문 밖으로 빼보기
     func fetchMemberData() {
+        print("fetchMemberData")
         for member in members{
             let uid = member.memberUID
             if dicMembersData[uid] != nil {continue}
             Task{
                 do{
+                    print("uid:\(uid)")
                     dicMembersData[uid] = try await getUserData(uid)
 //                    guard let memberData = dicMembersData[uid] else{return}
-                    dicMembers[uid]?.memberName = dicMembersData[uid]?.userName
-                    dicMembers[uid]?.memberImage = dicMembersData[uid]?.userImage
+                    await MainActor.run{
+                        dicMembers[uid]?.memberName = dicMembersData[uid]?.userName
+                        dicMembers[uid]?.memberImage = dicMembersData[uid]?.userImage
+                    }
                 }catch{
                     print("오류!dicMembersData.UID:\(uid)")
                 }
@@ -90,7 +94,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     /// FireStore와 meetings 배열 실시간 연동
     func meetingsListener(){
         print("meetingsListener")
-        isLoading = true
+        isLoading = false
         Task{
             do{
                 guard let currentUID = currentUID else{return}
@@ -280,7 +284,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     }
     
     /// - 모임 수정하기
-    func editMeeting(title: String, description: String, place: String, numbersOfMembers: Int, meetingDate: Date){
+    func editMeeting(title: String?, description: String?, place: String?, numbersOfMembers: Int?, meetingDate: Date?){
         print("updateMeeting:\(title)")
         isLoading = true
         Task{
@@ -307,7 +311,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                 }
                 */
                 let doc = db.collection(strMeetings).document(meetingID)
-                try await doc.updateData(Meeting.firestoreUpdateMeeting(title, description, place, numbersOfMembers, meetingDate))
+                try await doc.updateData(Meeting.firestoreUpdateMeeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, meetingDate: meetingDate))
 
                 await MainActor.run(body: {
                     isLoading = false
@@ -321,7 +325,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
 
     func meetingListener(meetingID: String){
         print("meetingListener")
-        isLoading = true
+        isLoading = false
         let doc = db.collection(strMeetings).document(meetingID)
         
         let listener = doc.addSnapshotListener({ snapshot, error in

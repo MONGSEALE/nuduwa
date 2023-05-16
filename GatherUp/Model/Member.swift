@@ -18,7 +18,7 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
     var joinDate: Date
 
     // 기본 생성자
-    init(id: String? = nil, memberUID: String, memberName: String? = nil, memberImage: String? = nil, joinDate: Date = Date()) {
+    init(id: String? = nil, memberUID: String, memberName: String? = nil, memberImage: URL? = nil, joinDate: Date = Date()) {
         self.id = id
         self.memberUID = memberUID
         self.memberName = memberName
@@ -28,15 +28,21 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any], id: String) {
+        print("me")
         guard let memberUID = data["memberUID"] as? String,
               let joinDate = data["joinDate"] as? Timestamp
-        else { return nil }
-        
+        else {
+            print("me1")
+            return nil
+            
+        }
+        print("me2")
         self.id = id
         self.memberUID = memberUID
         self.memberName = nil
         self.memberImage = nil
         self.joinDate = joinDate.dateValue()
+        print("id:\(id)")
     }
     
     // Firestore에 저장할 필드
@@ -53,20 +59,6 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
             "memberUID": memberUID,
             "joinDate": FieldValue.serverTimestamp()
         ]
-    }
-
-    func fetchMemberData() {
-        Task{
-            do{
-                guard let id = id else{return}
-                let doc = db.collection("Users").document(id!)
-                let memberData = try await doc.getDocument(as: UserData.self)
-                self.memberName = memberData.userName
-                self.memberImage = memberData.userImage
-            }catch{
-                print("오류!getMemberData")
-            }
-        }
     }
 }
 
