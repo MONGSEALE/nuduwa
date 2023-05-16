@@ -10,17 +10,17 @@ import Firebase
 import FirebaseFirestoreSwift
 
 struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
-    @DocumentID var id: String?
+    @DocumentID var id: String
     let chatterUID: String
     let DMPeopleID: String
     let timestamp: Timestamp
 
     // 기본 생성자
-    init(id: String? = nil, chatterUID: String, DMPeopleID: String, timestamp: Timestamp? = nil) {
-        self.id = id
+    init(chatterUID: String, DMPeopleID: String) {
+        self.id = UUID().uuidString
         self.chatterUID = chatterUID
         self.DMPeopleID = DMPeopleID
-        self.timestamp = timestamp ?? Timestamp(date: Date())
+        self.timestamp = Timestamp(date: Date())
     }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any], id: String) {

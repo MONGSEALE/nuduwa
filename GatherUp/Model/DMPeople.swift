@@ -14,8 +14,8 @@ struct DMPeople : Identifiable, Codable, Equatable, FirestoreConvertible {
     var chattersUID: [String]
 
     // 기본 생성자
-    init(id: String? = nil, chattersUID: [String]) {
-        self.id = id
+    init(chattersUID: [String]) {
+        self.id = UUID().uuidString
         self.chattersUID = chattersUID
     }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -31,5 +31,10 @@ struct DMPeople : Identifiable, Codable, Equatable, FirestoreConvertible {
         return [
             "chattersUID": chattersUID
         ]
+    }
+
+    // 배열 안만들고 손쉽게 생성
+    static func create(_ chatterUID1: String, _ chatterUID2: String) -> DMPeople {
+        return DMPeople(chattersUID: [chatterUID1, chatterUID2])
     }
 }

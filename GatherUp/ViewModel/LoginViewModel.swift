@@ -150,7 +150,7 @@ class LoginViewModel: FirebaseViewModel {
                 }
                 print("1")
                 // Creating a User Firestore Object
-                let newUser = User.newGoogleUser(userName: userData.displayName, userGoogleIDCode: userData.uid, userGoogleEmail: userData.email, userImage: userData.photoURL)
+                let newUser = User.newGoogleUser(userName: userData.displayName, userGoogleUID: userData.uid, userGoogleEmail: userData.email, userImage: userData.photoURL)
                 // Saving User Doc into Firestore Database
                 print("2")
                 let doc = db.collection(strUsers).document(currentUID)

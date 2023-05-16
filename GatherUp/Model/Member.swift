@@ -10,7 +10,7 @@ import Firebase
 import FirebaseFirestoreSwift
 
 struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
-    @DocumentID var id: String?
+    @DocumentID var id: String
     
     let memberUID: String
     var memberName: String?
@@ -18,12 +18,12 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
     var joinDate: Date
 
     // 기본 생성자
-    init(id: String? = nil, memberUID: String, memberName: String? = nil, memberImage: URL? = nil, joinDate: Date = Date()) {
-        self.id = id
+    init(memberUID: String, memberName: String? = nil, memberImage: URL? = nil) {
+        self.id = UUID().uuidString
         self.memberUID = memberUID
         self.memberName = memberName
         self.memberImage = memberImage
-        self.joinDate = joinDate
+        self.joinDate = Date()
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
