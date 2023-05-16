@@ -177,7 +177,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                 
                 let document = try await db.collection(strMeetings).addDocument(data: meeting.firestoreData)
                 let meetingID = document.documentID
-                self.joinMeeting(meetingID: meetingID)
+                self.joinMeeting(meetingID: meetingID, numbersOfMembers: 0)
                 
                 isLoading = false
                 
@@ -186,40 +186,39 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
             }
         }
     }
-    override func joinMeeting(meetingID: String, numbersOfMembers: Int = 0){
-        print("joinMeeting")
-        isLoading = true
-        Task{
-            do{
-                guard let currentUID = currentUID else{return}
-                let userData = try await getUserData(currentUID)
-
-//                let member = Member(memberUID: currentUID)
-//                let joinMeeting = JoinMeeting(meetingID: meetingID, isHost: true)
-
-                let text = "\(userData.userName)님이 채팅에 참가하셨습니다."
-                // let message = ChatMessage(
-                //     text: "\(userData.userName)님이 채팅에 참가하셨습니다.",
-                //     userUID: "SYSTEM",
-                //     timestamp: Timestamp(),
-                //     isSystemMessage: true
-                // )
-
-                let meetingsDoc = db.collection(strMeetings).document(meetingID)
-                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
-                
-                try await meetingsDoc.collection(strMembers).addDocument(data: Member.member(currentUID))
-
-                try await joinMeetingsCol.addDocument(data: MeetingList.host(meetingID))
-                
-                try await meetingsDoc.collection(self.strMessage).addDocument(data: Message.systemMessage(text))
-                
-                isLoading = false
-            } catch {
-                handleErrorTask(error)
-            }
-        }
-    }
+//    override func joinMeeting(meetingID: String, numbersOfMembers: Int = 0){
+//        print("joinMeeting")
+//        isLoading = true
+//        Task{
+//            do{
+//                guard let currentUID = currentUID else{return}
+//                let userData = try await getUserData(currentUID)
+//
+//                let meetingsDoc = db.collection(strMeetings).document(meetingID)
+//                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
+//                
+//                if members.count < numbersOfMembers || numbersOfMembers == 0 {
+//                    let member = Member(memberUID: currentUID)
+//                    let meetingList = MeetingList(meetingID: meetingID)
+//                    let text = "\(userData.userName)님이 채팅에 참가하셨습니다."
+//                    let message = Message(text, uid: "SYSTEM", isSystemMessage: true)
+//                    
+//                    try await meetingsDoc.collection(strMembers).addDocument(data: member.firestoreData)
+//                    try await joinMeetingsCol.addDocument(data: meetingList.firestoreData)
+//                    try await meetingsDoc.collection(self.strMessage).addDocument(data: message.firestoreData)
+//                }else{
+//                    print("모임 참가 실패")
+//                }
+//                //참가 실패시 에러핸들 구현
+//                await MainActor.run {
+//                    isLoading = false
+//                }
+//                
+//            } catch {
+//                handleErrorTask(error)
+//            }
+//        }
+//    }
     /// 작성자 중복 확인
     func checkedOverlap(){
         print("checkedOverlap")

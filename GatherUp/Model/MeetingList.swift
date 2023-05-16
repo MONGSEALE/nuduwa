@@ -50,7 +50,7 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
         
         return data
     }
-    
+    /*
     // member가 가입
     static func member(_ meetingID: String) -> [String: Any] {
         return [
@@ -67,5 +67,6 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
             "isHost" : true
         ]
     }
+     */
 }
 

@@ -188,9 +188,7 @@ struct MemberItemView: View {
     
     var body: some View {
             HStack {
-                if member.memberUID == userUID {
-                    MemberChatImage(image: member.memberImage!)
-                } else if hostUID == userUID {
+                if hostUID == userUID && member.memberUID != userUID {
                     Menu {
                         Button("프로필보기", action: {isShowMember = true})
                         Button("추방하기", role: .destructive, action: {
@@ -217,7 +215,7 @@ struct MemberItemView: View {
                 Spacer()
             }
             .sheet(isPresented: $isShowMember){
-                MemberProfileView(member: member, userUID: viewModel.currentUID!)
+                MemberProfileView(member: member, isCurrent: member.memberUID == viewModel.currentUID)
             }
             .padding(.horizontal)
     }
@@ -226,10 +224,7 @@ struct MemberChatImage: View {
     let image: URL
     
     var body: some View {
-        WebImage(url: image).placeholder{
-            Image(systemName: "xmark.app")
-                .resizable()
-        }
+        WebImage(url: image).placeholder{ProgressView()}
             .resizable()
             .scaledToFill()
             .frame(width: 40, height: 40)

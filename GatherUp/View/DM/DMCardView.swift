@@ -14,6 +14,8 @@ struct DMCardView: View {
     
     let chattingRoom: DMList
     
+    @State var showDM: Bool = false
+    
     /// - Callbacks
     //    var onUpdate: (DM)->()
     
@@ -42,6 +44,12 @@ struct DMCardView: View {
         }
         .onDisappear{
             viewModel.removeListeners()
+        }
+        .onTapGesture {
+            showDM = true
+        }
+        .fullScreenCover(isPresented: $showDM){
+            DMView(receiverID: chattingRoom.chatterUID, showDMView: $showDM)
         }
     }
 }

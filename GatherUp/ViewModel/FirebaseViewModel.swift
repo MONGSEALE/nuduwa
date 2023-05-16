@@ -17,7 +17,7 @@ class FirebaseViewModel: ObservableObject {
     /// 콜렉션 이름
     /// Users 콜렉션
     let strUsers = "Users"
-    let strChatters = "DMList"
+    let strDMList = "DMList"
     let strJoinMeetings = "JoinMeetings"
     /// Meetings 콜렉션
     let strMeetings = "Meetings"
@@ -61,7 +61,7 @@ class FirebaseViewModel: ObservableObject {
 
     // 유저 이름과 이미지만 가져오기
     func fetchUserData(_ userUID: String?) {
-        print("fetchUserData:\(userUID)")
+        print("fetchUserData:\(userUID ?? "uidNon")")
         Task{
             do{
                 let userData = try await getUserData(userUID)
@@ -74,9 +74,9 @@ class FirebaseViewModel: ObservableObject {
         }
     }
     func getUserData(_ userUID: String?) async throws -> UserData {
-        print("getUserData:\(userUID)")
+        print("getUserData:\(userUID ?? "uidNon")")
         do{
-            guard let userUID = userUID else{print("리턴");throw SomeError.miss}
+            guard let userUID = userUID else{throw SomeError.miss}
             let doc = db.collection(strUsers).document(userUID)
             let userData: UserData? = try await doc.getDocument(as: UserData.self)
             guard let userData = userData else{throw SomeError.miss}
@@ -88,7 +88,7 @@ class FirebaseViewModel: ObservableObject {
 
     /// 유저 데이터 한번 가져오기
     func fetchUser(_ userUID: String?) {
-        print("fetchUser:\(userUID)")
+        print("fetchUser:\(userUID ?? "uidNon")")
         Task{
             do{
                 let user = try await getUser(userUID)
@@ -114,23 +114,17 @@ class FirebaseViewModel: ObservableObject {
     /// 유저 데이터 실시간 가져오기
     func userListener(_ userUID: String?) {
         print("userListener")
-        Task{
-            guard let userUID = userUID else{
-                print("유저아이디 없음")
-                return
-            }
-            let doc = db.collection(strUsers).document(userUID)
-            let listener = doc.addSnapshotListener { snapshot, error in
-                if let error = error{
-                    self.handleErrorTask(error)
-                    return
-                }
-                guard let document = snapshot else{print("No Users");return}
-                self.user = try? document.data(as: User.self)
-                print("유저\(self.user)")
-            }
-            listeners[doc.path] = listener
+        guard let userUID = userUID else{return}
+        
+        let doc = db.collection(strUsers).document(userUID)
+        let listener = doc.addSnapshotListener { snapshot, error in
+            if let error = error {return}
+            
+            guard let document = snapshot else{print("No Users");return}
+            self.user = document.data(as: User.self)
+            print("유저\(String(describing: self.user))")
         }
+        listeners[doc.path] = listener
     }
     
     /// 에러처리

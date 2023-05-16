@@ -13,7 +13,7 @@ struct MemberProfileView: View {
     @State var showMessage: Bool = false
     @State var message: String = ""
     @State private var showDMView: Bool = false
-    let userUID: String
+    let isCurrent: Bool
     
     var body: some View {
         ZStack{
@@ -32,23 +32,31 @@ struct MemberProfileView: View {
                         .hAlign(.leading)
                 }
                 Spacer()
-                Button {
-                    showDMView = true
-                } label: {
-                    Text("1:1 메시지")
-                        .font(.callout)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 30)
-                        .padding(.vertical, 10)
-                        .background(.blue, in: Capsule())
+                if !isCurrent{
+                    Button {
+                        showDMView = true
+                    } label: {
+                        Text("1:1 메시지")
+                            .font(.callout)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 30)
+                            .padding(.vertical, 10)
+                            .background(.blue, in: Capsule())
+                    }
+                    .fullScreenCover(isPresented: $showDMView){
+                        DMView(receiverID: member.memberUID, showDMView: $showDMView)
+                            .edgesIgnoringSafeArea(.all)
+                            .transition(.move(edge: .trailing))
+                            .animation(.easeInOut(duration: 0.3))
+                    }
                 }
             }
-            if showDMView {
-                DMView(receiverID: member.memberUID, showDMView: $showDMView)
-                    .edgesIgnoringSafeArea(.all)
-                    .transition(.move(edge: .trailing))
-                    .animation(.easeInOut(duration: 0.3))
-            }
+//            if showDMView {
+//                DMView(receiverID: member.memberUID, showDMView: $showDMView)
+//                    .edgesIgnoringSafeArea(.all)
+//                    .transition(.move(edge: .trailing))
+//                    .animation(.easeInOut(duration: 0.3))
+//            }
         }
         .padding(30)
     }

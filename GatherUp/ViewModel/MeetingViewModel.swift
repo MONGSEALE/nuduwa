@@ -215,8 +215,9 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                 }
 
                 let text = "\(member.userName)님이 채팅에 나가셨습니다."
+                let message = Message(text, uid: "", isSystemMessage: true)
 
-                try await doc.collection(strMessage).addDocument(data: Message.systemMessage(text))
+                try await doc.collection(strMessage).addDocument(data: message.firestoreData)
                     
                 
                 isLoading = false

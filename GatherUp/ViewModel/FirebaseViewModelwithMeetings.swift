@@ -31,19 +31,13 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
         let col = db.collection(strMeetings).document(meetingID).collection(strMembers)
 
         let listener = col.addSnapshotListener { querySnapshot, error in
-            if let error = error{
-                print("에러")
-                self.handleErrorTask(error)
-                return
-            }
-            print("1")
+            if let error = error{print("에러membersListener:\(error)");return}
+            
             guard let documents = querySnapshot?.documents else {return}
-            print("2")
             self.members = documents.compactMap{ documents -> Member? in
-                try? documents.data(as: Member.self)
+                documents.data(as: Member.self)
             }
             print("member:\(self.members)")
-            print("4")
             self.convertMembers(meetingID: meetingID)
         }
         listeners[col.path] = listener
@@ -73,71 +67,33 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
             do{
                 guard let currentUID = currentUID else{return}
                 let userData = try await getUserData(currentUID)
+
                 let meetingsDoc = db.collection(strMeetings).document(meetingID)
                 let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
                 
-                if members.count < numbersOfMembers {
-                    try await meetingsDoc.collection(strMembers).addDocument(data: Member.member(currentUID))
-                    try await joinMeetingsCol.addDocument(data: MeetingList.member(meetingID))
+                if members.count < numbersOfMembers || numbersOfMembers == 0 {
+                    let member = Member(memberUID: currentUID)
+                    let meetingList = MeetingList(meetingID: meetingID)
                     let text = "\(userData.userName)님이 채팅에 참가하셨습니다."
-                    try await meetingsDoc.collection(self.strMessage).addDocument(data: Message.systemMessage(text))
+                    let message = Message(text, uid: "SYSTEM", isSystemMessage: true)
+                    
+                    try await meetingsDoc.collection(strMembers).addDocument(data: member.firestoreData)
+                    try await joinMeetingsCol.addDocument(data: meetingList.firestoreData)
+                    try await meetingsDoc.collection(self.strMessage).addDocument(data: message.firestoreData)
                 }else{
                     print("모임 참가 실패")
                 }
-
-
                 //참가 실패시 에러핸들 구현
-               
-                isLoading = false
-            } catch {
-                handleErrorTask(error)
-            }
-        }
-    }
-    /*
-    func joinMeeting(meetingID: String, numbersOfMembers: Int){
-        print("joinMeeting")
-        isLoading = true
-        Task{
-            do{
-                guard let currentUID = currentUID else{return}
-                let userData = await fetchUserData(currentUID)
-                let member = Member(memberUID: currentUID)
-                let meetingsDoc = db.collection(strMeetings).document(meetingID)
-                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
-                
-                if members.count < numbersOfMembers {
-                    try meetingsDoc.collection(strMembers).addDocument(from: member, completion: {error in
-                        if let error = error{
-                            self.handleErrorTask(error)
-                            return
-                        }
-                        print("모임 참가 완료")
-
-                        let joinMeeting = JoinMeeting(meetingID: meetingID)
-
-                        try joinMeetingsCol.addDocument(from: joinMeeting)
-                        
-                        meetingsDoc.collection(self.strMessage).addDocument(data: [
-                            "text": "\(userData.userName)님이 채팅에 참가하셨습니다.",
-                            "userUID": "SYSTEM",
-                            "timestamp": Timestamp(),
-                            "isSystemMessage": true
-                        ])
-                    })
-                }else{print("모임 참가 실패")}
-
-
-                //참가 실패시 에러핸들 구현
-                await MainActor.run(body: {
+                await MainActor.run {
                     isLoading = false
-                })
+                }
+                
             } catch {
                 handleErrorTask(error)
             }
         }
     }
-*/
+    
     func joinMeetingsListener(){
         guard let currentUID = currentUID else{return}
 
