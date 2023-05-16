@@ -10,7 +10,6 @@ import SwiftUI
 struct ContentView: View {
     @StateObject var loginViewModel: LoginViewModel = .init()
     @State var isLoading: Bool = true
-    @State private var showDMView = false
     @State private var selectedReceiverID: String = ""
    
     var body: some View {
@@ -20,30 +19,23 @@ struct ContentView: View {
             }else{
                 // 로그인변수가 false면 Login뷰로 이동
                 if loginViewModel.isLogin {
-                    if true {
-                        TabView{
-                            MapView()
-                                .tabItem{
-                                    Label("찾기",systemImage:"map.circle")
-                                }
-                            MeetingsView()
-                                .tabItem{
-                                    Label("모임",systemImage: "person.3.sequence")
-                                }
-                            DMListView(showDMView: $showDMView, selectedReceiverID: $selectedReceiverID)
-                                .tabItem{
-                                    Label("채팅",systemImage: "message")
-                                }
-                            ProfileView()
-                                .tabItem{
-                                    Label("내 정보",systemImage:"person.crop.circle")
-                                }
-                        }
-                    }else{
-//                        DMView(receiverID: selectedReceiverID, showDMView: $showDMView)
-//                            .edgesIgnoringSafeArea(.all)
-//                            .transition(.move(edge: .trailing))
-//                            .animation(.easeInOut(duration: 0.3))
+                    TabView{
+                        MapView()
+                            .tabItem{
+                                Label("찾기",systemImage:"map.circle")
+                            }
+                        MeetingsView()
+                            .tabItem{
+                                Label("모임",systemImage: "person.3.sequence")
+                            }
+                        DMListView()
+                            .tabItem{
+                                Label("채팅",systemImage: "message")
+                            }
+                        ProfileView()
+                            .tabItem{
+                                Label("내 정보",systemImage:"person.crop.circle")
+                            }
                     }
                 } else {
                     Login()

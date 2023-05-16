@@ -51,12 +51,6 @@ struct MemberProfileView: View {
                     }
                 }
             }
-//            if showDMView {
-//                DMView(receiverID: member.memberUID, showDMView: $showDMView)
-//                    .edgesIgnoringSafeArea(.all)
-//                    .transition(.move(edge: .trailing))
-//                    .animation(.easeInOut(duration: 0.3))
-//            }
         }
         .padding(30)
     }
