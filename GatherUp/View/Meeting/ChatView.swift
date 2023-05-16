@@ -87,10 +87,12 @@ struct ChatView: View {
                                         .id("system-\(index)")
                                 }
                                 else{
-                                    MessageRow(message: currentMessage, member: members[currentMessage.senderUID]! , identifying: currentMessage.senderUID == chatViewModel.currentUID)
+                                    MessageRow(message: currentMessage, member: members[currentMessage.senderUID] ?? chatViewModel.nonMembers[currentMessage.senderUID] ??
+                                               Member(memberUID: ""), identifying: currentMessage.senderUID == chatViewModel.currentUID)
                                 }
                             }
                         }
+                        .padding(10)
                         .onChange(of: chatViewModel.messages) { messages in
                             if let lastMessageIndex = messages.indices.last {
                                 withAnimation {

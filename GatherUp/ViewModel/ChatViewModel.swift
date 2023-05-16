@@ -14,8 +14,21 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
 
     @Published var messages: [Message] = []
     @Published var lastMessageId: String = ""
-    @Published var nonMembers: [String: Member] = [:]
+    @Published var nonMembers: [String: Member] = [:]  // Message 치고 나간 사람 배열
     
+    func fetchNonMembers() {
+        for message in messages {
+            if !members.contains(where: {$0.memberUID == message.senderUID}){
+                Task{
+                    let memberData = try await getUserData(message.senderUID)
+                    await MainActor.run{
+                        self.nonMembers[message.senderUID] = Member(memberUID: memberData.id!, memberName: memberData.userName, memberImage: memberData.userImage)
+                    }
+                }
+            }
+        }
+        
+    }
     ///채팅구현
     func messagesListener(meetingID: String) {
         isLoading = true
@@ -29,6 +42,8 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
                 self.messages = documents.compactMap { document -> Message? in
                     document.data(as: Message.self)
                 }
+                
+                self.fetchNonMembers()
             }
             listeners[query.description] = listener
             await MainActor.run{
