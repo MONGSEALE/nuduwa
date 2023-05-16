@@ -10,7 +10,6 @@ import SwiftUI
 struct ContentView: View {
     @StateObject var loginViewModel: LoginViewModel = .init()
     @State var isLoading: Bool = true
-    @State private var selectedReceiverID: String = ""
    
     var body: some View {
         ZStack{
