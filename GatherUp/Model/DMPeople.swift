@@ -6,13 +6,30 @@
 //
 
 import SwiftUI
-import Foundation
 import FirebaseFirestoreSwift
-import FirebaseFirestore
 
-struct DMPeople : Identifiable,Codable,Equatable {
+struct DMPeople : Identifiable, Codable, Equatable, FirestoreConvertible {
     @DocumentID var id: String?
     
-    var users:[String]
+    var chattersUID: [String]
+
+    // 기본 생성자
+    init(id: String? = nil, chattersUID: [String]) {
+        self.id = id
+        self.chattersUID = chattersUID
+    }
+    // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
+    init?(data: [String: Any], id: String) {
+        guard let chattersUID = data["chattersUID"] as? [String] else { return nil }
+        
+        self.id = id
+        self.chattersUID = chattersUID
+    }
     
+    // Firestore에 저장할 필드
+    var firestoreData: [String: Any] {
+        return [
+            "chattersUID": chattersUID
+        ]
+    }
 }

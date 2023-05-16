@@ -121,8 +121,8 @@ class LoginViewModel: FirebaseViewModel {
                 
                 try await Auth.auth().signIn(with: credential)
                 
-                await fetchCurrentUserAsync()
-                if self.user == nil{
+                let currentUser = try? await getUser(currentUID)
+                if currentUser == nil{
                     registerUser()
                 }
                 
@@ -140,20 +140,35 @@ class LoginViewModel: FirebaseViewModel {
         print("registerUser")
         Task{
             do{
-                let userData = Auth.auth().currentUser?.providerData[0]
-                // Uploading Profile Photo Into Firebase Storage
-                guard let userUID = Auth.auth().currentUser?.uid else{return}
-                
+                guard let userData = Auth.auth().currentUser?.providerData[0] else{
+                    print("registerUser오류")
+                    return
+                }
+                guard let currentUID = currentUID else{
+                    print("registerUser오류")
+                    return
+                }
+                print("1")
                 // Creating a User Firestore Object
-                let user = User(userName: (userData?.displayName)!, userUID: userUID, userSNSID: userData?.uid, userEmail: userData?.email, userImage: userData?.photoURL)
+                let newUser = User.newGoogleUser(userName: userData.displayName, userGoogleIDCode: userData.uid, userGoogleEmail: userData.email, userImage: userData.photoURL)
                 // Saving User Doc into Firestore Database
-                try db.collection(strUsers).document(userUID).setData(from: user, completion: {
+                print("2")
+                let doc = db.collection(strUsers).document(currentUID)
+                print("3")
+//                try await doc.setData(newUser)
+                try doc.setData(newUser, completion: {
                     error in
-                    if error == nil{
-                        print("Saved Successfully")
+                    guard let error = error else{
+                        print("에러")
+                        self.isLoading = false
+                        return
                     }
+                    print("Saved Successfully")
+                    
                 })
+                print("4")
             }catch{
+                print("5")
                 await handleError(error)
             }
         }

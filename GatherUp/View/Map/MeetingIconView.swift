@@ -26,6 +26,7 @@ struct MeetingIconView: View {
     var onLocate: (CLLocationCoordinate2D)->()
     
     var body: some View {
+        let isHost = meeting.hostUID == viewModel.currentUID
         VStack(spacing:0){
             WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
                 .resizable()
@@ -34,12 +35,12 @@ struct MeetingIconView: View {
                 .cornerRadius(60)
                 .clipShape(Circle())
                 .padding(4) // Adjust the padding value to increase or decrease the size of the blue circle
-                .background(Circle().fill(Color.blue))
+                .background(Circle().fill(isHost ? .red : isJoin ? .green : .blue))
             
             Image(systemName: "triangle.fill")
                 .resizable()
                 .scaledToFit()
-                .foregroundColor(isJoin ? .green : .blue)
+                .foregroundColor(isHost ? .red : isJoin ? .green : .blue)
                 .frame(width: 15,height: 15)
                 .rotationEffect(Angle(degrees: 180))
                 .offset( y : -3)
@@ -49,11 +50,11 @@ struct MeetingIconView: View {
             if(showAnnotation==false){
                 showSheet = true
                 onLocate(CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
-                viewModel.fetchUser(userUID: meeting.hostUID)
+                viewModel.fetchUserData(meeting.hostUID)
             }
         }
         .sheet(isPresented: $showSheet){
-            MeetingInfoSheetView(meetingID: meeting.id!, hostUID: meeting.hostUID)
+            MeetingInfoSheetView(meeting: meeting)
                 .presentationDetents([.fraction(0.3),.height(700)])
                 .onAppear{
                     withAnimation(.easeInOut(duration: 0.25)){
@@ -68,7 +69,7 @@ struct MeetingIconView: View {
         }
         .scaleEffect(isClicked ? 1.7: 1.0)
         .onAppear{
-            viewModel.fetchUser(userUID: meeting.hostUID)
+            viewModel.fetchUserData(meeting.hostUID)
         }
     }
 }

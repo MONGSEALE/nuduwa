@@ -14,7 +14,7 @@ struct ReusableProfileContent: View {
     @State private var imageData: Data? = nil
     @State var showImagePicker: Bool = false
     @State var isBool = true
-    @State var editName: String = ""
+    @State var editName: String?
     
     @Binding var isEdit: Bool
     
@@ -63,7 +63,7 @@ struct ReusableProfileContent: View {
                         
                         
                         VStack(alignment: .leading, spacing: 6){
-                            EditText(text: user.userName, editText: $editName, item: "닉네임을 입력해주세요", isEditable: isEdit)
+                            EditText(text: user.userName ?? "", editText: $editName, item: "닉네임을 입력해주세요", isEditable: isEdit)
                                 .font(.title3)
                                 .fontWeight(.semibold)
                             Text(user.userEmail ?? "")

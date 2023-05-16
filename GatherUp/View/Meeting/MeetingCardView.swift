@@ -47,20 +47,37 @@ struct MeetingCardView: View {
                     .padding(.vertical,8)
                     .foregroundColor(.black)
             }
+            
+            if meeting.hostUID == viewModel.currentUID!{
+                VStack(){
+                    Text("MINE")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(Color.red)
+                        )
+                        .foregroundColor(.white)
+                }
+            }
         }
         .hAlign(.leading)
         
         .onAppear {
             viewModel.meeting = meeting
-            viewModel.fetchUser(userUID: meeting.hostUID)
+            viewModel.fetchUserData(meeting.hostUID)
             viewModel.meetingListener(meetingID: meeting.id!)
         }
         .onDisappear {
-            viewModel.removeListener()
+            viewModel.removeListeners()
         }
         .onChange(of: viewModel.meeting) { updatedMeeting in
-            if updatedMeeting.hostUID != "" {
-                onUpdate(updatedMeeting)
+            if let updatedMeeting {
+                if updatedMeeting.hostUID != "" {
+                    onUpdate(updatedMeeting)
+                }
             }
         }
         .onChange(of: viewModel.deletedMeeting) { _ in

@@ -15,9 +15,11 @@ struct DetailMeetingView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var isEdit: Bool = false
-    @State private var title: String = ""
-    @State private var description: String = ""
-    @State var meetingDate: Date = Date()
+    @State private var editTitle: String? = nil
+    @State private var editDescription: String? = nil
+    @State private var editPlace: String? = nil
+    @State private var editNumbersOfMembers: Int? = nil
+    @State private var editMeetingDate: Date? = nil
     
     @State private var toChatView: Bool = false
     
@@ -31,6 +33,8 @@ struct DetailMeetingView: View {
   
     var body: some View {
         let isHost = meeting.hostUID == viewModel.currentUID
+        let meeting = viewModel.meeting ?? meeting
+
         NavigationStack{
             if viewModel.isLoading {
                 ProgressView()
@@ -39,38 +43,41 @@ struct DetailMeetingView: View {
                 ScrollView(.vertical, showsIndicators: false){
                     LazyVStack{
                         HStack(spacing: 12){
-                            WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
+                            WebImage(url: viewModel.user?.userImage ?? meeting.hostImage).placeholder{ProgressView()}
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: 100, height: 100)
                                 .clipShape(Circle())
                             
                             VStack(alignment: .leading, spacing: 6){
-                                EditText(text: viewModel.meeting.title, editText: $title, item: "모임 제목",isEditable: isEdit)
+                                EditText(text: meeting.title, editText: $editTitle, item: "모임 제목",isEditable: isEdit)
                                     .font(.title3)
                                     .fontWeight(.semibold)
-                                Text(viewModel.user?.userName ?? "")
+                                Text(viewModel.user?.userName ?? meeting.hostName ?? "")
                                     .font(.callout)
-                                Text(viewModel.meeting.meetingDate.formatted(date: .numeric, time: .shortened))
+                                Text(meeting.meetingDate.formatted(date: .numeric, time: .shortened))
                                     .font(.caption2)
                                     .foregroundColor(.gray)
                             }
                             .hAlign(.leading)
                         }
-                        EditText(text: viewModel.meeting.description, editText: $description, item: "모임 내용", isEditable: isEdit)
+                        EditText(text: meeting.description, editText: $editDescription, item: "모임 내용", isEditable: isEdit)
                             .textSelection(.enabled)
                             .padding(.vertical,8)
                             .hAlign(.leading)
                         if isHost && isEdit {
                             Section(header:Text("시간 설정")){
-                                DatePicker("",selection: $meetingDate, in:dateRange)
+                                DatePicker("",selection: Binding<Date>(
+                                    get: { self.editMeetingDate ?? meeting.meetingDate },
+                                    set: { self.editMeetingDate = $0 }
+                                ), in:dateRange)
                                     .datePickerStyle(GraphicalDatePickerStyle())
                             }
                         }
                         HStack{
                             Text("참여자:")
                                 .font(.caption2)
-                            ForEach(viewModel.members){ member in
+                            ForEach(Array(viewModel.dicMembers.values)){ member in
                                 WebImage(url: member.memberImage).placeholder{ProgressView()}
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
@@ -100,34 +107,37 @@ struct DetailMeetingView: View {
                 Group{
                     if isHost {
                         EditButtonStack(isEdit: $isEdit) {
-                            viewModel.editMeeting(title: title, description: description, meetingDate: meetingDate)
+                            if viewModel.meeting != nil{
+                                viewModel.editMeeting(title: editTitle, description: editDescription, place: editPlace, numbersOfMembers: editNumbersOfMembers, meetingDate: editMeetingDate)
+                            }
                         } onCancle: {
-                            title = viewModel.meeting.title
-                            description = viewModel.meeting.description
-                            meetingDate = viewModel.meeting.meetingDate
+                            editTitle = meeting.title
+                            editDescription = meeting.description
+                            editMeetingDate = meeting.meetingDate
                         } onDelete: {
-                            viewModel.deleteMeeting(meetingID: viewModel.meeting.id!)
+                            viewModel.deleteMeeting(meetingID: meeting.id!)
                         }
                     } else {
                         Button(action: {
-                            viewModel.leaveMeeting(meetingID: viewModel.meeting.id!, memberUID: viewModel.currentUID)
+                            viewModel.leaveMeeting(meetingID: meeting.id!, memberUID: viewModel.currentUID)
                             dismiss()
                         }){
                             CustomButtonText(text: "모임 나가기", backgroundColor: .red)
                         }
                     }
                 }
-                
+                .padding(.bottom, 15)
             }
+            
         }
         .onAppear{
-            meetingDate = meeting.meetingDate
-            viewModel.fetchUser(userUID: meeting.hostUID)
+            editMeetingDate = meeting.meetingDate
+            viewModel.fetchUserData(meeting.hostUID)
             viewModel.meetingListener(meetingID: meeting.id!)
             viewModel.membersListener(meetingID: meeting.id!)
         }
         .onDisappear{
-            viewModel.removeListener()
+            viewModel.removeListeners()
         }
         .onChange(of: viewModel.deletedMeeting) { _ in
             dismiss()
@@ -137,17 +147,25 @@ struct DetailMeetingView: View {
 
 struct EditText: View {
     let text: String
-    @Binding var editText: String
+    @Binding var editText: String?
     let item: String
     let isEditable: Bool
     
     var body: some View {
       if isEditable {
-          TextField(item, text: $editText)
+          TextField(item, text: Binding<String>(
+                            get: { self.text },
+                            set: { self.editText = $0.isEmpty ? nil : $0 }
+                        ))
               .textFieldStyle(RoundedBorderTextFieldStyle())
               .padding()
               .onAppear{
                   editText = text
+              }
+              .onDisappear{
+                if editText == text{
+                    editText = nil
+                }
               }
       } else {
           Text(text)
@@ -157,6 +175,7 @@ struct EditText: View {
       }
     }
 }
+
 struct EditButtonStack: View {
     
     @Binding var isEdit: Bool

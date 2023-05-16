@@ -13,18 +13,18 @@ struct SearchUserView: View {
     
     var body: some View {
         List{
-                ForEach(fetchedUsers){ user in
-                    NavigationLink {
-                        ReusableProfileContent(isEdit: $isEdit, user: user){ _,_  in
-                            //
-                        }
-                    } label: {
-                        Text(user.userName)
-                            .font(.callout)
-                            .hAlign(.leading)
+            ForEach(fetchedUsers){ user in
+                NavigationLink {
+                    ReusableProfileContent(isEdit: $isEdit, user: user){ _,_  in
+                        //
                     }
+                } label: {
+                    Text(user.userName!)
+                        .font(.callout)
+                        .hAlign(.leading)
                 }
             }
+        }
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle("유저 검색")
             .searchable(text: $searchText)

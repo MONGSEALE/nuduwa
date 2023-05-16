@@ -16,8 +16,8 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack{
             VStack{
-                if (viewModel.currentUser != nil && !viewModel.isLoading) {
-                    ReusableProfileContent(isEdit: $isEdit, user: viewModel.currentUser!){ updateName, updateImage in
+                if (viewModel.user != nil && !viewModel.isLoading) {
+                    ReusableProfileContent(isEdit: $isEdit, user: viewModel.user!){ updateName, updateImage in
                         if updateName != nil || updateImage != nil{
                             viewModel.editUser(userName: updateName, userImage: updateImage)
                         }
@@ -61,7 +61,7 @@ struct ProfileView: View {
             }
         }
         .onAppear{
-            viewModel.currentUserListener()
+            viewModel.userListener(viewModel.currentUID)
         }
     }
 }

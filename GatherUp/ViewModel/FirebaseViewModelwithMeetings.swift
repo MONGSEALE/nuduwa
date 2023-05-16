@@ -20,7 +20,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     @Published var joinMeetingIDs: [String] = []     // 가입모임ID 배열
 
     //나중에 하위 클래스로 이동
-    @Published var meeting: Meeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: 0, longitude: 0, hostUID: "")
+    @Published var meeting: Meeting?
 
     /// 자식Class MeetingViewModel에서 쓸 함수
     func convertMembers(meetingID: String) { }
@@ -28,21 +28,27 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     /// 모임맴버 가져오기
     func membersListener(meetingID: String){
         print("membersListener")
-        Task{
-            let doc = db.collection(strMeetings).document(meetingID).collection(strMembers)
-            docListener = doc.addSnapshotListener { (querySnapshot, error) in
-                if let error = error{
-                    self.handleErrorTask(error)
-                    return
-                }
-                guard let documents = querySnapshot?.documents else {return}
-                self.members = documents.compactMap{ documents -> Member? in
-                    try? documents.data(as: Member.self)
-                }
-                self.convertMembers(meetingID: meetingID)
+        let col = db.collection(strMeetings).document(meetingID).collection(strMembers)
+
+        let listener = col.addSnapshotListener { querySnapshot, error in
+            if let error = error{
+                print("에러")
+                self.handleErrorTask(error)
+                return
             }
+            print("1")
+            guard let documents = querySnapshot?.documents else {return}
+            print("2")
+            self.members = documents.compactMap{ documents -> Member? in
+                try? documents.data(as: Member.self)
+            }
+            print("member:\(self.members)")
+            print("4")
+            self.convertMembers(meetingID: meetingID)
         }
+        listeners[col.path] = listener
     }
+
 
     /// = 서버에서 수정된 모임 meetings 배열에서 수정하기
     func updateLocalMeetingDataFromServer(updatedMeeting: Meeting) {
@@ -60,6 +66,35 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     }
     
     /// 모임 참가하기
+    func joinMeeting(meetingID: String, numbersOfMembers: Int){
+        print("joinMeeting")
+        isLoading = true
+        Task{
+            do{
+                guard let currentUID = currentUID else{return}
+                let userData = try await getUserData(currentUID)
+                let meetingsDoc = db.collection(strMeetings).document(meetingID)
+                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
+                
+                if members.count < numbersOfMembers {
+                    try await meetingsDoc.collection(strMembers).addDocument(data: Member.member(currentUID))
+                    try await joinMeetingsCol.addDocument(data: MeetingList.member(meetingID))
+                    let text = "\(userData.userName)님이 채팅에 참가하셨습니다."
+                    try await meetingsDoc.collection(self.strMessage).addDocument(data: Message.systemMessage(text))
+                }else{
+                    print("모임 참가 실패")
+                }
+
+
+                //참가 실패시 에러핸들 구현
+               
+                isLoading = false
+            } catch {
+                handleErrorTask(error)
+            }
+        }
+    }
+    /*
     func joinMeeting(meetingID: String, numbersOfMembers: Int){
         print("joinMeeting")
         isLoading = true
@@ -102,25 +137,25 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
             }
         }
     }
-
+*/
     func joinMeetingsListener(){
         guard let currentUID = currentUID else{return}
 
         let col = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
 
-        col.addSnapshotListener { querySnapshot, error in
+        let listener = col.addSnapshotListener { querySnapshot, error in
             if let error = error{
                 self.handleErrorTask(error)
                 return
             }
             guard let querySnapshot = querySnapshot else{
-                self.handleErrorTask(error)
                 return
             }
             self.joinMeetingIDs = querySnapshot.documents.compactMap{ documents -> String? in
-                try? documents.data().data["meetingID"]
+                try? documents.data()["meetingID"] as? String
             }
         }
+        listeners[col.path] = listener
     }
 }
 

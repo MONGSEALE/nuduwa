@@ -69,7 +69,7 @@ struct ChatView: View {
                             ForEach(chatViewModel.messages.indices, id: \.self) { index in
                                 let currentMessage = chatViewModel.messages[index]
                                 let previousMessage = index > 0 ? chatViewModel.messages[index - 1] : nil
-                                
+
                                 if isNewDay(previousMessage: previousMessage, currentMessage: currentMessage) {
                                     Text(formatDate(currentMessage.timestamp))
                                         .font(.caption2)
@@ -87,8 +87,7 @@ struct ChatView: View {
                                         .id("system-\(index)")
                                 }
                                 else{
-                                    MessageRow(message: chatViewModel.messages[index], member: members[currentMessage.userUID]!, identifying: chatViewModel.messages[index].userUID == chatViewModel.currentUID)
-                                        .id(index)
+                                    MessageRow(message: currentMessage, member: members[currentMessage.senderUID]! , identifying: currentMessage.senderUID == chatViewModel.currentUID)
                                 }
                             }
                         }
@@ -136,7 +135,7 @@ struct ChatView: View {
         return dateFormatter.string(from: date)
     }
     
-    func isNewDay(previousMessage: ChatMessage?, currentMessage: ChatMessage) -> Bool {
+    func isNewDay(previousMessage: Message?, currentMessage: Message) -> Bool {
         guard let previousMessage = previousMessage else { return true }
         
         let calendar = Calendar.current
@@ -246,7 +245,7 @@ struct NickName: View {
 
 struct MessageRow: View {
   
-    let message: ChatMessage
+    let message: Message
     let member: Member
     let identifying: Bool
 
