@@ -184,6 +184,8 @@ struct EditButtonStack: View {
     var onCancle: ()->()
     var onDelete: ()->()
     
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
         HStack{
             if isEdit{
@@ -208,6 +210,7 @@ struct EditButtonStack: View {
                 }
                 Button(action: {
                     onDelete()
+                    dismiss()
                 }){
                     CustomButtonText(text: "모임 삭제", backgroundColor: .red)
                 }
@@ -215,6 +218,7 @@ struct EditButtonStack: View {
         }
     }
 }
+
 
 
 struct CustomButtonText: View {
