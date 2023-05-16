@@ -143,11 +143,20 @@ struct EditText: View {
     
     var body: some View {
       if isEditable {
-          TextField(item, text: $editText)
+          TextField(item, text: Binding<String>(
+                            get: { self.editText ?? ""
+                            },
+                            set: { self.editText = $0.isEmpty ? nil : $0 }
+                        ))
               .textFieldStyle(RoundedBorderTextFieldStyle())
               .padding()
               .onAppear{
                   editText = text
+              }
+              .onDisappear{
+                if editText == text{
+                    editText = nil
+                }
               }
       } else {
           Text(text)
