@@ -49,7 +49,7 @@ struct DMCardView: View {
             showDM = true
         }
         .fullScreenCover(isPresented: $showDM){
-            DMView(receiverID: chattingRoom.chatterUID, showDMView: $showDM)
+            DMView(receiverID: chattingRoom.chatterUID, : $showDM)
         }
     }
 }
