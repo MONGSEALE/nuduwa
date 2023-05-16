@@ -19,107 +19,64 @@ class DMViewModel: FirebaseViewModel {
     @Published var userImageURLs: [String: User] = [:]
     
     func sendDM(message: String, receiverID: String) {
-//        if message == "" {return}
-//        Task{
-//            do{
-//                guard let senderID = currentUID else{return}
-//                let dmPeople = DMPeople(chattersUID: [senderID,receiverID])
-//                let dmListcol = db.collection(strUsers).document(senderID).collection(strChatters)
-//                let dmPeoplecol = db.collection(strDMPeople)
-//
-//                let querySnapshot = try await col.whereField("chatterUID", isEqualTo: receiverID).getDocuments()
-//
-//                if querySnapshot.documents.isEmpty {
-//                    dmPeoplecol.whereField(receiverID, in: <#T##[Any]#>)
-//
-//
-//                    let documentRef = try await db.collection(strDMPeople).addDocument(data: dmPeople.firestoreData)
-//                    guard let documentRef = documentRef else{return}
-//                    let documentID = documentRef.documentID
-//                    let chatter = DMList(chatterUID: receiverID, DMPeopleID: documentID)
-//                    try? col.addDocument(from: chatter){ _ in
-//                        self.db.collection(self.strDMPeople).document(documentID).collection(self.strDM).addDocument(data: messageData)
-//                    }
-//                    let receiverDoc = self.db.collection(self.strUsers).document(receiverID).collection(self.strChatters)
-//
-//                    receiverDoc.whereField("chatterUID", isEqualTo: senderID).getDocuments{ querySnapshot, err in
-//                        if let err = err {
-//                            print("Error getting documents: \(err)")
-//                        } else {
-//                            if querySnapshot!.documents.isEmpty {
-//                                let chatter = DMList(chatterUID: senderID, DMPeopleID: documentID)
-//                                try? receiverDoc.addDocument(from: chatter)
-//                            }
-//                        }
-//                    }
-//                } else {
-//                    for document in querySnapshot!.documents {
-//                        let documentID = document.get("DMPeopleID") as! String
-//                        try? self.db.collection(self.strDMPeople).document(documentID).collection(self.strDM).addDocument(data: messageData)
-//                    }
-//                }
-//            }catch{
-//                print("오류!sendDM")
-//            }
-
-        }
-    /*
-        guard let senderID = currentUID else{return}
         if message == "" {return}
-
-        let users: DMPeople = DMPeople(chattersUID: [senderID,receiverID])
-
-        let col = db.collection(strUsers).document(senderID).collection(strChatters)
-
-        col.whereField("chatterUID", isEqualTo: receiverID).getDocuments{ querySnapshot, err in
-            if let err = err {
-                print("Error getting documents: \(err)")
-            } else {
-                if querySnapshot!.documents.isEmpty {
-                    let documentRef = try? self.db.collection(self.strDMPeople).addDocument(from: users)
-                    guard let documentRef = documentRef else{return}
-                    let documentID = documentRef.documentID
-                    let chatter = DMList(chatterUID: receiverID, DMPeopleID: documentID)
-                    try? col.addDocument(from: chatter){ _ in
-                        self.db.collection(self.strDMPeople).document(documentID).collection(self.strDM).addDocument(data: messageData)
-                    }
-                    let receiverDoc = self.db.collection(self.strUsers).document(receiverID).collection(self.strChatters)
-
-                    receiverDoc.whereField("chatterUID", isEqualTo: senderID).getDocuments{ querySnapshot, err in
-                        if let err = err {
-                            print("Error getting documents: \(err)")
-                        } else {
-                            if querySnapshot!.documents.isEmpty {
-                                let chatter = DMList(chatterUID: senderID, DMPeopleID: documentID)
-                                try? receiverDoc.addDocument(from: chatter)
-                            }
+        Task{
+            do{
+                guard let senderID = currentUID else{return}
+                let dmPeople = DMPeople(chattersUID: [senderID,receiverID])
+                let dmListcol = db.collection(strUsers).document(senderID).collection(strChatters)
+                let dmPeoplecol = db.collection(strDMPeople)
+                
+                let messageData = Message(message, uid: senderID)
+                
+                let dmListSnapshot = try await dmListcol.whereField("chatterUID", isEqualTo: receiverID).getDocuments()
+                
+                if dmListSnapshot.documents.isEmpty {
+                    var documentRef: DocumentReference?
+                    let dmPeopleSnapshot = try await dmPeoplecol.whereField("chattersUID", arrayContains: receiverID).getDocuments()
+                    if dmPeopleSnapshot.documents.isEmpty {
+                        documentRef = try await dmPeoplecol.addDocument(data: dmPeople.firestoreData)
+                    } else {
+                        dmPeopleSnapshot.documents.forEach{ document in
+                            documentRef = document.reference
                         }
                     }
+                    guard let documentRef = documentRef else{return}
+                    
+                    let documentID = documentRef.documentID
+                    let chatter = DMList(chatterUID: receiverID, DMPeopleID: documentID)
+                    
+                    try await dmListcol.addDocument(data: chatter.firestoreData)
+                    
+                    try await dmPeoplecol.document(documentID).collection(strDM).addDocument(data: messageData.firestoreData)
+                    
+                    let receiverDoc = self.db.collection(self.strUsers).document(receiverID).collection(self.strChatters)
                 } else {
-                    for document in querySnapshot!.documents {
+                    for document in dmListSnapshot.documents {
                         let documentID = document.get("DMPeopleID") as! String
-                        try? self.db.collection(self.strDMPeople).document(documentID).collection(self.strDM).addDocument(data: messageData)
+                        try await dmPeoplecol.document(documentID).collection(self.strDM).addDocument(data: messageData.firestoreData)
                     }
                 }
+            }catch{
+                print("오류!sendDM")
             }
+            
         }
-     
     }
-     */
     
     func startListeningDM(chatterUID: String) {
         print("startListeningDM")
         Task{
             guard let currentUID = currentUID else{return}
             let chattersQuery = db.collection(strUsers).document(currentUID).collection(strChatters)
-                        .whereField("chatterUID", isEqualTo: chatterUID)
+                .whereField("chatterUID", isEqualTo: chatterUID)
             let dmPeopleDoc = db.collection(strDMPeople)
             let dmPeopleQuery = dmPeopleDoc.whereField("users", arrayContains: chatterUID)
             var dmPeopleID: String?
             
             do{
                 let chattersSnapshot = try await chattersQuery.getDocuments()
-
+                
                 if !chattersSnapshot.documents.isEmpty {
                     for document in chattersSnapshot.documents {
                         dmPeopleID = document.data()["DMPeopleID"] as? String ?? ""
@@ -136,16 +93,16 @@ class DMViewModel: FirebaseViewModel {
                         return
                     }
                 }
-
+                
                 guard let dmPeopleID = dmPeopleID else {return}
-
+                
                 let dmDoc = dmPeopleDoc.document(dmPeopleID).collection(self.strDM)
                 let query = dmDoc.order(by: "timestamp")
-
+                
                 let listener = query.addSnapshotListener { querySnapshot, error in
                     if let error = error {self.handleErrorTask(error);return}
                     guard let querySnapshot = querySnapshot else {return}
-
+                    
                     self.messages = querySnapshot.documents.compactMap { document -> Message? in
                         try? document.data(as: Message.self)
                     }
@@ -155,45 +112,8 @@ class DMViewModel: FirebaseViewModel {
                 handleErrorTask(error)
             }
         }
-        /*
-        chattersQuery.getDocuments{ querySnapshot, error in
-            if let error = error || querySnapshot == nil {self.handleErrorTask(error);return}
-
-            if !querySnapshot.documents.isEmpty {
-                for document in querySnapshot.documents {
-                    dmPeopleID = document.data()["DMPeopleID"] as? String ?? ""
-                }
-            } else {
-                dmPeopleQuery.getDocuments{ querySnapshot, error in
-                    if let error = error || querySnapshot == nil {self.handleErrorTask(error);return}
-
-                    if !querySnapshot.documents.isEmpty {
-                        for document in querySnapshot.documents {
-                            dmPeopleID = document.documentID
-                        }
-                    } else {
-                        print("서버저장된DM없음");return
-                    }
-                }
-            }
-            guard let dmPeopleID = dmPeopleID else{print("디엠피플오류");return}
-            print("dmPeopleID:\(dmPeopleID)")
-            // 두 유저 간의 DM 문서를 참조합니다.
-            let dmDoc = dmPeopleDoc.document(dmPeopleID).collection(self.strDM)
-
-            // DM 컬렉션에서 모든 DM을 시간순으로 가져오는 쿼리를 생성합니다.
-            let query = dmDoc.order(by: "timestamp")
-            
-            // 쿼리의 결과에 대한 리스너를 추가합니다.
-            self.docListener = query.addSnapshotListener { querySnapshot, error in
-                if let error = error || querySnapshot == nil {self.handleErrorTask(error);return}
-                    // 쿼리 결과를 DM 객체의 배열로 변환하고, 이를 messages 배열에 저장합니다.
-                self.messages = querySnapshot.documents.compactMap { document -> DM? in
-                    try? document.data(as: DM.self)
-                }
-            }
-        }*/
     }
+    
     func dmListener(dmPeopleID: String) {
         print("dmListener")
         guard let currentUID = currentUID else{return}
