@@ -17,6 +17,13 @@ class DMViewModel: FirebaseViewModel {
     @Published var chattingRooms: [DMList] = []
     @Published var isTabBarHidden: Bool = false
     @Published var userImageURLs: [String: User] = [:]
+
+    var paginationDoc: QueryDocumentSnapshot?
+
+    override func removeListeners() {
+        super.init()
+        messages.removeAll
+    }
     
     func sendDM(message: String, receiverID: String) {
         if message.isEmpty {return}
@@ -104,19 +111,59 @@ class DMViewModel: FirebaseViewModel {
                 guard let dmPeopleID = dmPeopleID else {return}
                 
                 let dmDoc = dmPeopleDoc.document(dmPeopleID).collection(self.strDM)
-                let query = dmDoc.order(by: "timestamp")
+                let query = dmDoc.order(by: "timestamp", descending: true)
+                            .limit(to: 20)
+                // .limit(to: 25)  
+                // if paged == nil {
+                //     query = query
+                    
+                // } else {
+
+                // }
+                // guard let lastSnapshot = snapshot.documents.last else {
+                //     return
+                // }
+                // let next = db.collection("cities")
+                // .order(by: "population")
+                // .start(afterDocument: lastSnapshot)
                 
                 let listener = query.addSnapshotListener { querySnapshot, error in
                     if let error = error {self.handleErrorTask(error);return}
                     guard let querySnapshot = querySnapshot else {return}
-                    
-                    self.messages = querySnapshot.documents.compactMap { document -> Message? in
-                        document.data(as: Message.self)
+
+                    querySnapshot.documentChanges.forEach { diff in
+                        if (diff.type == .added) {
+                            if paginationDoc == nil{
+                                self.messages.append(diff.document.data(as: Message.self))
+                            } else {
+                                self.messages.insert(diff.document.data(as: Message.self, at: 0))
+                            }
+                        } 
                     }
+                    
+                    // self.messages = querySnapshot.documents.compactMap { document -> Message? in
+                    //     document.data(as: Message.self)
+                    // }
+                    self.paginationDoc = querySnapshot.documents.last
                 }
                 listeners[query.description] = listener
             } catch {
                 handleErrorTask(error)
+            }
+        }
+    }
+    func fetchPrevMessage() {
+        Task{
+            do{
+                let query = db.collection(strDMPeople).document(dmPeopleID).collection(strDM).order(by: "timestamp", descending: true)
+                            .startAfter(at: paginationDoc.limit(to: 20))//.start(afterDocument: paginationDoc)
+                let doc = try await query.getDocuments()
+                let prevMessage = doc.documents.compactMap { document -> Message? in
+                    document.data(as: Message.self)
+                }
+                messages.append(contentsOf: prevMessage)
+            }catch{
+                print("오류fetchPrevMessage")
             }
         }
     }
