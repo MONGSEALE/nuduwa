@@ -112,7 +112,7 @@ class FirebaseViewModel: ObservableObject {
             throw error
         }
     }
-    func getDocData<T:FirestoreConvertible>(doc: DocumentReference)  async throws -> T {
+    func getDocData<T:FirestoreConvertible>(doc: DocumentReference) async throws -> T {
         print("getDocData")
         do{
             return try await doc.getDocument(as: T.self)
