@@ -10,18 +10,19 @@ import Firebase
 import FirebaseFirestoreSwift
 
 struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
-    @DocumentID var id: String?
+    @DocumentID var id: String
     
     let text: String
     let senderUID: String
     let timestamp: Timestamp
     var isSystemMessage: Bool
 
-    init(_ text: String, uid: String, isSystemMessage: Bool = false) {
+    init(_ text: String, uid: String, isSystemMessage: Bool? = nil) {
+        self.id = UUID().uuidString
         self.text = text
         self.senderUID = uid
         self.timestamp = Timestamp(date: Date())
-        self.isSystemMessage = isSystemMessage
+        self.isSystemMessage = isSystemMessage ?? false
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -54,8 +55,14 @@ struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
         
         return data
     }
-/*
+
     // system 메시지
+    static func createSystemMessage(_ text: String) -> Message {
+        let uid = "SYSTEM"
+        let isSystemMessage = true
+        return Message(text, uid: uid, isSystemMessage: isSystemMessage)
+    }
+    /*
     static func systemMessage(_ text: String) -> [String: Any] {
         return [
             "text": text,

@@ -64,6 +64,7 @@ class FirebaseViewModel: ObservableObject {
         print("fetchUserData:\(userUID ?? "uidNon")")
         Task{
             do{
+                guard let userUID = userUID else{throw SomeError.miss}
                 let userData = try await getUserData(userUID)
                 await MainActor.run{
                     self.user = User.convertUserData(userData)
@@ -91,6 +92,7 @@ class FirebaseViewModel: ObservableObject {
         print("fetchUser:\(userUID ?? "uidNon")")
         Task{
             do{
+                guard let userUID = userUID else{throw SomeError.miss}
                 let user = try await getUser(userUID)
                 self.user = user
             }catch{
@@ -106,6 +108,14 @@ class FirebaseViewModel: ObservableObject {
             let user: User? = try await doc.getDocument(as: User.self)
             guard let user = user else{throw SomeError.miss}
             return user
+        }catch{
+            throw error
+        }
+    }
+    func getDocData<T:FirestoreConvertible>(doc: DocumentReference)  async throws -> T {
+        print("getDocData")
+        do{
+            return try await doc.getDocument(as: T.self)
         }catch{
             throw error
         }
@@ -147,80 +157,3 @@ class FirebaseViewModel: ObservableObject {
         isLoading = false
     }
 }
-
-
-/*
-func fetchUserData(_ userUID: String)async throws -> UserData {
-        print("fetchUserData:\(userUID)")
-        do {
-            let document = try await db.collection(strUsers).document(userUID).getDocument()
-            let name = document.data()?["userName"] as? String ?? ""
-            let imageUrl = document.data()?["userImage"] as? String ?? ""
-            let image = URL(string: imageUrl)
-            return UserData(userName: name, userImage: image!)
-        } catch {
-            print("에러 fetchUserData: \(error)")
-            return UserData(userName: "name", userImage: URL(string:"image"))
-        }
-    }
-func getDocument<T: FirestoreConvertible>(docRef: DocumentReference) async throws -> T? {        
-        do {
-            let document = try await docRef.getDocument()
-            return document.data(as: T.self)
-        } catch {
-            throw error
-        }
-    }
-    func getDocuments<T: FirestoreConvertible>(colRef: CollectionReference) async throws -> [T] { 
-        do {
-            let querySnapshot = try await colRef.getDocuments()
-            guard let querySnapshot = querySnapshot else{throw}
-
-            return documents.compactMap { document -> T? in
-                document.data(as: T.self)
-            }
-        } catch {
-            throw error
-        }
-    }
-func collectionListener<T: FirestoreConvertible>(colRef: CollectionReference, completion: @escaping ([T]?, Error?) -> Void) -> ListenerRegistration {
-        return colRef.addSnapshotListener { querySnapshot, error in
-            if let error = error {
-                completion(nil, error)
-                return
-            }   
-            
-            guard let documents = querySnapshot?.documents else {
-                completion([], nil)
-                return
-            }
-            
-            let items = documents.compactMap { document -> T? in
-                document.data(as: T.self)
-            }
-            
-            completion(items, nil)
-        }
-    }
-    func membersListener(meetingID: String) {
-        let colRef = db.collection(strMeetings).document(meetingID).collection(strMembers)
-        
-        let registration = collectionListener(colRef) { (members: [Member]?, error) in
-            if let error = error {
-                handleError(error)
-                return
-            }
-            
-            guard let members = members else {
-                // Handle empty members data
-                return
-            }
-            
-            // Process members data
-            // ...
-        }
-        
-        // Store the ListenerRegistration if needed to remove the listener later
-        // ...
-    }
-*/
