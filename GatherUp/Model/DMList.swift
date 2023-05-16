@@ -22,6 +22,7 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         self.id = UUID().uuidString
         self.chatterUID = chatterUID
         self.DMPeopleID = DMPeopleID
+        self.unreadMessages = 0
         self.timestamp = Timestamp(date: Date())
     }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -44,8 +45,10 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         return [
             "chatterUID": chatterUID,
             "DMPeopleID": DMPeopleID,
-            "unreadMessages" : unreadMessages
+            "unreadMessages" : 0
             "timestamp" : FieldValue.serverTimestamp()
         ]
     }
+    // unreadMessages +1
+    
 }
