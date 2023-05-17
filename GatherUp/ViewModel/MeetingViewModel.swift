@@ -262,7 +262,8 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                 guard let meetingID = meeting.id else{return}
                 
                 let doc = db.collection(strMeetings).document(meetingID)
-                try await doc.updateData(Meeting.firestoreUpdateMeeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, meetingDate: meetingDate))
+                let updateMeeting = Meeting.updateMeeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, meetingDate: meetingDate)
+                try await doc.updateData(updateMeeting.firestoreUpdate)
 
                 await MainActor.run(body: {
                     isLoading = false

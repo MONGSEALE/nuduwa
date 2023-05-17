@@ -10,7 +10,7 @@ import Firebase
 import FirebaseFirestoreSwift
 
 struct MeetingList: Identifiable, Codable, FirestoreConvertible {
-    @DocumentID var id: String
+    @DocumentID var id: String?
 
     let meetingID: String
     var joinDate: Date
@@ -51,8 +51,8 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
         return data
     }
 
-    struct func createMeeting(_ meetingID: String) -> MeetingList {
-        return MeetingList(meetingID: meetingID, isHost = true)
+    static func createMeeting(_ meetingID: String) -> MeetingList {
+        return MeetingList(meetingID: meetingID, isHost: true)
     }
     /*
     // member가 가입

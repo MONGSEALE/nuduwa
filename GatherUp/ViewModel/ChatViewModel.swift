@@ -79,7 +79,7 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
     
     func sendSystemMessage(meetingID: String, text: String) {
         let col = db.collection(strMeetings).document(meetingID).collection(strMessage)
-        let message = Message(text, uid: "SYSTEM", isSystemMessage: true)
+        let message = Message.createSystemMessage(text)
         col.addDocument(data: message.firestoreData)
     }
 

@@ -40,11 +40,12 @@ struct DMView: View {
                                 let isCurrentUser = message.senderUID == viewModel.currentUID
                                 
                                 DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
-                                    .onAppear {
-                                        if message.id == viewModel.messages.last?.id && paginationDoc != nil {
-                                            fetchPrevMessage()
-                                        }
-                                    }
+//                                    .onAppear {
+//                                        if message.id == viewModel.messages.last?.id && viewModel.paginationDoc != nil {
+//                                            guard let docID = viewModel.dmPeopleID else{return}
+//                                            viewModel.fetchPrevMessage(dmPeopleID: docID)
+//                                        }
+//                                    }
                             }
                         }
                         .onChange(of: viewModel.messages) { messages in

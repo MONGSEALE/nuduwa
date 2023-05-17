@@ -36,6 +36,17 @@ struct DMCardView: View {
                     .foregroundColor(Color(.lightGray))
             }
             Spacer()
+            if chattingRoom.unreadMessages > 0 {
+                Text("\(chattingRoom.unreadMessages)")
+                .foregroundColor(.white)
+                .padding(10)
+                .background(
+                Circle()
+                       .fill(Color.red)
+                )
+            }
+            Spacer()
+                .frame(width: 12)
         }
         .buttonStyle(PlainButtonStyle())
         .onTapGesture {
@@ -57,7 +68,7 @@ struct DMCardView: View {
             viewModel.removeListeners()
         }
         .fullScreenCover(isPresented: $showDM){
-            DMView(receiverID: chattingRoom.chatterUID, : $showDM)
+            DMView(receiverID: chattingRoom.chatterUID, showDMView: $showDM)
         }
     }
 }

@@ -10,7 +10,7 @@ import Firebase
 import FirebaseFirestoreSwift
 
 struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
-    @DocumentID var id: String
+    @DocumentID var id: String?
     
     let memberUID: String
     var memberName: String?
@@ -32,8 +32,8 @@ struct Member: Identifiable,Codable,Equatable, Hashable, FirestoreConvertible{
               let joinDate = data["joinDate"] as? Timestamp
         else {
             return nil
-            
         }
+        
         self.id = id
         self.memberUID = memberUID
         self.memberName = nil

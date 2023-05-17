@@ -14,15 +14,15 @@ import CoreLocation
 import GeoFireUtils
 
 struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertible{
-    @DocumentID var id: String
+    @DocumentID var id: String?
     
     var title: String
     var description: String
     var place : String
     var numbersOfMembers : Int
   
-    let private latitude: Double
-    let private longitude: Double
+    let latitude: Double
+    let longitude: Double
     
     var geoHash: String?
     
@@ -57,7 +57,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     }
     
     // 기본 생성자
-    init(title: String, description: String, place : String, numbersOfMembers : Int, location: CLLocationCoordinate2D, meetingDate: Date, hostUID: String, type: MeetingType? = nil, category: Category? = nil) {
+    init(title: String, description: String, place : String, numbersOfMembers : Int, location: CLLocationCoordinate2D, meetingDate: Date, hostUID: String = "", hostName: String? = nil, hostImage: URL? = nil, type: MeetingType? = nil, category: Category? = nil) {
         self.id = UUID().uuidString
         self.title = title
         self.description = description
@@ -96,7 +96,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         else { print("오류!아이디:\(id)");return nil }
 
         let geoHash = data["geoHash"] as? String? ?? nil
-        let category = data["category"] as? String? ?? nil
+        let category = data["category"] as? Category? ?? nil
         
         self.id = id
         self.title = title
@@ -116,7 +116,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         self.hostImage = nil
 
         self.type = .basic
-        self.type = category
+        self.category = category
     }
     
     // Firestore에 저장할 필드
@@ -177,6 +177,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     //     return Meeting(id: id, title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
     // }
     static func piledMapAnnotation(meeting: Meeting) -> Meeting {
+        var meeting = meeting
         meeting.type = .piled
 
         return meeting
@@ -200,23 +201,23 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     } 
 
     // 모임 수정용 Meeting구조체
-    static func updateMeeting(title: String = "", description: String = "", place: String = "", numbersOfMembers: Int = 0, meetingDate: Date = Date(timeIntervalSince1970:0), category: Category? = nil) -> Meeting {
+    static func updateMeeting(title: String? = nil, description: String? = nil, place: String? = nil, numbersOfMembers: Int? = nil, meetingDate: Date? = nil, category: Category? = nil) -> Meeting {
 
-        let title: String = title
-        let description: String = description
-        let place : String = place
-        let numbersOfMembers : Int = numbersOfMembers
+        let title: String = title ?? ""
+        let description: String = description ?? ""
+        let place : String = place ?? ""
+        let numbersOfMembers : Int = numbersOfMembers ?? 0
     
         let location = CLLocationCoordinate2D(latitude: 0, longitude: 0)
 
-        let meetingDate: Date = meetingDate
+        let meetingDate: Date = meetingDate ?? Date(timeIntervalSince1970:0)
         
         let hostUID: String = " "
 
         let type: MeetingType = .basic
-        let category: Category = category
+        let category: Category? = category
 
-        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, meetingDate: meetingDate, hostUID: hostUID, type: type)
+        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, meetingDate: meetingDate, hostUID: hostUID, type: type, category: category)
     }
     // 수정 모임 firestore에 업데이트
     var firestoreUpdate: [String: Any] {

@@ -19,7 +19,7 @@ struct SearchUserView: View {
                         //
                     }
                 } label: {
-                    Text(user.userName!)
+                    Text(user.userName)
                         .font(.callout)
                         .hAlign(.leading)
                 }

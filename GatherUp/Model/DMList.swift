@@ -10,7 +10,7 @@ import Firebase
 import FirebaseFirestoreSwift
 
 struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
-    @DocumentID var id: String
+    @DocumentID var id: String?
     let chatterUID: String
     let DMPeopleID: String
     var unreadMessages: Int
@@ -18,11 +18,11 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
     let timestamp: Timestamp
 
     // 기본 생성자
-    init(chatterUID: String, DMPeopleID: String) {
+    init(chatterUID: String, DMPeopleID: String, unreadMessages: Int = 0) {
         self.id = UUID().uuidString
         self.chatterUID = chatterUID
         self.DMPeopleID = DMPeopleID
-        self.unreadMessages = 0
+        self.unreadMessages = unreadMessages
         self.timestamp = Timestamp(date: Date())
     }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -45,7 +45,7 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         return [
             "chatterUID": chatterUID,
             "DMPeopleID": DMPeopleID,
-            "unreadMessages" : 0
+            "unreadMessages" : 0,
             "timestamp" : FieldValue.serverTimestamp()
         ]
     }

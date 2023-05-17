@@ -10,7 +10,7 @@ import Firebase
 import FirebaseFirestoreSwift
 
 struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
-    @DocumentID var id: String
+    @DocumentID var id: String?
     
     let text: String
     let senderUID: String
@@ -52,7 +52,6 @@ struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
             data["isSystemMessage"] = isSystemMessage
             data["senderUID"] = "SYSTEM"
         }
-        
         return data
     }
 

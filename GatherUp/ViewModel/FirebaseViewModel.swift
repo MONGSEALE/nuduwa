@@ -112,14 +112,14 @@ class FirebaseViewModel: ObservableObject {
             throw error
         }
     }
-    func getDocData<T:FirestoreConvertible>(doc: DocumentReference) async throws -> T {
-        print("getDocData")
-        do{
-            return try await doc.getDocument(as: T.self)
-        }catch{
-            throw error
-        }
-    }
+//    func getDocData<T:FirestoreConvertible>(doc: DocumentReference) async throws -> T {
+//        print("getDocData")
+//        do{
+//            return try await doc.getDocument(as: T.self)
+//        }catch{
+//            throw error
+//        }
+//    }
 
     /// 유저 데이터 실시간 가져오기
     func userListener(_ userUID: String?) {

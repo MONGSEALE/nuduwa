@@ -18,7 +18,7 @@ struct MeetingSetSheetView: View {
     @State private var selection : Int = 0
     @State private var meetingDate = Date()
     let coordinateCreated: CLLocationCoordinate2D
-    @State private var choiceCategory = String?
+    @State private var choiceCategory: String?
     
     let onCreate: (Meeting)->()
     
@@ -192,18 +192,18 @@ struct ChoiceMeetingCategoryView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            ForEach(Meeting.Category.allCases) { category in
+            ForEach(Meeting.Category.allCases, id: \.self) { category in
                 Button{
-                    if choiceCategory != category {
-                        choiceCategory = category
+                    if choiceCategory != "\(category)" {
+                        choiceCategory = "\(category)"
                     } else {
                         choiceCategory = nil
                     }
                     
                 } label: {
-                    Text(category)
+                    Text("\(category.rawValue)")
                 }
-                .background(choiceCategory==category ? Color.blue)
+                .background((choiceCategory ?? "")=="\(category)" ? Color.blue : Color.gray)
             }
         }
     }
