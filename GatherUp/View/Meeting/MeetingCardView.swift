@@ -48,7 +48,7 @@ struct MeetingCardView: View {
                     .foregroundColor(.black)
             }
             
-            if meeting.hostUID == viewModel.currentUID!{
+            if meeting.hostUID == viewModel.currentUID ?? ""{
                 VStack(){
                     Text("MINE")
                         .font(.caption)

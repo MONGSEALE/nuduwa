@@ -114,15 +114,22 @@ class DMViewModel: FirebaseViewModel {
                     if dmListReceiverSnapshot.documents.isEmpty {
                         // 상대방도 DM데이터 없을때, DMPeople에서 상대방과 DM한 데이터 검색
                         var documentRef: DocumentReference?  // DMPeople 문서 경로
-                        let dmPeopleSnapshot = try await dmPeopleCol.whereField("chattersUID", arrayContains: receiverID).getDocuments()
-                        if dmPeopleSnapshot.documents.isEmpty {
+                        let dmPeopleSnapshot1 = try await dmPeopleCol.whereField("chattersUID", isEqualTo: [senderID,receiverID]).getDocuments()
+                        let dmPeopleSnapshot2 = try await dmPeopleCol.whereField("chattersUID", isEqualTo: [receiverID,senderID]).getDocuments()
+                        if dmPeopleSnapshot1.documents.isEmpty && dmPeopleSnapshot2.documents.isEmpty {
                             // 상대방과 첫 DM일때
                             let dmPeople = DMPeople(chattersUID: [senderID,receiverID])
                             // DMPeople 콜렉션에 문서 추가
                             documentRef = try await dmPeopleCol.addDocument(data: dmPeople.firestoreData)
                         } else {
                             // 상대방과 이전에 대화했을때 해당 문서 가져오기
-                            guard let document = dmPeopleSnapshot.documents.first else{return}
+                            var dmPeopleSnapshot: QuerySnapshot?
+                            if dmPeopleSnapshot1.documents.isEmpty {
+                                dmPeopleSnapshot = dmPeopleSnapshot2
+                            } else {
+                                dmPeopleSnapshot = dmPeopleSnapshot1
+                            }
+                            guard let document = dmPeopleSnapshot?.documents.first else{return}
                             documentRef = document.reference
                         }
                         guard let documentRef = documentRef else{return}
