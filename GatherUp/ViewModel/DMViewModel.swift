@@ -64,6 +64,7 @@ class DMViewModel: FirebaseViewModel {
                 dmPeopleID = document.get("DMPeopleID") as? String
             }
             await MainActor.run {
+                isLoading = false
 
             }
         }
