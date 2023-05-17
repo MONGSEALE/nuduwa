@@ -25,6 +25,7 @@ class DMViewModel: FirebaseViewModel {
         super.removeListeners()
         messages.removeAll()
     }
+    /*
     func sendDM(message: String, receiverID: String) {
             guard let senderID = Auth.auth().currentUser?.uid else { return }
             if message.isEmpty { return }
@@ -87,8 +88,8 @@ class DMViewModel: FirebaseViewModel {
                     }
                 }
             }
-        }
-    /*
+        }*/
+    
     func sendDM(message: String, receiverID: String) {
         if message.isEmpty {return}
         Task{
@@ -97,40 +98,70 @@ class DMViewModel: FirebaseViewModel {
                 // 서버에 저장할 메시지
                 let messageData = Message(message, uid: senderID)
                 // 콜렉션 경로들
-                let dmListCol = db.collection(strUsers).document(senderID).collection(strDMList)
+                let dmListCorrentCol = db.collection(strUsers).document(senderID).collection(strDMList)
+                let dmListReceiverCol = db.collection(strUsers).document(receiverID).collection(strDMList)
                 let dmPeopleCol = db.collection(strDMPeople)
                 
                 var dmID: String?
                 
                 // 본인 DMList에서 상대방과 DM데이터 검색 - DM방 나갔을시 검색안됨
-                let dmListSnapshot = try await dmListCol.whereField("chatterUID", isEqualTo: receiverID).getDocuments()
+                let dmListCurrentSnapshot = try await dmListCorrentCol.whereField("chatterUID", isEqualTo: receiverID).getDocuments()
+                // 상대방 DMList 검색
+                let dmListReceiverSnapshot = try await dmListReceiverCol.whereField("chatterUID", isEqualTo: senderID).getDocuments()
                 
-                if dmListSnapshot.documents.isEmpty {
+                if dmListCurrentSnapshot.documents.isEmpty {
                     // 상대방과 DM데이터 없을때
-                    var documentRef: DocumentReference?  // DMPeople 문서 경로
-                    // DMPeople에서 상대방과 DM한 데이터 검색
-                    let dmPeopleSnapshot = try await dmPeopleCol.whereField("chattersUID", arrayContains: receiverID).getDocuments()
-                    if dmPeopleSnapshot.documents.isEmpty {
-                        // 상대방과 첫 DM일때
-                        let dmPeople = DMPeople(chattersUID: [senderID,receiverID])
-                        // DMPeople 콜렉션에 문서 추가
-                        documentRef = try await dmPeopleCol.addDocument(data: dmPeople.firestoreData)
+                    if dmListReceiverSnapshot.documents.isEmpty {
+                        // 상대방도 DM데이터 없을때, DMPeople에서 상대방과 DM한 데이터 검색
+                        var documentRef: DocumentReference?  // DMPeople 문서 경로
+                        let dmPeopleSnapshot = try await dmPeopleCol.whereField("chattersUID", arrayContains: receiverID).getDocuments()
+                        if dmPeopleSnapshot.documents.isEmpty {
+                            // 상대방과 첫 DM일때
+                            let dmPeople = DMPeople(chattersUID: [senderID,receiverID])
+                            // DMPeople 콜렉션에 문서 추가
+                            documentRef = try await dmPeopleCol.addDocument(data: dmPeople.firestoreData)
+                        } else {
+                            // 상대방과 이전에 대화했을때 해당 문서 가져오기
+                            guard let document = dmPeopleSnapshot.documents.first else{return}
+                            documentRef = document.reference
+                        }
+                        guard let documentRef = documentRef else{return}
+                        
+                        dmID = documentRef.documentID  // DMPeople 문서 id
+                        guard let dmID = dmID else{return}
+                        let currentDMList = DMList(chatterUID: receiverID, DMPeopleID: dmID, unreadMessages: 1)
+                        let receiverDMList = DMList(chatterUID: senderID, DMPeopleID: dmID, unreadMessages: 1)
+                        
+                        // 본인 DMList에 상대방과의 DM데이터 추가
+                        let _ = try await dmListCorrentCol.addDocument(data: currentDMList.firestoreData)
+                        print("본인DM추가")
+                        // 상대방 DMList에 본인과의 DM데이터 추가
+                        let _ = try await dmListReceiverCol.addDocument(data: receiverDMList.firestoreData)
+                        print("상대DM추가")
                     } else {
-                        // 상대방과 이전에 대화했을때 해당 문서 가져오기
-                        guard let document = dmPeopleSnapshot.documents.first else{return}
-                        documentRef = document.reference
+                        // 상대방에 DM데이터 있을때
+                        guard let document = dmListReceiverSnapshot.documents.first else{return}
+                        dmID = document.get("DMPeopleID") as? String
+                        guard let dmID = dmID else{return}
+                        let currentDMList = DMList(chatterUID: receiverID, DMPeopleID: dmID, unreadMessages: 1)
+                        // 본인 DMList에 상대방과의 DM데이터 추가
+                        let _ = try await dmListCorrentCol.addDocument(data: currentDMList.firestoreData)
+                        self.incrementUnreadMessages(receiverID: receiverID, chatRoomID: document.documentID)
+                        
                     }
-                    guard let documentRef = documentRef else{return}
-                    
-                    dmID = documentRef.documentID  // DMPeople 문서 id
-                    guard let dmID = dmID else{return}
-                    let chatter = DMList(chatterUID: receiverID, DMPeopleID: dmID)
-                    // 본인 DMList에 상대방과의 DM데이터 추가
-                    let _ = try await dmListCol.addDocument(data: chatter.firestoreData)
                 } else {
                     // 상대방과 DM데이터 있을때
-                    guard let document = dmListSnapshot.documents.first else{return}
+                    guard let document = dmListCurrentSnapshot.documents.first else{return}
                     dmID = document.get("DMPeopleID") as? String
+                    if dmListReceiverSnapshot.documents.isEmpty {
+                        // 상대방dp DM데이터 없을때, 상대방 DMList에 본인과의 DM데이터 추가
+                        guard let dmID = dmID else{return}
+                        let receiverDMList = DMList(chatterUID: senderID, DMPeopleID: dmID, unreadMessages: 1)
+                        let _ = try await dmListReceiverCol.addDocument(data: receiverDMList.firestoreData)
+                    } else {
+                        guard let document = dmListReceiverSnapshot.documents.first else{return}
+                        self.incrementUnreadMessages(receiverID: receiverID, chatRoomID: document.documentID)
+                    }
                 }
                 guard let dmID = dmID else{return}
                 // DMPeople 아까 만든 문서에 메시지 추가
@@ -140,7 +171,7 @@ class DMViewModel: FirebaseViewModel {
             }
             
         }
-    }*/
+    }
     
     func startListeningDM(chatterUID: String) {
         print("startListeningDM")
@@ -216,6 +247,12 @@ class DMViewModel: FirebaseViewModel {
                 handleErrorTask(error)
             }
         }
+        // 채팅방 ID를 얻습니다. 이는 ChatRoomID를 가져오는 별도의 메서드를 통해 얻을 수 있습니다.
+        self.fetchChatRoomID(receiverID: chatterUID) { chatRoomID in
+            // 새로운 메시지가 도착하면 unreadMessages를 0으로 설정
+            guard let senderID = self.currentUID else{return}
+            self.resetUnreadMessages(userID: senderID, chatRoomID: chatRoomID)
+        }
     }
 //    func fetchPrevMessage(dmPeopleID: String) {
 //        Task{
@@ -250,6 +287,7 @@ class DMViewModel: FirebaseViewModel {
                     }
         listeners[query.description] = listener
     }
+    
     
     func startListeningRecentMessages() {
         guard let currentUID = currentUID else{return}
@@ -291,7 +329,8 @@ class DMViewModel: FirebaseViewModel {
     }
     /// 서버에 안 읽은 메시지 +1 저장
     func incrementUnreadMessages(receiverID: String, chatRoomID: String) {
-        let docRef = self.db.collection("Users").document(receiverID).collection("Chatters").document(chatRoomID)
+        print("incrementUnreadMessages")
+        let docRef = self.db.collection("Users").document(receiverID).collection(strDMList).document(chatRoomID)
        
         docRef.updateData([
             "unreadMessages": FieldValue.increment(Int64(1))
@@ -306,7 +345,7 @@ class DMViewModel: FirebaseViewModel {
     }
     
     func resetUnreadMessages(userID: String, chatRoomID: String) {
-        let docRef = Firestore.firestore().collection("Users").document(userID).collection("Chatters").document(chatRoomID)
+        let docRef = Firestore.firestore().collection("Users").document(userID).collection(strDMList).document(chatRoomID)
 
         docRef.updateData([
             "unreadMessages": 0
@@ -321,7 +360,7 @@ class DMViewModel: FirebaseViewModel {
     
     func fetchChatRoomID(receiverID: String, completion: @escaping (String) -> Void) {
         let userUID = Auth.auth().currentUser?.uid ?? ""
-        db.collection("Users").document(userUID).collection("Chatters").whereField("chatterUID", isEqualTo: receiverID).getDocuments { (snapshot, error) in
+        db.collection("Users").document(userUID).collection(strDMList).whereField("chatterUID", isEqualTo: receiverID).getDocuments { (snapshot, error) in
             if let error = error {
                 print(error.localizedDescription)
                 return

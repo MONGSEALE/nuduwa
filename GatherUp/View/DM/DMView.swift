@@ -97,6 +97,11 @@ struct DMView: View {
             }
             .onDisappear {
                 print("바이")
+                viewModel.fetchChatRoomID(receiverID: receiverID) { chatRoomID in
+                    // 새로운 메시지가 도착하면 unreadMessages를 0으로 설정
+                    guard let senderID = viewModel.currentUID else{return}
+                    viewModel.resetUnreadMessages(userID: senderID, chatRoomID: chatRoomID)
+                }
                 viewModel.removeListeners()
             }
             
