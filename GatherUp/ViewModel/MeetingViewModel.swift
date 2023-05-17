@@ -161,36 +161,6 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
             
         }
     }
-
-    /// 모임 데이터 가져오기
-//    func meetingListner(meetingID: String){
-//        print("meetingListner")
-//        isLoading = true
-//        Task{
-//            let doc = db.collection(strMeetings).document(meetingID)
-//
-//            let listener = doc.addSnapshotListener{ snapshot, error in
-//                if let error = error {
-//                    self.handleErrorTask(error)
-//                    return
-//                }
-//                if let snapshot {
-//                    if snapshot.exists{
-//                        if let updatedMeeting = try? snapshot.data(as: Meeting.self){
-//                            self.meeting = updatedMeeting
-//                        }
-//                    }else{
-//                        self.isDelete = true
-//                    }
-//                }
-//                self.isLoading = false
-//            }
-//
-//            listeners[doc.path] = listener
-//        }
-//    }
-    
-
     
     ///모임 나가기
     func leaveMeeting(meetingID: String, memberUID: String?) {
@@ -208,15 +178,14 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
 
                 let querySnapshot = try await query.getDocuments()
 
-//                guard let documents = querySnapshot.documents else { return }
-
                 for document in querySnapshot.documents {
                     try await doc.collection(strMembers).document(document.documentID).delete()
                 }
 
                 let text = "\(member.userName)님이 채팅에 나가셨습니다."
+                let message = Message(text, uid: "", isSystemMessage: true)
 
-                try await doc.collection(strMessage).addDocument(data: Message.systemMessage(text))
+                try await doc.collection(strMessage).addDocument(data: message.firestoreData)
                     
                 
                 isLoading = false
@@ -291,27 +260,10 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
             do{
                 guard let meeting = meeting else{return}
                 guard let meetingID = meeting.id else{return}
-                /*
-                if title != meeting.title {
-                    try await
-                    db.collection(strMeetings).document(meetingID).updateData(["title": title])
-                    print("title 수정")
-                }
                 
-                if description != meeting.description {
-                    try await
-                    db.collection(strMeetings).document(meetingID).updateData(["description": description])
-                    print("description 수정")
-                }
-                
-                if meetingDate != meeting.meetingDate {
-                    try await
-                    db.collection(strMeetings).document(meetingID).updateData(["meetingDate": meetingDate])
-                    print("meetingDate 수정")
-                }
-                */
                 let doc = db.collection(strMeetings).document(meetingID)
-                try await doc.updateData(Meeting.firestoreUpdateMeeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, meetingDate: meetingDate))
+                let updateMeeting = Meeting.updateMeeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, meetingDate: meetingDate)
+                try await doc.updateData(updateMeeting.firestoreUpdate)
 
                 await MainActor.run(body: {
                     isLoading = false

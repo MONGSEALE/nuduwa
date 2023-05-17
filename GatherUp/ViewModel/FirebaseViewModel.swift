@@ -17,7 +17,7 @@ class FirebaseViewModel: ObservableObject {
     /// 콜렉션 이름
     /// Users 콜렉션
     let strUsers = "Users"
-    let strChatters = "DMList"
+    let strDMList = "DMList"
     let strJoinMeetings = "JoinMeetings"
     /// Meetings 콜렉션
     let strMeetings = "Meetings"
@@ -61,9 +61,10 @@ class FirebaseViewModel: ObservableObject {
 
     // 유저 이름과 이미지만 가져오기
     func fetchUserData(_ userUID: String?) {
-        print("fetchUserData:\(userUID)")
+        print("fetchUserData:\(userUID ?? "uidNon")")
         Task{
             do{
+                guard let userUID = userUID else{throw SomeError.miss}
                 let userData = try await getUserData(userUID)
                 await MainActor.run{
                     self.user = User.convertUserData(userData)
@@ -74,9 +75,9 @@ class FirebaseViewModel: ObservableObject {
         }
     }
     func getUserData(_ userUID: String?) async throws -> UserData {
-        print("getUserData:\(userUID)")
+        print("getUserData:\(userUID ?? "uidNon")")
         do{
-            guard let userUID = userUID else{print("리턴");throw SomeError.miss}
+            guard let userUID = userUID else{throw SomeError.miss}
             let doc = db.collection(strUsers).document(userUID)
             let userData: UserData? = try await doc.getDocument(as: UserData.self)
             guard let userData = userData else{throw SomeError.miss}
@@ -88,9 +89,10 @@ class FirebaseViewModel: ObservableObject {
 
     /// 유저 데이터 한번 가져오기
     func fetchUser(_ userUID: String?) {
-        print("fetchUser:\(userUID)")
+        print("fetchUser:\(userUID ?? "uidNon")")
         Task{
             do{
+                guard let userUID = userUID else{throw SomeError.miss}
                 let user = try await getUser(userUID)
                 self.user = user
             }catch{
@@ -110,27 +112,29 @@ class FirebaseViewModel: ObservableObject {
             throw error
         }
     }
+//    func getDocData<T:FirestoreConvertible>(doc: DocumentReference) async throws -> T {
+//        print("getDocData")
+//        do{
+//            return try await doc.getDocument(as: T.self)
+//        }catch{
+//            throw error
+//        }
+//    }
 
     /// 유저 데이터 실시간 가져오기
     func userListener(_ userUID: String?) {
         print("userListener")
-        Task{
-            guard let userUID = userUID else{
-                print("유저아이디 없음")
-                return
-            }
-            let doc = db.collection(strUsers).document(userUID)
-            let listener = doc.addSnapshotListener { snapshot, error in
-                if let error = error{
-                    self.handleErrorTask(error)
-                    return
-                }
-                guard let document = snapshot else{print("No Users");return}
-                self.user = try? document.data(as: User.self)
-                print("유저\(self.user)")
-            }
-            listeners[doc.path] = listener
+        guard let userUID = userUID else{return}
+        
+        let doc = db.collection(strUsers).document(userUID)
+        let listener = doc.addSnapshotListener { snapshot, error in
+            if let error = error {return}
+            
+            guard let document = snapshot else{print("No Users");return}
+            self.user = document.data(as: User.self)
+            print("유저\(String(describing: self.user))")
         }
+        listeners[doc.path] = listener
     }
     
     /// 에러처리
@@ -153,80 +157,3 @@ class FirebaseViewModel: ObservableObject {
         isLoading = false
     }
 }
-
-
-/*
-func fetchUserData(_ userUID: String)async throws -> UserData {
-        print("fetchUserData:\(userUID)")
-        do {
-            let document = try await db.collection(strUsers).document(userUID).getDocument()
-            let name = document.data()?["userName"] as? String ?? ""
-            let imageUrl = document.data()?["userImage"] as? String ?? ""
-            let image = URL(string: imageUrl)
-            return UserData(userName: name, userImage: image!)
-        } catch {
-            print("에러 fetchUserData: \(error)")
-            return UserData(userName: "name", userImage: URL(string:"image"))
-        }
-    }
-func getDocument<T: FirestoreConvertible>(docRef: DocumentReference) async throws -> T? {        
-        do {
-            let document = try await docRef.getDocument()
-            return document.data(as: T.self)
-        } catch {
-            throw error
-        }
-    }
-    func getDocuments<T: FirestoreConvertible>(colRef: CollectionReference) async throws -> [T] { 
-        do {
-            let querySnapshot = try await colRef.getDocuments()
-            guard let querySnapshot = querySnapshot else{throw}
-
-            return documents.compactMap { document -> T? in
-                document.data(as: T.self)
-            }
-        } catch {
-            throw error
-        }
-    }
-func collectionListener<T: FirestoreConvertible>(colRef: CollectionReference, completion: @escaping ([T]?, Error?) -> Void) -> ListenerRegistration {
-        return colRef.addSnapshotListener { querySnapshot, error in
-            if let error = error {
-                completion(nil, error)
-                return
-            }   
-            
-            guard let documents = querySnapshot?.documents else {
-                completion([], nil)
-                return
-            }
-            
-            let items = documents.compactMap { document -> T? in
-                document.data(as: T.self)
-            }
-            
-            completion(items, nil)
-        }
-    }
-    func membersListener(meetingID: String) {
-        let colRef = db.collection(strMeetings).document(meetingID).collection(strMembers)
-        
-        let registration = collectionListener(colRef) { (members: [Member]?, error) in
-            if let error = error {
-                handleError(error)
-                return
-            }
-            
-            guard let members = members else {
-                // Handle empty members data
-                return
-            }
-            
-            // Process members data
-            // ...
-        }
-        
-        // Store the ListenerRegistration if needed to remove the listener later
-        // ...
-    }
-*/

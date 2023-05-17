@@ -65,7 +65,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
             // meeting1과 가까이 있는 모임 있으면 meeting1도 bigIconMeetings에 저장후 원래 Meetings에선 삭제하고 type.piled Meeting 저장
             if !nearbyMeetings.isEmpty {
                 bigIconMeetings[meeting1.id!, default: []] = [meeting1] + nearbyMeetings
-                let meeting = Meeting.piledMapAnnotation(id: meeting1.id!, location: meeting1.location, geoHash: meeting1.geoHash)
+                let meeting = Meeting.piledMapAnnotation(meeting: meeting1)
 //                let meeting = Meeting(id: meeting1.id, title: "", description: "", place: "", numbersOfMembers: 0, latitude: meeting1.latitude, longitude: meeting1.longitude, hostUID: "", type: .piled)
                 setFetchedMeetings.remove(meeting1)
                 setFetchedMeetings.insert(meeting)
@@ -165,19 +165,10 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
             do{
                 /// - Firestore에 저장
                 print("firebase save")
-                // await fetchCurrentUserAsync()
-                // var meeting = meeting
-                // guard let currentUID = currentUID else{return}
-                // meeting.hostUID = currentUID
-                
-                // let location = CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude)
-                // let geoHash = GFUtils.geoHash(forLocation: meeting.location)
-                // geoHash 구조체에 넣을수 있나??
-                // meeting.geoHash = geoHash
                 
                 let document = try await db.collection(strMeetings).addDocument(data: meeting.firestoreData)
                 let meetingID = document.documentID
-                self.joinMeeting(meetingID: meetingID)
+                self.joinMeeting(meetingID: meetingID, numbersOfMembers: 0)
                 
                 isLoading = false
                 
@@ -186,40 +177,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
             }
         }
     }
-    override func joinMeeting(meetingID: String, numbersOfMembers: Int = 0){
-        print("joinMeeting")
-        isLoading = true
-        Task{
-            do{
-                guard let currentUID = currentUID else{return}
-                let userData = try await getUserData(currentUID)
-
-//                let member = Member(memberUID: currentUID)
-//                let joinMeeting = JoinMeeting(meetingID: meetingID, isHost: true)
-
-                let text = "\(userData.userName)님이 채팅에 참가하셨습니다."
-                // let message = ChatMessage(
-                //     text: "\(userData.userName)님이 채팅에 참가하셨습니다.",
-                //     userUID: "SYSTEM",
-                //     timestamp: Timestamp(),
-                //     isSystemMessage: true
-                // )
-
-                let meetingsDoc = db.collection(strMeetings).document(meetingID)
-                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
-                
-                try await meetingsDoc.collection(strMembers).addDocument(data: Member.member(currentUID))
-
-                try await joinMeetingsCol.addDocument(data: MeetingList.host(meetingID))
-                
-                try await meetingsDoc.collection(self.strMessage).addDocument(data: Message.systemMessage(text))
-                
-                isLoading = false
-            } catch {
-                handleErrorTask(error)
-            }
-        }
-    }
+    
     /// 작성자 중복 확인
     func checkedOverlap(){
         print("checkedOverlap")

@@ -150,13 +150,14 @@ class LoginViewModel: FirebaseViewModel {
                 }
                 print("1")
                 // Creating a User Firestore Object
-                let newUser = User.newGoogleUser(userName: userData.displayName, userGoogleIDCode: userData.uid, userGoogleEmail: userData.email, userImage: userData.photoURL)
+                let userProviderData = UserProviderData(uid: userData.uid, name: userData.displayName, email: userData.email, image: userData.photoURL)
+                let newUser = User.newGoogleUser(userGoogleData: userProviderData)
                 // Saving User Doc into Firestore Database
                 print("2")
                 let doc = db.collection(strUsers).document(currentUID)
                 print("3")
 //                try await doc.setData(newUser)
-                try doc.setData(newUser, completion: {
+                try doc.setData(newUser.firestoreDataGoogleUser, completion: {
                     error in
                     guard let error = error else{
                         print("에러")

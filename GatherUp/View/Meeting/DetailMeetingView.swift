@@ -78,11 +78,7 @@ struct DetailMeetingView: View {
                             Text("참여자:")
                                 .font(.caption2)
                             ForEach(Array(viewModel.dicMembers.values)){ member in
-                                WebImage(url: member.memberImage).placeholder{ProgressView()}
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 30, height: 30)
-                                    .clipShape(Circle())
+                                MemberImageButton(member: member, isCurrent: member.memberUID == viewModel.currentUID)
                             }
                         }
                     }
@@ -236,4 +232,25 @@ struct CustomButtonText: View {
     }
 }
 
+struct MemberImageButton: View {
+    let member: Member
+    let isCurrent: Bool
+    @State var showProfile: Bool = false
+    
+    var body: some View {
+        Button{
+            showProfile = true
+        } label: {
+            WebImage(url: member.memberImage).placeholder{ProgressView()}
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 30, height: 30)
+                .clipShape(Circle())
+                .sheet(isPresented: $showProfile){
+                    MemberProfileView(member: member, isCurrent: isCurrent)
+                }
 
+        }
+            
+    }
+}

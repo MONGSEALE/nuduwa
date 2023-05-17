@@ -17,11 +17,12 @@ struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
     let timestamp: Timestamp
     var isSystemMessage: Bool
 
-    init(_ text: String, uid: String) {
+    init(_ text: String, uid: String, isSystemMessage: Bool? = nil) {
+        self.id = UUID().uuidString
         self.text = text
         self.senderUID = uid
         self.timestamp = Timestamp(date: Date())
-        self.isSystemMessage = false
+        self.isSystemMessage = isSystemMessage ?? false
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -49,12 +50,18 @@ struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
         // isSystemMessage true일 때만 Firestore에 저장
         if isSystemMessage == true {
             data["isSystemMessage"] = isSystemMessage
+            data["senderUID"] = "SYSTEM"
         }
-        
         return data
     }
 
     // system 메시지
+    static func createSystemMessage(_ text: String) -> Message {
+        let uid = "SYSTEM"
+        let isSystemMessage = true
+        return Message(text, uid: uid, isSystemMessage: isSystemMessage)
+    }
+    /*
     static func systemMessage(_ text: String) -> [String: Any] {
         return [
             "text": text,
@@ -63,4 +70,5 @@ struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
             "isSystemMessage": true
         ]
     }
+ */
 }

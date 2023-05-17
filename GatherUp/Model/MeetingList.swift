@@ -17,11 +17,11 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
     let isHost: Bool
 
     // 기본 생성자
-    init(id: String? = nil, meetingID: String, joinDate: Date = Date(), isHost: Bool = false) {
-        self.id = id
+    init(meetingID: String, isHost: Bool? = nil) {
+        self.id = UUID().uuidString
         self.meetingID = meetingID
-        self.joinDate = joinDate
-        self.isHost = isHost
+        self.joinDate = Date()
+        self.isHost = isHost ?? false
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -50,7 +50,11 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
         
         return data
     }
-    
+
+    static func createMeeting(_ meetingID: String) -> MeetingList {
+        return MeetingList(meetingID: meetingID, isHost: true)
+    }
+    /*
     // member가 가입
     static func member(_ meetingID: String) -> [String: Any] {
         return [
@@ -67,5 +71,6 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
             "isHost" : true
         ]
     }
+     */
 }
 

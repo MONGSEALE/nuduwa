@@ -16,10 +16,6 @@ struct DMListView: View {
     @State private var userImageURLs: [String: URL] = [:]
     @State private var tabBar : UITabBar! = nil
     
-    @Binding var showDMView: Bool
-    @Binding var selectedReceiverID: String
-    
-    
     var body: some View {
         
         NavigationStack{
@@ -53,10 +49,6 @@ struct DMListView: View {
                             
                             ForEach(viewModel.chattingRooms) { chattingRoom in
                                 DMCardView(chattingRoom: chattingRoom)
-                                    .onTapGesture {
-                                        selectedReceiverID = chattingRoom.chatterUID
-                                        showDMView = true
-                                    }
                                     .padding(.bottom,5)
                                 Divider()
 //                             .contextMenu {

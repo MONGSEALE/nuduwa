@@ -40,6 +40,12 @@ struct DMView: View {
                                 let isCurrentUser = message.senderUID == viewModel.currentUID
                                 
                                 DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
+//                                    .onAppear {
+//                                        if message.id == viewModel.messages.last?.id && viewModel.paginationDoc != nil {
+//                                            guard let docID = viewModel.dmPeopleID else{return}
+//                                            viewModel.fetchPrevMessage(dmPeopleID: docID)
+//                                        }
+//                                    }
                             }
                         }
                         .onChange(of: viewModel.messages) { messages in
@@ -91,6 +97,11 @@ struct DMView: View {
             }
             .onDisappear {
                 print("바이")
+                viewModel.fetchChatRoomID(receiverID: receiverID) { chatRoomID in
+                    // 새로운 메시지가 도착하면 unreadMessages를 0으로 설정
+                    guard let senderID = viewModel.currentUID else{return}
+                    viewModel.resetUnreadMessages(userID: senderID, chatRoomID: chatRoomID)
+                }
                 viewModel.removeListeners()
             }
             

@@ -36,7 +36,6 @@
 		33AD61BF2A0A318800CD908D /* SearchUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AD61BE2A0A318800CD908D /* SearchUserView.swift */; };
 		33AD61C12A0A31B400CD908D /* FirebaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AD61C02A0A31B400CD908D /* FirebaseViewModel.swift */; };
 		33AD61C32A0A31D300CD908D /* FirebaseViewModelwithMeetings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AD61C22A0A31D300CD908D /* FirebaseViewModelwithMeetings.swift */; };
-		33AD61C52A0A320F00CD908D /* MeetingInfoSheetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AD61C42A0A320F00CD908D /* MeetingInfoSheetViewModel.swift */; };
 		33ADB13829D6610900352451 /* Meeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13729D6610900352451 /* Meeting.swift */; };
 		33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13929D666A500352451 /* ReusableMeetingsView.swift */; };
 		33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13B29D667E500352451 /* MeetingCardView.swift */; };
@@ -87,7 +86,6 @@
 		33AD61BE2A0A318800CD908D /* SearchUserView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchUserView.swift; sourceTree = "<group>"; };
 		33AD61C02A0A31B400CD908D /* FirebaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseViewModel.swift; sourceTree = "<group>"; };
 		33AD61C22A0A31D300CD908D /* FirebaseViewModelwithMeetings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseViewModelwithMeetings.swift; sourceTree = "<group>"; };
-		33AD61C42A0A320F00CD908D /* MeetingInfoSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingInfoSheetViewModel.swift; sourceTree = "<group>"; };
 		33ADB13729D6610900352451 /* Meeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meeting.swift; sourceTree = "<group>"; };
 		33ADB13929D666A500352451 /* ReusableMeetingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableMeetingsView.swift; sourceTree = "<group>"; };
 		33ADB13B29D667E500352451 /* MeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCardView.swift; sourceTree = "<group>"; };
@@ -164,7 +162,6 @@
 				33A6B84129EE460A0030E85B /* ChatViewModel.swift */,
 				33AD61C02A0A31B400CD908D /* FirebaseViewModel.swift */,
 				33AD61C22A0A31D300CD908D /* FirebaseViewModelwithMeetings.swift */,
-				33AD61C42A0A320F00CD908D /* MeetingInfoSheetViewModel.swift */,
 				33AF5AC02A0C84490060427E /* DMViewModel.swift */,
 			);
 			path = ViewModel;
@@ -410,7 +407,6 @@
 				33AEB8932A11B8B00048A8C7 /* MeetingList.swift in Sources */,
 				339A101229D3E9C100B4DD98 /* LoginViewModel.swift in Sources */,
 				33AF5ABA2A0C7F270060427E /* DMPeople.swift in Sources */,
-				33AD61C52A0A320F00CD908D /* MeetingInfoSheetViewModel.swift in Sources */,
 				33AD61C32A0A31D300CD908D /* FirebaseViewModelwithMeetings.swift in Sources */,
 				339A101529D3E9F400B4DD98 /* Login.swift in Sources */,
 				429515D129C4A744006DD4B3 /* ContentView.swift in Sources */,
