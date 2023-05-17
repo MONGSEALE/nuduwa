@@ -14,15 +14,17 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
     let chatterUID: String
     let DMPeopleID: String
     var unreadMessages: Int
+    var latestMessage: Date
 
     let timestamp: Timestamp
 
     // 기본 생성자
-    init(chatterUID: String, DMPeopleID: String, unreadMessages: Int = 0) {
+    init(chatterUID: String, DMPeopleID: String, unreadMessages: Int? = nil, latestMessage: Date? = nil) {
         self.id = UUID().uuidString
         self.chatterUID = chatterUID
         self.DMPeopleID = DMPeopleID
-        self.unreadMessages = unreadMessages
+        self.unreadMessages = unreadMessages ?? 0
+        self.latestMessage = latestMessage ?? Date()
         self.timestamp = Timestamp(date: Date())
     }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -30,6 +32,7 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         guard let chatterUID = data["chatterUID"] as? String,
               let DMPeopleID = data["DMPeopleID"] as? String,
               let unreadMessages = data["unreadMessages"] as? Int,
+              let latestMessage = data["latestMessage"] as? Timestamp,
               let timestamp = data["timestamp"] as? Timestamp
         else { return nil }
         
@@ -37,6 +40,7 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         self.chatterUID = chatterUID
         self.DMPeopleID = DMPeopleID
         self.unreadMessages = unreadMessages
+        self.latestMessage = latestMessage.dateValue()
         self.timestamp = timestamp
     }
     
@@ -46,6 +50,7 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
             "chatterUID": chatterUID,
             "DMPeopleID": DMPeopleID,
             "unreadMessages" : unreadMessages,
+            "latestMessage": Date(),
             "timestamp" : FieldValue.serverTimestamp()
         ]
     }

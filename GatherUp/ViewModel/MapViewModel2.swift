@@ -165,7 +165,9 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
             do{
                 /// - Firestore에 저장
                 print("firebase save")
-                
+                var meeting = meeting
+                guard let currentUID = currentUID else{return}
+                meeting.hostUID = currentUID
                 let document = try await db.collection(strMeetings).addDocument(data: meeting.firestoreData)
                 let meetingID = document.documentID
                 self.joinMeeting(meetingID: meetingID, numbersOfMembers: 0)
@@ -184,6 +186,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         
         Task{
             do{
+                guard let currentUID = currentUID else{return}
                 let doc = db.collection(strMeetings).whereField("hostUID", isEqualTo: currentUID)
                 let query = try? await doc.getDocuments()
                 

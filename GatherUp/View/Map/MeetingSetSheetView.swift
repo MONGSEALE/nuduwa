@@ -18,7 +18,7 @@ struct MeetingSetSheetView: View {
     @State private var selection : Int = 0
     @State private var meetingDate = Date()
     let coordinateCreated: CLLocationCoordinate2D
-    @State private var choiceCategory: String?
+//    @State private var choiceCategory: String?
     
     let onCreate: (Meeting)->()
     
@@ -112,7 +112,7 @@ struct MeetingSetSheetView: View {
                             )
                         }
 
-                        ChoiceMeetingCategoryView(choiceCategory: $choiceCategory)
+//                        ChoiceMeetingCategoryView(choiceCategory: $choiceCategory)
                     }
                     Spacer()
                     Button{
@@ -120,7 +120,7 @@ struct MeetingSetSheetView: View {
                             showErrorMessage(duration: 2)
                         }
                         else{
-                            let newMeeting = Meeting.createNewMeeting(title: title, description: description, place: place, numbersOfMembers: selection+2, location: coordinateCreated, meetingDate: meetingDate)
+                            let newMeeting = Meeting(title: title, description: description, place: place, numbersOfMembers: selection+2, location: coordinateCreated, meetingDate: meetingDate)
                             
                             // Meeting(title: title, description: description, place:place, numbersOfMembers:selection+2, latitude:coordinateCreated.latitude, longitude: coordinateCreated.longitude, geoHash: "", meetingDate:meetingDate, hostUID: "")
                             onCreate(newMeeting)

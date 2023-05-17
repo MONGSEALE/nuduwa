@@ -166,10 +166,14 @@ class DMViewModel: FirebaseViewModel {
                 guard let dmID = dmID else{return}
                 // DMPeople 아까 만든 문서에 메시지 추가
                 let _ = try await dmPeopleCol.document(dmID).collection(strDM).addDocument(data: messageData.firestoreData)
+                
+                self.fetchChatRoomID(receiverID: receiverID) { chatRoomID in
+                    self.startListeningDM(chatterUID: receiverID)
+                    self.resetUnreadMessages(userID: senderID, chatRoomID: chatRoomID)
+                }
             }catch{
                 print("오류!sendDM")
             }
-            
         }
     }
     
@@ -310,7 +314,7 @@ class DMViewModel: FirebaseViewModel {
             print("documents:\(documents)")
             self.chattingRooms = documents.compactMap{ documents -> DMList? in
                 try? documents.data(as: DMList.self)
-            }
+            }.sorted{ $0.latestMessage > $1.latestMessage}
             self.isLoading = false
             print("Rooms:\(self.chattingRooms)")
         }
@@ -333,7 +337,8 @@ class DMViewModel: FirebaseViewModel {
         let docRef = self.db.collection("Users").document(receiverID).collection(strDMList).document(chatRoomID)
        
         docRef.updateData([
-            "unreadMessages": FieldValue.increment(Int64(1))
+            "unreadMessages": FieldValue.increment(Int64(1)),
+            "latestMessage": Date()
         ]) { err in
             if let err = err {
                 print("Error updating document: \(err)")
