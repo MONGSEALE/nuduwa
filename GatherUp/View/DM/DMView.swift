@@ -12,11 +12,12 @@ import Firebase
 import FirebaseAuth
 
 struct DMView: View {
-    @StateObject private var viewModel = DMViewModel()
+    @StateObject private var viewModel: DMViewModel = .init()
     
     @Environment(\.dismiss) private var dismiss
     @State private var messageText: String = ""
     let receiverID: String
+    let dmPeopleID: String
     @Binding var showDMView: Bool
     
     var body: some View {
@@ -61,14 +62,20 @@ struct DMView: View {
                 HStack{
                     CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $messageText)
                     Button{
-                        viewModel.sendDM(message: messageText, receiverID: receiverID)
-                        messageText = ""
+                        if viewModel.dmPeopleID != nil{
+                            viewModel.sendDM(message: messageText)
+                            messageText = ""
+                        }
                     }label: {
-                        Image(systemName: "paperplane.fill")
-                            .foregroundColor(.white)
-                            .padding(10)
-                            .background(Color("lightblue"))
-                            .cornerRadius(50)
+                        if viewModel.dmPeopleID != nil{
+                            Image(systemName: "paperplane.fill")
+                                .foregroundColor(.white)
+                                .padding(10)
+                                .background(Color("lightblue"))
+                                .cornerRadius(50)
+                        } else {
+                            ProgressView()
+                        }
                     }
                 }
                 .padding(.horizontal)
@@ -92,16 +99,15 @@ struct DMView: View {
                 }
             }
             .onAppear {
-                viewModel.startListeningDM(chatterUID: receiverID)
+                viewModel.setDmPeopleID(dmPeopleID: dmPeopleID, receiverUID: receiverID)
                 viewModel.fetchUserData(receiverID)
+                viewModel.dmListener(dmPeopleID: dmPeopleID)
+                viewModel.updateReadTime()
             }
             .onDisappear {
-                print("바이")
-                viewModel.fetchChatRoomID(receiverID: receiverID) { chatRoomID in
-                    // 새로운 메시지가 도착하면 unreadMessages를 0으로 설정
-                    guard let senderID = viewModel.currentUID else{return}
-                    viewModel.resetUnreadMessages(userID: senderID, chatRoomID: chatRoomID)
-                }
+                print("디스어피어")
+                viewModel.ifNoChatRemoveDoc()
+                viewModel.updateReadTime()
                 viewModel.removeListeners()
             }
             

@@ -13,35 +13,26 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
     @DocumentID var id: String?
     let chatterUID: String
     let DMPeopleID: String
-    var unreadMessages: Int
-    var latestMessage: Date
-
-    let timestamp: Timestamp
+    let latestReadTime: Date
 
     // 기본 생성자
-    init(chatterUID: String, DMPeopleID: String, unreadMessages: Int? = nil, latestMessage: Date? = nil) {
+    init(chatterUID: String, DMPeopleID: String) {
         self.id = UUID().uuidString
         self.chatterUID = chatterUID
         self.DMPeopleID = DMPeopleID
-        self.unreadMessages = unreadMessages ?? 0
-        self.latestMessage = latestMessage ?? Date()
-        self.timestamp = Timestamp(date: Date())
+        self.latestReadTime = Date()
     }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any], id: String) {
         guard let chatterUID = data["chatterUID"] as? String,
               let DMPeopleID = data["DMPeopleID"] as? String,
-              let unreadMessages = data["unreadMessages"] as? Int,
-              let latestMessage = data["latestMessage"] as? Timestamp,
-              let timestamp = data["timestamp"] as? Timestamp
+              let latestReadTime = data["latestReadTime"] as? Timestamp
         else { return nil }
         
         self.id = id
         self.chatterUID = chatterUID
         self.DMPeopleID = DMPeopleID
-        self.unreadMessages = unreadMessages
-        self.latestMessage = latestMessage.dateValue()
-        self.timestamp = timestamp
+        self.latestReadTime = latestReadTime.dateValue()
     }
     
     // Firestore에 저장할 필드
@@ -49,11 +40,14 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         return [
             "chatterUID": chatterUID,
             "DMPeopleID": DMPeopleID,
-            "unreadMessages" : unreadMessages,
-            "latestMessage": Date(),
-            "timestamp" : FieldValue.serverTimestamp()
+            "latestReadTime": FieldValue.serverTimestamp()
         ]
     }
-    // unreadMessages +1
+    // update latestReadTime
+    static var firestoreUpdate: [String: Any] {
+        return [
+            "latestReadTime": FieldValue.serverTimestamp()
+        ]
+    }
     
 }

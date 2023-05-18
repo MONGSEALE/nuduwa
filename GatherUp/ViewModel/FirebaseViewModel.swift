@@ -42,7 +42,8 @@ class FirebaseViewModel: ObservableObject {
        return Auth.auth().currentUser?.uid
     }
     enum SomeError: Error {
-        case miss
+        case missCurrentUID
+        case missSomething
         case error
     }
     
@@ -64,7 +65,7 @@ class FirebaseViewModel: ObservableObject {
         print("fetchUserData:\(userUID ?? "uidNon")")
         Task{
             do{
-                guard let userUID = userUID else{throw SomeError.miss}
+                guard let userUID = userUID else{throw SomeError.missCurrentUID}
                 let userData = try await getUserData(userUID)
                 await MainActor.run{
                     self.user = User.convertUserData(userData)
@@ -77,10 +78,10 @@ class FirebaseViewModel: ObservableObject {
     func getUserData(_ userUID: String?) async throws -> UserData {
         print("getUserData:\(userUID ?? "uidNon")")
         do{
-            guard let userUID = userUID else{throw SomeError.miss}
+            guard let userUID = userUID else{throw SomeError.missCurrentUID}
             let doc = db.collection(strUsers).document(userUID)
             let userData: UserData? = try await doc.getDocument(as: UserData.self)
-            guard let userData = userData else{throw SomeError.miss}
+            guard let userData = userData else{throw SomeError.missCurrentUID}
             return userData
         }catch{
             throw error
@@ -92,7 +93,7 @@ class FirebaseViewModel: ObservableObject {
         print("fetchUser:\(userUID ?? "uidNon")")
         Task{
             do{
-                guard let userUID = userUID else{throw SomeError.miss}
+                guard let userUID = userUID else{throw SomeError.missCurrentUID}
                 let user = try await getUser(userUID)
                 self.user = user
             }catch{
@@ -103,10 +104,10 @@ class FirebaseViewModel: ObservableObject {
     func getUser(_ userUID: String?) async throws -> User {
         print("getUserData")
         do{
-            guard let userUID = userUID else{throw SomeError.miss}
+            guard let userUID = userUID else{throw SomeError.missCurrentUID}
             let doc = db.collection(strUsers).document(userUID)
             let user: User? = try await doc.getDocument(as: User.self)
-            guard let user = user else{throw SomeError.miss}
+            guard let user = user else{throw SomeError.missCurrentUID}
             return user
         }catch{
             throw error

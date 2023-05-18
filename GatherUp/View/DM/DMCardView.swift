@@ -36,8 +36,8 @@ struct DMCardView: View {
                     .foregroundColor(Color(.lightGray))
             }
             Spacer()
-            if chattingRoom.unreadMessages > 0 {
-                Text("\(chattingRoom.unreadMessages)")
+            if viewModel.unreadCount > 0 {
+                Text("\(viewModel.unreadCount)")
                 .foregroundColor(.white)
                 .padding(10)
                 .background(
@@ -54,7 +54,7 @@ struct DMCardView: View {
         }
         .contextMenu { // 길게 눌렀을 때 표시할 메뉴
             Button(action: {
-                viewModel.leaveChatroom(chatroom: chattingRoom) // 채팅방 나가기 메뉴 선택 시 처리
+                viewModel.leaveChatroom(dmPeopleID: chattingRoom.DMPeopleID) // 채팅방 나가기 메뉴 선택 시 처리
             }) {
                 Text("채팅방 나가기")
                 Image(systemName: "trash")
@@ -68,7 +68,8 @@ struct DMCardView: View {
             viewModel.removeListeners()
         }
         .fullScreenCover(isPresented: $showDM){
-            DMView(receiverID: chattingRoom.chatterUID, showDMView: $showDM)
+            DMView(receiverID: chattingRoom.chatterUID, dmPeopleID: chattingRoom.DMPeopleID, showDMView: $showDM)
         }
     }
+        
 }

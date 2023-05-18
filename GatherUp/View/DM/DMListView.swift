@@ -12,9 +12,7 @@ import SDWebImageSwiftUI
 
 struct DMListView: View {
     
-    @StateObject private var viewModel = DMViewModel()
-    @State private var userImageURLs: [String: URL] = [:]
-    @State private var tabBar : UITabBar! = nil
+    @StateObject private var viewModel: DMViewModel = .init()
     
     var body: some View {
         
@@ -51,13 +49,6 @@ struct DMListView: View {
                                 DMCardView(chattingRoom: chattingRoom)
                                     .padding(.bottom,5)
                                 Divider()
-//                             .contextMenu {
-//                                 Button(action: {
-//                                          viewModel.deleteRecentMessage(receiverID: receiverID)
-//                                 }) {
-//                                 Label("채팅방 나가기", systemImage: "trash")
-//                                 }
-//                             }
                             }
                             .padding(.horizontal)
                         }
@@ -66,7 +57,7 @@ struct DMListView: View {
             }
         }
         .onAppear {
-           viewModel.startListeningRecentMessages()
+           viewModel.dmListListener()
        }
     }
 }
