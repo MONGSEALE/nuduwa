@@ -17,7 +17,7 @@ struct DMView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var messageText: String = ""
     let receiverID: String
-    let dmPeopleID: String
+    let dmPeopleID: String? = nil
     @Binding var showDMView: Bool
     
     var body: some View {
@@ -41,12 +41,18 @@ struct DMView: View {
                                 let isCurrentUser = message.senderUID == viewModel.currentUID
                                 
                                 DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
-//                                    .onAppear {
-//                                        if message.id == viewModel.messages.last?.id && viewModel.paginationDoc != nil {
-//                                            guard let docID = viewModel.dmPeopleID else{return}
-//                                            viewModel.fetchPrevMessage(dmPeopleID: docID)
-//                                        }
-//                                    }
+                                   .onAppear {
+                                        var lastMessage: String? = nil
+                                        if viewModel.message.count >= 10 {
+                                            lastMessage = viewModel.message[viewModel.message.count - 10]
+                                        } else {
+                                            lastMessage = viewModel.messages.last
+                                        }
+                                        if message.id == lastMessage?.id && viewModel.paginationDoc != nil {
+                                            guard let docID = viewModel.dmPeopleID else{return}
+                                            viewModel.fetchPrevMessage(dmPeopleID: docID)
+                                        }
+                                   }
                             }
                         }
                         .onChange(of: viewModel.messages) { messages in
@@ -101,13 +107,10 @@ struct DMView: View {
             .onAppear {
                 viewModel.setDmPeopleID(dmPeopleID: dmPeopleID, receiverUID: receiverID)
                 viewModel.fetchUserData(receiverID)
-                viewModel.dmListener(dmPeopleID: dmPeopleID)
-                viewModel.updateReadTime()
             }
             .onDisappear {
                 print("디스어피어")
                 viewModel.ifNoChatRemoveDoc()
-                viewModel.updateReadTime()
                 viewModel.removeListeners()
             }
             
