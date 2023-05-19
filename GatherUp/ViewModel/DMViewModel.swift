@@ -512,7 +512,7 @@ class DMViewModel: FirebaseViewModel {
         print("dmListListener")
         guard let currentUID = currentUID else{return}
         
-        let dmListCol = db.collection(strUsers).document(currentUID).collection(strDMList)
+        let dmListCol = db.collection(strUsers).document(currentUID).collection(strDMList).order(by: "latestMessage")
         
         let listener = dmListCol.addSnapshotListener{ querySnapshot, error in
             if let error = error {self.handleErrorTask(error);return}
@@ -522,7 +522,7 @@ class DMViewModel: FirebaseViewModel {
                 if (diff.type == .added) {
                     self.chattingRooms = querySnapshot.documents.compactMap{ document -> DMList? in
                         document.data(as: DMList.self)
-                    }.sorted{ $0.latestMessage > $1.latestMessage}
+                    }
                 }
                 if (diff.type == .modified) {
                    print("Modified city: \(diff.document.data())")
@@ -536,7 +536,7 @@ class DMViewModel: FirebaseViewModel {
 //            }.sorted{ $0.latestMessage > $1.latestMessage}
         }
         
-        listeners[dmListCol.path] = listener
+        listeners[dmListCol.description] = listener
     }
 
 //    func fetchUnreadCount() {
