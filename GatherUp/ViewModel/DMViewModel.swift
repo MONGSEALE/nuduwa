@@ -13,81 +13,65 @@ import FirebaseFirestore
 
 class DMViewModel: FirebaseViewModel {
     
-    @Published var messages: [Message] = []
-    @Published var chattingRooms: [DMList] = []
-    @Published var isTabBarHidden: Bool = false
-    @Published var userImageURLs: [String: User] = [:]
-    @Published var dmPeopleID: String? = nil
+    @Published var messages: [Message] = []             // 메시지 배열 - 채팅방에서 사용
+    @Published var chattingRooms: [DMList] = []         // DMList 배열 - 채팅방리스트에서 사용
+    @Published var dmPeopleID: String? = nil            // Firestore 문서 아이디값
     
-    var currentDMListDocRef: DocumentReference? = nil
-    var receiverDMListDocRef: DocumentReference? = nil
+    var currentDMListDocRef: DocumentReference? = nil   // Firestore 사용자 DMList 경로
+    var receiverDMListDocRef: DocumentReference? = nil  // Firestore 상대방 DMList 경로
+    var paginationDoc: QueryDocumentSnapshot? = nil     // Firestore 문서 가져올때 페이지변수
     
-    var isReading: Bool = false
+    var isReading: Bool = false                         // 채팅방 들어갔는지 확인변수
+    var isReady: Bool = false
     
     // var dmList: DMList? = nil
     // var isFirstDM: Bool = false
     // var unreadCount: Int = 0
-
-    struct DecRefAndID {
-        let docRef: DocumentReference?
-        let docID: String?
-    }
-    var paginationDoc: QueryDocumentSnapshot?
     
-    override init() {
-        super.init()
-        print("viewmodel")
-    }
-
     override func removeListeners() {
         print("removeListeners")
         super.removeListeners()
-//        messages.removeAll()
+        messages.removeAll()
     }
 
-    private func getDMListDoc(uid: String, otherUID: String) async throws -> DecRefAndID? {
+    func readLastDM(){
+        isReady = true
+    }
+
+    /// 채팅방 들어갔을때 실행하는 함수
+    func setDMRoom(receiverUID: String) {
+        guard let currentUID = currentUID else{return}
+        isLoading = true
+        Task{
+            do{
+                let data = try await fetchDMPeopleID(receiverUID: receiverUID)
+                self.currentDMListDocRef = data.0
+                self.receiverDMListDocRef = data.1
+                self.dmPeopleID = data.2
+                isReading = true
+                dmListener(dmPeopleID: self.dmPeopleID)
+            }catch{
+                isLoading = false
+                print("오류315")
+            }
+        }
+    }
+    /// DMList 경로와 DMPeopleID 가져오는 함수
+    private func getDMListDoc(uid: String, otherUID: String) async throws -> (DocumentReference?,String?) {
         do{
             let query = db.collection(strUsers).document(uid).collection(strDMList).whereField("chatterUID", isEqualTo: otherUID)
             let snapshot = try await query.getDocuments()
             let doc = snapshot.documents.first
             let docRef = doc?.reference
-            let docID = doc?.get("DMPeopleID") as? String
+            let dmPeopleID = doc?.get("DMPeopleID") as? String
             
-            return DecRefAndID(docRef: docRef, docID: docID)
+            return (docRef, dmPeopleID)
         }catch{
             throw SomeError.error
         }
     }
-
-    func setDmPeopleID(dmPeopleID: String? = nil, receiverUID: String) {
-        guard let currentUID = currentUID else{return}
-        Task{
-            do{
-                if let dmPeopleID = dmPeopleID {
-                    self.dmPeopleID = dmPeopleID
-                    Task {
-                        let doc = try await getDMListDoc(uid: currentUID, otherUID: receiverUID)
-                        self.currentDMListDocRef = doc?.docRef
-                    }
-                    Task {
-                        let doc = try await getDMListDoc(uid: receiverUID, otherUID: currentUID)
-                        self.receiverDMListDocRef = doc?.docRef
-                    }
-                } else {
-                    let data = try await fetchDMPeopleID(receiverUID: receiverUID)
-                    self.dmPeopleID = data.0.docID
-                    self.currentDMListDocRef = data.0.docRef
-                    self.receiverDMListDocRef = data.1
-                }
-                enterDM()
-                
-            }catch{
-                print("오류315")
-            }
-        }
-    }
-
-    private func fetchDMPeopleID(receiverUID: String) async throws -> (DecRefAndID, DocumentReference) {
+    /// DMPeopleID와 사용자, 상대방 DMList 경로 가져오는 함수
+    private func fetchDMPeopleID(receiverUID: String) async throws -> (DocumentReference, DocumentReference, String) {
         print("fetchDMPeopleID")
         guard let currentUID = currentUID else{throw SomeError.missCurrentUID}
         do{
@@ -95,32 +79,37 @@ class DMViewModel: FirebaseViewModel {
             let dmListCorrentCol = db.collection(strUsers).document(currentUID).collection(strDMList)     // 사용자 DMLIst경로
             let dmListReceiverCol = db.collection(strUsers).document(receiverUID).collection(strDMList)  // 상대방 DMList경로
             let dmPeopleCol = db.collection(strDMPeople)
-             /*
-            // 사용자 DMList에서 상대방과 DM데이터 검색 - DM방 나갔을시 DMPeople 콜렉션에 데이터 있어도 사용자 DMList에 없음
-            let dmListSenderSnapshot = try? await dmListCorrentCol.whereField("chatterUID", isEqualTo: receiverUID).getDocuments()
-            // 상대방 DMList에서 사용자와 DM데이터 검색
-            let dmListReceiverSnapshot = try? await dmListReceiverCol.whereField("chatterUID", isEqualTo: currentUID).getDocuments()
-            
-            // DMList 문서 데이터 없으면 nil
-            let currentDMList = dmListSenderSnapshot?.documents.first
-            let receiverDMList = dmListReceiverSnapshot?.documents.first
-            // DMListDoc 저장 없으면 nil
-            currentDMListDocRef = currentDMList?.reference
-            receiverDMListDocRef = receiverDMList?.reference
-            */
+
             var dmPeopleID: String?
             var currentDocRef: DocumentReference?
             var receiverDocRef: DocumentReference?
-            let currentDoc = try? await getDMListDoc(uid: currentUID, otherUID: receiverUID)
-            let receiverDoc = try? await getDMListDoc(uid: receiverUID, otherUID: currentUID)
-            // docRef값 저장 없으면 nil
-            currentDocRef = currentDoc?.docRef
-            receiverDocRef = receiverDoc?.docRef
-            // dmPeopleID 값이 있으면 저장
-            if let id = currentDoc?.docID {
-                dmPeopleID = id
-            } else if let id = receiverDoc?.docID {
-                dmPeopleID = id
+
+            // 비동기로 2개작업 동시에 실행
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                // 사용자 DMList 경로와 dmPeopleID 가져오기
+                group.addTask {
+                    do {
+                        let data = try await getDMListDoc(uid: currentUID, otherUID: receiverUID)
+                        if let data = data {
+                            currentDocRef = data.0
+                            dmPeopleID = data.1
+                        }
+                    } catch {
+                        throw error
+                    }
+                }
+                // 상대방 DMList 경로와 dmPeopleID 가져오기
+                group.addTask {
+                    do {
+                        let data = try await getDMListDoc(uid: receiverUID, otherUID: currentUID)
+                        if let data = data {
+                            receiverDocRef = data.0
+                            dmPeopleID = data.1
+                        }
+                    } catch {
+                        throw error
+                    }
+                }
             }
 
             if currentDocRef != nil && receiverDocRef != nil{
@@ -170,90 +159,17 @@ class DMViewModel: FirebaseViewModel {
                 currentDocRef = currentDMListRef
                 receiverDocRef = receiverDMListRef
             }
-            // guard let currentDMListDocRef = currentDMListDocRef else{throw SomeError.missSomething}
-            // dmList = try await currentDMListDocRef.getDocument(as: DMList.self)
-            guard let receiverDocRef = receiverDocRef else{throw SomeError.missSomething}
-            return (DecRefAndID(docRef: currentDocRef, docID: dmPeopleID), receiverDocRef)
-
-            
-            
-            /*
-            if let currentDMList = currentDMList, let _ = receiverDMList {
-                // 사용자와 상대방 모두 DMList에 서로간 DM데이터 있을때
-                dmPeopleID = currentDMList.get("DMPeopleID") as? String
-                
-            } else if let currentDMList = currentDMList {
-                // 사용자 DMList에만 상대방과 DM데이터 있을때
-                dmPeopleID = currentDMList.get("DMPeopleID") as? String
-                // 상대방 DMList에 사용자와의 DM데이터 문서 생성
-                guard let dmPeopleID = dmPeopleID else{throw SomeError.missSomething}
-                let receiverDMList = DMList(chatterUID: currentUID, DMPeopleID: dmPeopleID)
-                let receiverDMListRef = try await dmListReceiverCol.addDocument(data: receiverDMList.firestoreData)
-                // DMListDoc 저장
-                receiverDMListDocRef = receiverDMListRef
-                print("ㅇ4")
-            } else if let receiverDMList = receiverDMList {
-                // 상대방 DMList에만 사용자와 DM데이터 있을때
-                dmPeopleID = receiverDMList.get("DMPeopleID") as? String
-                // 사용자 DMList에 상대방과의 DM데이터 문서 생성
-                guard let dmPeopleID = dmPeopleID else{throw SomeError.missSomething}
-                let currentDMList = DMList(chatterUID: receiverUID, DMPeopleID: dmPeopleID)
-                let currentDMListRef = try await dmListCorrentCol.addDocument(data: currentDMList.firestoreData)
-                // DMListDoc 저장
-                currentDMListDocRef = currentDMListRef
-                print("ㅇ5")
-            } else {
-                print("ㅇ6")
-                // 둘 다 DMList에 서로간의 DM데이터가 없을때, DMPeople 콜렉션에서 검색
-                let query = dmPeopleCol.whereField("chattersUID", arrayContainsAny: [currentUID,receiverUID])
-                let dmPeopleSnapshot = try await query.getDocuments()
-                print("7")
-                if let dmPeopleDoc = dmPeopleSnapshot.documents.first {
-                    // 상대방과 이전에 대화기록 있을때
-                    dmPeopleID = dmPeopleDoc.documentID
-                } else {
-                    // 상대방과 첫 DM일때, DMPeople에 문서 생성
-                    let dmPeople = DMPeople(chattersUID: [currentUID,receiverUID])
-                    let documentRef = try await dmPeopleCol.addDocument(data: dmPeople.firestoreData)
-                    dmPeopleID = documentRef.documentID
-                }
-                print("ㅇ7")
-                guard let dmPeopleID = dmPeopleID else{throw SomeError.missSomething}
-                // 사용자 DMList에 상대방과의 DM데이터 문서 생성
-                let currentDMList = DMList(chatterUID: receiverUID, DMPeopleID: dmPeopleID)
-                let currentDMListRef = try await dmListCorrentCol.addDocument(data: currentDMList.firestoreData)
-                // 상대방 DMList에 사용자와의 DM데이터 문서 생성
-                let receiverDMList = DMList(chatterUID: currentUID, DMPeopleID: dmPeopleID)
-                let receiverDMListRef = try await dmListReceiverCol.addDocument(data: receiverDMList.firestoreData)
-                // DMListID 저장
-                currentDMListDocRef = currentDMListRef
-                receiverDMListDocRef = receiverDMListRef
-            }
-            print("ㅇ8")
-            guard let currentDMListDocRef = currentDMListDocRef else{throw SomeError.missSomething}
-            dmList = try await currentDMListDocRef.getDocument(as: DMList.self)
-            print("9ㅇ")
-            
-            return dmPeopleID
-            */
+            guard let receiverDocRef = receiverDocRef,
+                  let currentDocRef = currentDocRef else{throw SomeError.missSomething}
+            return (currentDocRef, receiverDocRef, dmPeopleID)
         }catch{
             print("오류!패치디엠피플아이디:\(error.localizedDescription)")
             throw SomeError.error
         }
         
     }
-    /*
-    func updateReadTime(){
-        print("updateReadTime")
-        guard let currentDMListDocRef = currentDMListDocRef else{return}
-        Task{
-            try await currentDMListDocRef.updateData(DMList.firestoreUpdate)
-        }
-    }*/
-    func enterDM(){
-        isReading = true
-    }
-    func readDM(){
+    /// 채팅방 들어가서 리스닝 실행중에 사용자 DMList 필드 unreadMessages를 0으로 변경
+    func readDM() {
         print("readDM")
         if isReading {
             guard let currentDMListDocRef = currentDMListDocRef else{return}
@@ -262,7 +178,7 @@ class DMViewModel: FirebaseViewModel {
             }
         }
     }
-
+    /// 메시지 보내기
     func sendDM(message: String) {
         print("sendDM")
         if message.isEmpty {return}
@@ -278,14 +194,31 @@ class DMViewModel: FirebaseViewModel {
                 
                 // DMPeople - DM에 메시지 생성
                 let _ = try await dmCol.addDocument(data: messageData.firestoreData)
-                try await currentDMListDocRef.updateData(DMList.firestoreUpdate)
-                try await receiverDMListDocRef.updateData(DMList.firestoreUpdate)
+                // 비동기로 2개작업 동시에 실행
+                try await withThrowingTaskGroup(of: Void.self) { group in
+                    // 사용자 DMList 업데이트
+                    group.addTask {
+                        do {
+                            try await currentDMListDocRef.updateData(DMList.firestoreUpdate)
+                        } catch {
+                            throw error
+                        }
+                    }
+                    // 상대방 DMList 업데이트
+                    group.addTask {
+                        do {
+                            try await receiverDMListDocRef.updateData(DMList.firestoreUpdate)
+                        } catch {
+                            throw error
+                        }
+                    }
+                }
             }catch{
                 print("오류!sendDM")
             }
         }
     }
-    
+    /// 아무런 채팅도 안치고 채팅방 나가면 사용자, 상대방 DMList 문서 삭제
     func ifNoChatRemoveDoc() {
         print("ifNoChatRemoveDoc")
         Task{
@@ -297,144 +230,147 @@ class DMViewModel: FirebaseViewModel {
                 let dmPeopleDoc = db.collection(strDMPeople).document(dmPeopleID)
                 
                 let snapshot = try await dmPeopleDoc.collection(strDM).limit(to: 1).getDocuments()
-                print("snapshot:\(snapshot)")
                 
                 if snapshot.isEmpty{
-                    // 3개 문서 삭제를 각각 비동기로 동시에 수행
-                    docDelete(docRef: currentDMListDocRef)
-                    docDelete(docRef: receiverDMListDocRef)
-                    docDelete(docRef: dmPeopleDoc)
-//                    Task{
-//                        try await currentDMListDocRef.delete()
-//                    }
-//                    Task {
-//                        try await receiverDMListDocRef.delete()
-//                    }
-//                    Task {
-//                        try await dmPeopleDoc.delete()
-//                    }
+                    // 비동기로 3개작업 동시에 실행
+                    try await withThrowingTaskGroup(of: Void.self) { group in
+                        // 사용자 DMList 삭제
+                        group.addTask {
+                            do {
+                                try await currentDMListDocRef.delete()
+                            } catch {
+                                throw error
+                            }
+                        }
+                        // 상대방 DMList 삭제
+                        group.addTask {
+                            do {
+                                try await receiverDMListDocRef.delete()
+                            } catch {
+                                throw error
+                            }
+                        }
+                        // DMPeople 문서 삭제
+                        group.addTask {
+                            do {
+                                try await dmPeopleDoc.delete()
+                            } catch {
+                                throw error
+                            }
+                        }
+                    }
                 }
             }catch{
                 print("오류!ifNoChatRemoveDMPeople")
             }
         }
-        
-    }
-    func docDelete(docRef: DocumentReference) {
-        Task{
-            try await docRef.delete()
-        }
     }
     
-    func startListeningDM(chatterUID: String) {
-        print("startListeningDM")
-        Task{
-            guard let currentUID = currentUID else{return}
-            let chattersQuery = db.collection(strUsers).document(currentUID).collection(strDMList)
-                .whereField("chatterUID", isEqualTo: chatterUID)
-            let dmPeopleDoc = db.collection(strDMPeople)
-            let dmPeopleQuery = dmPeopleDoc.whereField("users", arrayContains: chatterUID)
-            
-            do{
-                let chattersSnapshot = try await chattersQuery.getDocuments()
-                var dmPeopleID: String?
-                
-                if !chattersSnapshot.documents.isEmpty {
-                    for document in chattersSnapshot.documents {
-                        dmPeopleID = document.data()["DMPeopleID"] as? String ?? ""
-                    }
-                } else {
-                    let dmPeopleSnapshot = try await dmPeopleQuery.getDocuments()
-                    
-                    if !dmPeopleSnapshot.documents.isEmpty {
-                        for document in dmPeopleSnapshot.documents {
-                            dmPeopleID = document.documentID
-                        }
-                    } else {
-                        print("서버저장된DM없음")
-                        return
-                    }
-                }
-                
-                guard let dmPeopleID = dmPeopleID else {return}
-                
-                let dmDoc = dmPeopleDoc.document(dmPeopleID).collection(self.strDM)
-                let query = dmDoc.order(by: "timestamp")//, descending: true)
-//                            .limit(to: 20)
-                // .limit(to: 25)  
-                // if paged == nil {
-                //     query = query
-                    
-                // } else {
-
-                // }
-                // guard let lastSnapshot = snapshot.documents.last else {
-                //     return
-                // }
-                // let next = db.collection("cities")
-                // .order(by: "population")
-                // .start(afterDocument: lastSnapshot)
-                
-                let listener = query.addSnapshotListener { querySnapshot, error in
-                    if let error = error {self.handleErrorTask(error);return}
-                    guard let querySnapshot = querySnapshot else {return}
-
-//                    querySnapshot.documentChanges.forEach { diff in
-//                        if (diff.type == .added) {
-//                            guard let data = diff.document.data(as: Message.self) else{return}
-//                            if self.paginationDoc == nil{
-//                                self.messages.append(data)
-//                            } else {
-//                                self.messages.insert(data, at: 0)
-//                            }
-//                        }
-//                    }
-                    
-                     self.messages = querySnapshot.documents.compactMap { document -> Message? in
-                         document.data(as: Message.self)
-                     }
-//                    self.paginationDoc = querySnapshot.documents.last
-                }
-                listeners[query.description] = listener
-            } catch {
-                handleErrorTask(error)
-            }
-        }
-    }
     func fetchPrevMessage(dmPeopleID: String) {
         print("fetchPrevMessage")
-//        Task{
-//            do{
-//                guard let paginationDoc = paginationDoc else{return}
-//                let query = db.collection(strDMPeople).document(dmPeopleID).collection(strDM).order(by: "timestamp", descending: true)
-//                    .start(afterDocument: paginationDoc).limit(to: 30)
-//                let doc = try await query.getDocuments()
-//                let prevMessage = doc.documents.compactMap { document -> Message? in
-//                    document.data(as: Message.self)
-//                }
-//                messages.insert(contentsOf: prevMessage, at: 0)
-//                if let lastDoc = doc.documents.last {
-//                    self.paginationDoc = lastDoc
-//                }
-//            }catch{
-//                print("오류fetchPrevMessage")
-//            }
-//        }
+        if !isReading {isLoading = false;return}
+        guard let paginationDoc = paginationDoc else{isLoading = false;return}
+        Task{
+            do{                
+                let query = db.collection(strDMPeople).document(dmPeopleID).collection(strDM).order(by: "timestamp", descending: true)
+                    .start(afterDocument: paginationDoc).limit(to: 30)
+                let doc = try await query.getDocuments()
+                let prevMessage = doc.documents.compactMap { document -> Message? in
+                    document.data(as: Message.self)
+                }
+                messages.insert(contentsOf: prevMessage.reversed(), at: 0)
+                if let lastDoc = doc.documents.last {
+                    self.paginationDoc = lastDoc
+                }
+                isLoading = false
+            }catch{
+                isLoading = false
+                print("오류fetchPrevMessage")
+            }
+        }
     }
     func dmListener(dmPeopleID: String?) {
         print("dmListener")
         guard let dmPeopleID = dmPeopleID else{return}
         let query = db.collection(strDMPeople).document(dmPeopleID).collection(strDM)
             .order(by: "timestamp", descending: true)
-//            .limit(to: 30)
+            .limit(to: 1)
         
         let listener = query.addSnapshotListener { querySnapshot, error in
             if let error = error {self.handleErrorTask(error);return}
             
-            guard let querySnapshot = querySnapshot else{return}
-            // 쿼리 결과를 DM 객체의 배열로 변환하고, 이를 messages 배열에 저장합니다.
+            guard let document = querySnapshot?.documents.first else{return}
+            guard let data = document.data(as: Message.self) else{return}
+            // 첫 실행이면 paginationDoc에 저장
+            if self.paginationDoc == nil{
+                self.paginationDoc = document
+                fetchPrevMessage(dmPeopleID: dmPeopleID)
+            }
+            self.messages.append(data)
+            self.readDM()
+        }
+        listeners[query.description] = listener
+    }
+    
+    func leaveChatroom(receiverUID: String) {
+        print("leaveChatroom")
+        guard let currentUID = currentUID else{return}
+        Task{
+            do{
+                if currentDMListDocRef == nil {
+                    let doc = try await getDMListDoc(uid: currentUID, otherUID: receiverUID)
+                    self.currentDMListDocRef = doc?.docRef
+                }
+                guard let currentDMListDocRef = currentDMListDocRef else{throw SomeError.missSomething}
+                docDelete(docRef: currentDMListDocRef)
+            }catch{
+                print("오류")
+            }
+        }
+    }
+    
+    
+    func dmListListener() {
+        print("dmListListener")
+        guard let currentUID = currentUID else{return}
+        isLoading = true
+
+        let dmListCol = db.collection(strUsers).document(currentUID).collection(strDMList)
+        
+        let listener = dmListCol.addSnapshotListener{ querySnapshot, error in
+            if let error = error {self.handleErrorTask(error);return}
             
-            querySnapshot.documentChanges.forEach { diff in
+            self.chattingRooms = querySnapshot?.documents.compactMap{ document -> DMList? in
+                document.data(as: DMList.self)
+            }.sorted{ $0.latestMessage > $1.latestMessage}
+            self.isLoading = false
+        }
+        listeners[dmListCol.path] = listener
+    }
+
+//    func fetchUnreadCount() {
+//        print("fetchUnreadCount")
+//        unreadCount = 0
+//        guard let dmList = dmList else{return}
+//        messages.forEach{ message in
+//            if message.timestamp.dateValue() > dmList.latestReadTime{
+//                unreadCount += 1
+//            }
+//        }
+//    }
+}
+
+
+    /*
+    func updateReadTime(){
+        print("updateReadTime")
+        guard let currentDMListDocRef = currentDMListDocRef else{return}
+        Task{
+            try await currentDMListDocRef.updateData(DMList.firestoreUpdate)
+        }
+    }*/
+/*
+    querySnapshot.documentChanges.forEach { diff in
                 if (diff.type == .added) {
                     guard let data = diff.document.data(as: Message.self) else{return}
                     if self.paginationDoc == nil{
@@ -460,94 +396,5 @@ class DMViewModel: FirebaseViewModel {
                     }
                     print("변경: \(diff.document.data())")
                 }
-                if (diff.type == .removed) {
-                    print("제거: \(diff.document.data())")
-                }
             }
-//            self.messages = querySnapshot.documents.compactMap{ document -> Message? in
-//                            document.data(as: Message.self)
-//                        }
-            self.readDM()
-        }
-        listeners[query.description] = listener
-    }
-    
-//    func dmListener(dmPeopleID: String) {
-//        print("dmListener")
-//        let query = db.collection(strDMPeople).document(dmPeopleID).collection(strDM)
-//                    .order(by: "timestamp")
-//
-//        let listener = query.addSnapshotListener { querySnapshot, error in
-//            if let error = error {self.handleErrorTask(error);return}
-//
-//            guard let documents = querySnapshot?.documents else{return}
-//            // 쿼리 결과를 DM 객체의 배열로 변환하고, 이를 messages 배열에 저장합니다.
-//            self.messages = documents.compactMap { document -> Message? in
-//                document.data(as: Message.self)
-//            }
-//            self.readDM()
-//        }
-//        listeners[query.description] = listener
-//    }
-    
-    func leaveChatroom(receiverUID: String) {
-        print("leaveChatroom")
-        guard let currentUID = currentUID else{return}
-        Task{
-            do{
-                if currentDMListDocRef == nil {
-                    let doc = try await getDMListDoc(uid: currentUID, otherUID: receiverUID)
-                    self.currentDMListDocRef = doc?.docRef
-                }
-                guard let currentDMListDocRef = currentDMListDocRef else{throw SomeError.missSomething}
-                docDelete(docRef: currentDMListDocRef)
-            }catch{
-                print("오류")
-            }
-        }
-    }
-    
-    
-    func dmListListener() {
-        print("dmListListener")
-        guard let currentUID = currentUID else{return}
-        
-        let dmListCol = db.collection(strUsers).document(currentUID).collection(strDMList).order(by: "latestMessage")
-        
-        let listener = dmListCol.addSnapshotListener{ querySnapshot, error in
-            if let error = error {self.handleErrorTask(error);return}
-            
-            guard let querySnapshot = querySnapshot else {self.isLoading = false;return}
-            querySnapshot.documentChanges.forEach{ diff in
-                if (diff.type == .added) {
-                    self.chattingRooms = querySnapshot.documents.compactMap{ document -> DMList? in
-                        document.data(as: DMList.self)
-                    }
-                }
-                if (diff.type == .modified) {
-                   print("Modified city: \(diff.document.data())")
-                }
-                if (diff.type == .removed) {
-                   print("Removed city: \(diff.document.data())")
-                }
-            }
-//            self.chattingRooms = querySnapshot.documents.compactMap{ document -> DMList? in
-//                document.data(as: DMList.self)
-//            }.sorted{ $0.latestMessage > $1.latestMessage}
-        }
-        
-        listeners[dmListCol.description] = listener
-    }
-
-//    func fetchUnreadCount() {
-//        print("fetchUnreadCount")
-//        unreadCount = 0
-//        guard let dmList = dmList else{return}
-//        messages.forEach{ message in
-//            if message.timestamp.dateValue() > dmList.latestReadTime{
-//                unreadCount += 1
-//            }
-//        }
-//    }
-}
-
+            */

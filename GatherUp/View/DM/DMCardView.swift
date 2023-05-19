@@ -13,11 +13,7 @@ struct DMCardView: View {
     @StateObject var viewModel: DMViewModel = .init()
     
     let chattingRoom: DMList
-    
-    @State var showDM: Bool = false
-    
-    /// - Callbacks
-    //    var onUpdate: (DM)->()
+    @Binding var showDM: Bool
     
     var body: some View {
         HStack(spacing: 16) {
