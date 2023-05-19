@@ -17,48 +17,51 @@ struct DMView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var messageText: String = ""
     let receiverID: String
-    let dmPeopleID: String? = nil
+    let dmPeopleID: String?
     @Binding var showDMView: Bool
     
     var body: some View {
         NavigationView{
             VStack {
-                ScrollView{
-                    ScrollViewReader { scrollViewProxy in
+                ScrollViewReader { scrollViewProxy in
+                    ScrollView{
                         VStack(alignment: .leading, spacing: 8) {
-                            ForEach(viewModel.messages.indices, id: \.self) { index in
-                                let message = viewModel.messages[index]
-                                let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
-                                
-                                if isNewDay(previousMessage: previousMessage, currentMessage: message) {
-                                    Text(formatDate(message.timestamp))
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                        .padding(.top)
-                                        .frame(maxWidth:.infinity)
-                                }
+                            ForEach(viewModel.messages, id: \.self) { message in
+//                                let message = viewModel.messages[index]
+//                                let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
+//
+//                                if isNewDay(previousMessage: previousMessage, currentMessage: message) {
+//                                    Text(formatDate(message.timestamp))
+//                                        .font(.caption)
+//                                        .foregroundColor(.gray)
+//                                        .padding(.top)
+//                                        .frame(maxWidth:.infinity)
+//                                }
                                 
                                 let isCurrentUser = message.senderUID == viewModel.currentUID
                                 
                                 DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
                                    .onAppear {
-                                        var lastMessage: String? = nil
-                                        if viewModel.message.count >= 10 {
-                                            lastMessage = viewModel.message[viewModel.message.count - 10]
+                                        var lastMessageId: String? = nil
+                                        if viewModel.messages.count >= 10 {
+                                            lastMessageId = viewModel.messages[viewModel.messages.count - 10].id
                                         } else {
-                                            lastMessage = viewModel.messages.last
+                                            lastMessageId = viewModel.messages.last?.id
                                         }
-                                        if message.id == lastMessage?.id && viewModel.paginationDoc != nil {
+                                        if message.id == lastMessageId && viewModel.paginationDoc != nil {
                                             guard let docID = viewModel.dmPeopleID else{return}
                                             viewModel.fetchPrevMessage(dmPeopleID: docID)
                                         }
                                    }
                             }
                         }
+                        .onAppear{
+                            scrollViewProxy.scrollTo(0, anchor: .bottom)
+                        }
                         .onChange(of: viewModel.messages) { messages in
-                            if let lastMessageIndex = messages.indices.last {
+                            if let message = messages.last {
                                 withAnimation {
-                                    scrollViewProxy.scrollTo(lastMessageIndex, anchor: .bottom)
+                                    scrollViewProxy.scrollTo(message, anchor: .bottom)
                                 }
                             }
                         }
@@ -103,6 +106,9 @@ struct DMView: View {
                         }
                     }
                 }
+            }
+            .onChange(of: viewModel.dmPeopleID){ id in
+                viewModel.dmListener(dmPeopleID: id)
             }
             .onAppear {
                 viewModel.setDmPeopleID(dmPeopleID: dmPeopleID, receiverUID: receiverID)

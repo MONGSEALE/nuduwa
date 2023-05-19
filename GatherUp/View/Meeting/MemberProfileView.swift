@@ -44,7 +44,7 @@ struct MemberProfileView: View {
                             .background(.blue, in: Capsule())
                     }
                     .fullScreenCover(isPresented: $showDMView){
-                        DMView(receiverID: member.memberUID, showDMView: $showDMView)
+                        DMView(receiverID: member.memberUID, dmPeopleID: nil, showDMView: $showDMView)
                             .edgesIgnoringSafeArea(.all)
                             .transition(.move(edge: .trailing))
                             .animation(.easeInOut(duration: 0.3))

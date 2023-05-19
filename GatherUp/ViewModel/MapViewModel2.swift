@@ -118,6 +118,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                     listeners.removeValue(forKey: key)
                     fetchedMeetings.removeValue(forKey: key)
                 }
+                print("키갯수:\(removedKeys)")
                 // let filteredMeetings = fetchedMeetings.filter { !queries.keys.contains($0.key) }
                 // fetchedMeetings = filteredMeetings
                 

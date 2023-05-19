@@ -22,18 +22,21 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         self.id = UUID().uuidString
         self.chatterUID = chatterUID
         self.DMPeopleID = DMPeopleID
+        self.unreadMessages = 0
         self.latestMessage = Date()
     }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any], id: String) {
         guard let chatterUID = data["chatterUID"] as? String,
               let DMPeopleID = data["DMPeopleID"] as? String,
+              let unreadMessages = data["unreadMessages"] as? Int,
               let latestMessage = data["latestMessage"] as? Timestamp
         else { return nil }
         
         self.id = id
         self.chatterUID = chatterUID
         self.DMPeopleID = DMPeopleID
+        self.unreadMessages = unreadMessages
         self.latestMessage = latestMessage.dateValue()
     }
     
@@ -53,7 +56,7 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         ]
     }
     // update unread
-    static var enterDMRoom: [String: Any] {
+    static var readDM: [String: Any] {
         return [
             "unreadMessages": 0
         ]
