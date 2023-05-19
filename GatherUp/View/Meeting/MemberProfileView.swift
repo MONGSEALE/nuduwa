@@ -10,11 +10,10 @@ import SDWebImageSwiftUI
 
 struct MemberProfileView: View {
     let member: Member
-    @State var showMessage: Bool = false
-    @State var message: String = ""
-    @State private var showDMView: Bool = false
     let isCurrent: Bool
-    
+
+    @State private var showDMView: Bool = false
+
     var body: some View {
         ZStack{
             VStack{

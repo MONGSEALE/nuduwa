@@ -14,56 +14,53 @@ import FirebaseAuth
 struct DMView: View {
     @StateObject private var viewModel: DMViewModel = .init()
     
-    @Environment(\.dismiss) private var dismiss
     @State private var messageText: String = ""
     let receiverID: String
     let dmPeopleID: String?
     @Binding var showDMView: Bool
     
     var body: some View {
-        NavigationView{
+        NavigationView{ //NavigationView 필요없으면 제거
             VStack {
                 ScrollViewReader { scrollViewProxy in
                     ScrollView{
                         VStack(alignment: .leading, spacing: 8) {
-                            ForEach(viewModel.messages, id: \.self) { message in
-//                                let message = viewModel.messages[index]
-//                                let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
-//
-//                                if isNewDay(previousMessage: previousMessage, currentMessage: message) {
-//                                    Text(formatDate(message.timestamp))
-//                                        .font(.caption)
-//                                        .foregroundColor(.gray)
-//                                        .padding(.top)
-//                                        .frame(maxWidth:.infinity)
-//                                }
+                            ForEach(viewModel.messages.indices, id: \.self) { index in
+                                let message = viewModel.messages[index]
+                                let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
+                                // 날짜 출력
+                                if isNewDay(previousMessage: previousMessage, currentMessage: message) {
+                                    Text(formatDate(message.timestamp))
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                        .padding(.top)
+                                        .frame(maxWidth:.infinity)
+                                }
                                 
                                 let isCurrentUser = message.senderUID == viewModel.currentUID
                                 
                                 DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
                                    .onAppear {
-                                        var lastMessageId: String? = nil
-                                        if viewModel.messages.count >= 10 {
-                                            lastMessageId = viewModel.messages[viewModel.messages.count - 10].id
-                                        } else {
-                                            lastMessageId = viewModel.messages.last?.id
+                                        if message.id == viewModel.messages.last?.id {
+                                            viewModel.readLastDM()
                                         }
-                                        if message.id == lastMessageId && viewModel.paginationDoc != nil {
+                                        
+                                        if message.id == viewModel.messages.first?.id && viewModel.paginationDoc != nil && viewModel.isReady != nil {
                                             guard let docID = viewModel.dmPeopleID else{return}
                                             viewModel.fetchPrevMessage(dmPeopleID: docID)
                                         }
                                    }
                             }
                         }
-                        .onAppear{
-                            scrollViewProxy.scrollTo(0, anchor: .bottom)
-                        }
                         .onChange(of: viewModel.messages) { messages in
-                            if let message = messages.last {
+                            if let lastMessageIndex = messages.indices.last {
                                 withAnimation {
-                                    scrollViewProxy.scrollTo(message, anchor: .bottom)
+                                    scrollViewProxy.scrollTo(lastMessageIndex, anchor: .bottom)
                                 }
                             }
+                        }
+                        .onAppear{
+                            scrollViewProxy.scrollTo(0, anchor: .bottom)
                         }
                     }
                 }
@@ -111,7 +108,7 @@ struct DMView: View {
                 viewModel.dmListener(dmPeopleID: id)
             }
             .onAppear {
-                viewModel.setDmPeopleID(dmPeopleID: dmPeopleID, receiverUID: receiverID)
+                viewModel.setDMRoom(receiverUID: receiverID)
                 viewModel.fetchUserData(receiverID)
             }
             .onDisappear {
@@ -145,11 +142,10 @@ struct DMView: View {
 
 struct DMMessageRow: View {
   
-    @State var message : Message
-    @State var identifying:Bool
+    let message : Message
+    let identifying: Bool
     let name: String?
     let image: URL?
-    
 
     var body: some View {
         HStack{
@@ -170,14 +166,12 @@ struct DMMessageRow: View {
                     }
                     .background(Color.blue.clipShape(ChatBubble()))
                     .padding(5)
-                    
-                    // Text(formatTimestamp(message.timestamp))
+                
                     Text(formatTimestamp(message.timestamp))
                         .font(.caption2)
                         .foregroundColor(.gray)
                         .padding(.leading,15)
-                }
-                )
+                })
                 Spacer()
             }
             else{
@@ -198,7 +192,6 @@ struct DMMessageRow: View {
                         .padding(.trailing,15)
                 }
             }
-            
         }
     }
     // Function to format the timestamp
@@ -208,11 +201,7 @@ struct DMMessageRow: View {
         let date = timestamp.dateValue()
         return dateFormatter.string(from: date)
     }
-    
-    
-
 }
-
 
 struct DMChatBubble: Shape {
     func path(in rect: CGRect) -> Path{

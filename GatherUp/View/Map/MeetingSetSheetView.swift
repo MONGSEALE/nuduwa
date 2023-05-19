@@ -18,7 +18,7 @@ struct MeetingSetSheetView: View {
     @State private var selection : Int = 0
     @State private var meetingDate = Date()
     let coordinateCreated: CLLocationCoordinate2D
-//    @State private var choiceCategory: String?
+    @State private var category: Meeting.Category?
     
     let onCreate: (Meeting)->()
     
@@ -112,7 +112,7 @@ struct MeetingSetSheetView: View {
                             )
                         }
 
-//                        ChoiceMeetingCategoryView(choiceCategory: $choiceCategory)
+                        ChoiceMeetingCategoryView(category: $category)
                     }
                     Spacer()
                     Button{
@@ -120,7 +120,7 @@ struct MeetingSetSheetView: View {
                             showErrorMessage(duration: 2)
                         }
                         else{
-                            let newMeeting = Meeting(title: title, description: description, place: place, numbersOfMembers: selection+2, location: coordinateCreated, meetingDate: meetingDate)
+                            let newMeeting = Meeting(title: title, description: description, place: place, numbersOfMembers: selection+2, location: coordinateCreated, meetingDate: meetingDate, category: category)
                             
                             // Meeting(title: title, description: description, place:place, numbersOfMembers:selection+2, latitude:coordinateCreated.latitude, longitude: coordinateCreated.longitude, geoHash: "", meetingDate:meetingDate, hostUID: "")
                             onCreate(newMeeting)
@@ -188,22 +188,22 @@ struct PopupError: View {
 }
 
 struct ChoiceMeetingCategoryView: View {
-    @Binding var choiceCategory: String?
+    @Binding var category: Meeting.Category??
 
     var body: some View {
         HStack(spacing: 12) {
-            ForEach(Meeting.Category.allCases, id: \.self) { category in
+            ForEach(Meeting.Category.allCases, id: \.self) { item in
                 Button{
-                    if choiceCategory != "\(category)" {
-                        choiceCategory = "\(category)"
+                    if self.category != item {
+                        self.category = item
                     } else {
-                        choiceCategory = nil
+                        self.category = nil
                     }
                     
                 } label: {
-                    Text("\(category.rawValue)")
+                    Text(item.rawValue)
                 }
-                .background((choiceCategory ?? "")=="\(category)" ? Color.blue : Color.gray)
+                .background((self.category?.rawValue ?? "")==item.rawValue ? Color.blue : Color.gray)
             }
         }
     }
