@@ -12,14 +12,18 @@ import FirebaseFirestoreSwift
 struct MeetingList: Identifiable, Codable, FirestoreConvertible {
     @DocumentID var id: String?
 
-    let meetingID: String
+    let meetingID: STring
+    let isEnd: Bool
+    var meetingDate: Date
     var joinDate: Date
     let isHost: Bool
 
     // 기본 생성자
-    init(meetingID: String, isHost: Bool? = nil) {
+    init(meetingID: String, meetingDate: Date, isHost: Bool? = nil) {
         self.id = UUID().uuidString
         self.meetingID = meetingID
+        self.isEnd = false
+        self.meetingDate = meetingDate
         self.joinDate = Date()
         self.isHost = isHost ?? false
     }
@@ -27,11 +31,15 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any], id: String) {
         guard let meetingID = data["meetingID"] as? String,
+              let isEnd = data["isEnd"] as? Bool,
+              let meetingDate = data["meetingDate"] as? Timestamp,
               let joinDate = data["joinDate"] as? Timestamp
         else { return nil }
         
         self.id = id
         self.meetingID = meetingID
+        self.isEnd = isEnd
+        self.meetingDate = meetingDate.dateValue()
         self.joinDate = joinDate.dateValue()
         self.isHost = data["isHost"] as? Bool ?? false
     }
@@ -40,7 +48,9 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
     var firestoreData: [String: Any] {
         var data: [String: Any] = [
             "meetingID": meetingID,
-            "joinDate": FieldValue.serverTimestamp()
+            "isEnd" : isEnd,
+            "meetingDate" : meetingDate
+            "joinDate": FieldValue.serverTimestamp()            
         ]
         
         // isHost가 true일 때만 Firestore에 저장
