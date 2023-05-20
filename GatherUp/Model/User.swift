@@ -78,13 +78,6 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         if let googleData = userGoogleData {
             data["userGoogleData"] = [ "googleUID": googleData.uid, "name": googleData.name, "email": googleData.email, "image": googleData.image?.absoluteString ]
         }
-        // if let userGoogleEmail = userGoogleEmail {
-        //     data["userEmail"] = userGoogleEmail
-        //     data["userGoogleEmail"] = userGoogleEmail
-        // }
-        // if let userImage = userImage {
-        //     data["userImage"] = userImage.absoluteString
-        // }
         
         return data
     }
@@ -100,17 +93,6 @@ struct User: Identifiable, Codable, FirestoreConvertible {
          
          return User(userName: name, userEmail: email, userImage: image, userGoogleData: userGoogleData)
      }
-    
-    // system 메시지
-//    static func systemMessage(_ text: String) -> [String: Any] {
-//        return [
-//            "text": text,
-//            "senderUID": "SYSTEM",
-//            "timestamp" : FieldValue.serverTimestamp(),
-//            "isSystemMessage": true
-//        ]
-//    }
-
     /*
     enum CodingKeys: CodingKey {
         case id

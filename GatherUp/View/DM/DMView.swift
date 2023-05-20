@@ -16,7 +16,7 @@ struct DMView: View {
     
     @State private var messageText: String = ""
     let receiverID: String
-    let dmPeopleID: String?
+    let dmPeopleDocRef: DocumentReference?
     @Binding var showDMView: Bool
     
     var body: some View {
@@ -46,8 +46,8 @@ struct DMView: View {
                                         }
                                         
                                         if message.id == viewModel.messages.first?.id && viewModel.paginationDoc != nil && viewModel.isReady != nil {
-                                            guard let docID = viewModel.dmPeopleID else{return}
-                                            viewModel.fetchPrevMessage(dmPeopleID: docID)
+                                            guard let docRef = viewModel.dmPeopleRef else{return}
+                                            viewModel.fetchPrevMessage(dmPeopleRef: docRef)
                                         }
                                    }
                             }
@@ -68,12 +68,12 @@ struct DMView: View {
                 HStack{
                     CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $messageText)
                     Button{
-                        if viewModel.dmPeopleID != nil{
+                        if viewModel.dmPeopleRef != nil{
                             viewModel.sendDM(message: messageText)
                             messageText = ""
                         }
                     }label: {
-                        if viewModel.dmPeopleID != nil{
+                        if viewModel.dmPeopleRef != nil{
                             Image(systemName: "paperplane.fill")
                                 .foregroundColor(.white)
                                 .padding(10)
@@ -104,9 +104,9 @@ struct DMView: View {
                     }
                 }
             }
-            .onChange(of: viewModel.dmPeopleID){ id in
-                viewModel.dmListener(dmPeopleID: id)
-            }
+            // .onChange(of: viewModel.dmPeopleRef){ id in
+            //     viewModel.dmListener(dmPeopleRef: id)
+            // }
             .onAppear {
                 viewModel.setDMRoom(receiverUID: receiverID)
                 viewModel.fetchUserData(receiverID)

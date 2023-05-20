@@ -50,21 +50,21 @@ struct DMCardView: View {
         }
         .contextMenu { // 길게 눌렀을 때 표시할 메뉴
             Button(action: {
-                viewModel.leaveChatroom(receiverUID: chattingRoom.chatterUID) // 채팅방 나가기 메뉴 선택 시 처리
+                viewModel.leaveChatroom(receiverUID: chattingRoom.receiverUID) // 채팅방 나가기 메뉴 선택 시 처리
             }) {
                 Text("채팅방 나가기")
                 Image(systemName: "trash")
             }
         }
         .onAppear{
-            viewModel.fetchUserData(chattingRoom.chatterUID)
-            viewModel.dmListener(dmPeopleID: chattingRoom.DMPeopleID)
+            viewModel.fetchUserData(chattingRoom.receiverUID)
+            viewModel.dmListener(dmPeopleDocRef: chattingRoom.dmPeopleDocRef)
         }
         .onDisappear{
             viewModel.removeListeners()
         }
         .fullScreenCover(isPresented: $showDM){
-            DMView(receiverID: chattingRoom.chatterUID, dmPeopleID: chattingRoom.DMPeopleID, showDMView: $showDM)
+            DMView(receiverID: chattingRoom.receiverUID, dmPeopleDocRef: chattingRoom.dmPeopleDocRef, showDMView: $showDM)
         }
     }
         
