@@ -68,19 +68,19 @@ class FirebaseViewModel: ObservableObject {
                 guard let userUID = userUID else{throw SomeError.missCurrentUID}
                 let userData = try await getUserData(userUID)
                 await MainActor.run{
-                    self.user = User.convertUserData(userData)
+                    self.user = userData
                 }
             }catch{
                 handleErrorTask(error)
             }
         }
     }
-    func getUserData(_ userUID: String?) async throws -> UserData {
+    func getUserData(_ userUID: String?) async throws -> User {
         print("getUserData:\(userUID ?? "uidNon")")
         do{
             guard let userUID = userUID else{throw SomeError.missCurrentUID}
             let doc = db.collection(strUsers).document(userUID)
-            let userData: UserData? = try await doc.getDocument(as: UserData.self)
+            let userData: User? = try await doc.getDocument(as: User.getUserNameImage.self)
             guard let userData = userData else{throw SomeError.missCurrentUID}
             return userData
         }catch{

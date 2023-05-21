@@ -56,15 +56,18 @@ struct MapView: View {
                 }
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))
+                .onChange(of: viewModel.region){ region in
+                    checkedLocationThrottled(region: region)
+                }
                 .onAppear{
                     serverViewModel.mapMeetingsListener(region: viewModel.region)              /// Map이 보여지는동안 Firebase와 실시간 연동
                     serverViewModel.checkedOverlap()    /// Map이 보여지는동안 실시간 중복확인
                     viewModel.checkIfLocationServicesIsEnabled()
-                    setupTimer()
+                    // setupTimer()
                     serverViewModel.joinMeetingsListener()
                 }
                 .onDisappear{
-                    timer.suspend()
+                    // timer.suspend()
                 }
                 .onTapGesture { tapLocation in
                     if(showAnnotation==true){
@@ -121,8 +124,33 @@ struct MapView: View {
                         }
                     }
                     .padding(15)
-                    
-                   
+                }
+                HStack{
+                    Spacer()
+                    Menu {
+                        ForEach(Meeting.Category.allCases, id: \.self) { item in
+                            Button{
+                                if serverViewModel.category != item {
+                                    serverViewModel.filterMeetingsByCategory(category: item)
+                                } else {
+                                    serverViewModel.filterMeetingsByCategory(category: nil)
+                                }
+                                
+                            } label: {
+                                Text(item.rawValue)
+                            }
+                            .background((serverViewModel.category?.rawValue ?? "")==item.rawValue ? Color.blue : Color.gray)
+
+                        }
+                    } label: {
+                        Text("카테고리필터")
+                            .fontWeight(.bold)
+                            .font(.system(size: 20))
+                            .foregroundColor(Color.white)
+                            .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
+                            .background(Color.yellow) // Moved the background modifier inside the else block
+                            .cornerRadius(20)
+                    }
                 }
                 Spacer()
                
@@ -322,12 +350,12 @@ extension MKCoordinateRegion {
 }
 
 /// MKCoordinateRegion 타입을 .onChange에서 사용가능하게 확장하는 코드. 현재 필요없어서 주석처리
-//extension MKCoordinateRegion: Equatable {
-//    public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
-//        return lhs.center.latitude == rhs.center.latitude &&
-//               lhs.center.longitude == rhs.center.longitude &&
-//               lhs.span.latitudeDelta == rhs.span.latitudeDelta &&
-//               lhs.span.longitudeDelta == rhs.span.longitudeDelta
-//    }
-//}
+extension MKCoordinateRegion: Equatable {
+   public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
+       return lhs.center.latitude == rhs.center.latitude &&
+              lhs.center.longitude == rhs.center.longitude &&
+              lhs.span.latitudeDelta == rhs.span.latitudeDelta &&
+              lhs.span.longitudeDelta == rhs.span.longitudeDelta
+   }
+}
 

@@ -15,14 +15,22 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     
 
     private var fetchedMeetings: [Meeting] = []         // 서버에서 가져오는 모임 배열
-    @Published var deletedMeeting: Bool = false
+    
 
     @Published var userMeetings: [MeetingList] = []  //수정
     
     @Published var dicMembers: [String: Member] = [:]
     @Published var dicMembersData: [String: UserData] = [:]
+    // @Published var deletedMeeting: Bool = false
+    // @Published var isDelete: Bool = false
+    var isDetailViewVisible: Bool = false
 
-    @Published var isDelete: Bool = false
+    func detailViewAppear() {
+        isDetailViewVisible = true
+    }
+    func detailViewDisappear() {
+        isDetailViewVisible = false
+    }
 
     /// 찾기쉽게 members 배열을 딕셔너리로 변환
     override func convertMembers(meetingID: String){
@@ -96,11 +104,12 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     /// FireStore와 meetings 배열 실시간 연동
     func meetingsListener(){
         print("meetingsListener")
+        guard let currentUID = currentUID else{return}
+        let query = db.collectionGroup(strMembers).whereField("memberUID", isEqualTo: currentUID)
+        if let listeners[query.description] {return}
         isLoading = false
         Task{
             do{
-                guard let currentUID = currentUID else{return}
-                let query = db.collectionGroup(strMembers).whereField("memberUID", isEqualTo: currentUID)
                 let listener = query.addSnapshotListener { querySnapshot, error in
                     if let error = error {print("에러!meetingsListener:\(error)");return}
                     
@@ -164,15 +173,15 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                     self.userMeetings = documents.compactMap { document -> MeetingList? in
                         document.data(as: MeetingList.self)
                     }.sorted(by: { meeting1, meeting2 in
-                        if meeting1.isHost && !meeting2.isHost {
-                            return true // meeting1이 isHost인 경우 앞으로 정렬
-                        } else if !meeting1.isHost && meeting2.isHost {
-                            return false // meeting2가 isHost인 경우 앞으로 정렬
+                       if meeting1.hostUID == currentUID && meeting2.hostUID != currentUID {
+                            return true // meeting1의 hostUID가 currentUID와 같을 때 meeting1을 앞으로 정렬
+                        } else if meeting1.hostUID != currentUID && meeting2.hostUID == currentUID {
+                            return false // meeting2의 hostUID가 currentUID와 같을 때 meeting2를 앞으로 정렬
                         } else {
-                            // isHost 속성이 같은 경우 meetingDate 필드를 기준으로 내림차순 정렬
+                            // hostUID가 같은 경우 meetingDate 필드를 기준으로 내림차순 정렬
                             return meeting1.meetingDate > meeting2.meetingDate
-                        }
-                    })
+                        }   
+                    })                 
                 }
                 listeners[query.description] = listener
             }catch{
