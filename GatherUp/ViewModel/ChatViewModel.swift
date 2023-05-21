@@ -20,7 +20,7 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
         for message in messages {
             if !members.contains(where: {$0.memberUID == message.senderUID}){
                 Task{
-                    let memberData = try await getUserData(message.senderUID)
+                    let memberData = try await getUser(message.senderUID)
                     await MainActor.run{
                         self.nonMembers[message.senderUID] = Member(memberUID: memberData.id!, memberName: memberData.userName, memberImage: memberData.userImage)
                     }

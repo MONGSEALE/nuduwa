@@ -68,7 +68,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                 guard let currentUID = currentUID else{return}
                 if members.count < numbersOfMembers || numbersOfMembers == 0 {
 
-                    let userData = try await getUserData(currentUID)
+                    let user = try await getUser(currentUID)
 
                     let meetingsDoc = db.collection(strMeetings).document(meetingID)
                     let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
@@ -101,7 +101,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                             // 모임-메시지 컬렉션에 메시지 추가
                             group.addTask {
                                 do {
-                                    let text = "\(userData.userName)님이 채팅에 참가하셨습니다."
+                                    let text = "\(user.userName)님이 채팅에 참가하셨습니다."
                                     let message = Message(text, uid: "SYSTEM", isSystemMessage: true)
                                     try await meetingsDoc.collection(self.strMessage).addDocument(data: message.firestoreData)
                                 } catch {

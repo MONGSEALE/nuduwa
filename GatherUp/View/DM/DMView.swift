@@ -109,7 +109,7 @@ struct DMView: View {
             // }
             .onAppear {
                 viewModel.setDMRoom(receiverUID: receiverID)
-                viewModel.fetchUserData(receiverID)
+                viewModel.fetchUser(receiverID)
             }
             .onDisappear {
                 print("디스어피어")

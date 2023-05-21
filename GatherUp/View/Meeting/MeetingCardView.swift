@@ -40,17 +40,17 @@ struct MeetingCardView: View {
                 Text(viewModel.user?.userName ?? "")
                     .font(.callout)
                     .foregroundColor(.black)
-                Text(meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))
+                Text(viewModel.meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))
                     .font(.caption2)
                     .foregroundColor(.gray)
                 
-                Text(meeting.description)
+                Text(viewModel.meeting.description)
                     .textSelection(.enabled)
                     .padding(.vertical,8)
                     .foregroundColor(.black)
             }
             
-            if meeting.hostUID == viewModel.currentUID ?? ""{
+            if viewModel.meeting.hostUID == viewModel.currentUID ?? ""{
                 VStack(){
                     Text("MINE")
                         .font(.caption)
@@ -69,7 +69,7 @@ struct MeetingCardView: View {
         
         .onAppear {
             // viewModel.meeting = meeting
-            viewModel.fetchUserData(meeting.hostUID)
+            viewModel.fetchUser(meeting.hostUID)
             // viewModel.meetingListener(meetingID: meeting.id!)
             viewModel.meetingListener(meetingID: meetingID)
         }

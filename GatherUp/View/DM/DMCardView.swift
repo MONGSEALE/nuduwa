@@ -57,7 +57,7 @@ struct DMCardView: View {
             }
         }
         .onAppear{
-            viewModel.fetchUserData(chattingRoom.receiverUID)
+            viewModel.fetchUser(chattingRoom.receiverUID)
             viewModel.dmListener(dmPeopleDocRef: chattingRoom.dmPeopleDocRef)
         }
         .onDisappear{

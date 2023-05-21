@@ -118,7 +118,7 @@ struct MeetingInfoSheetView: View {
             
         }
         .onAppear {
-            viewModel.fetchUserData(meeting.hostUID)
+            viewModel.fetchUser(meeting.hostUID)
             viewModel.meetingListener(meetingID: meeting.id!)
             viewModel.membersListener(meetingID: meeting.id!)
         }

@@ -55,7 +55,7 @@ struct PiledMeetingCardView: View {
             .hAlign(.leading)
         }
         .onAppear{
-            viewModel.fetchUserData(meeting.hostUID)
+            viewModel.fetchUser(meeting.hostUID)
         }
     }
 }
