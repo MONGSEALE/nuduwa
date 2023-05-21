@@ -10,12 +10,14 @@ import SDWebImageSwiftUI
 
 struct MeetingCardView: View {
     
-    @StateObject var viewModel: MeetingViewModel = .init()
+    // @StateObject var viewModel: MeetingViewModel = .init()
+    @ObservedObject var viewModel: MeetingViewModel //수정
     
-    var meeting: Meeting
+    // var meeting: Meeting
+    let meetingID: String
     /// - Callbacks
-    var onUpdate: (Meeting)->()
-    var onDelete: ()->()
+    // var onUpdate: (Meeting)->()
+    // var onDelete: ()->()
     
     var body: some View {
         HStack(alignment: .top, spacing: 12){
@@ -66,22 +68,26 @@ struct MeetingCardView: View {
         .hAlign(.leading)
         
         .onAppear {
-            viewModel.meeting = meeting
+            // viewModel.meeting = meeting
             viewModel.fetchUserData(meeting.hostUID)
-            viewModel.meetingListener(meetingID: meeting.id!)
+            // viewModel.meetingListener(meetingID: meeting.id!)
+            viewModel.meetingListener(meetingID: meetingID)
         }
         .onDisappear {
-            viewModel.removeListeners()
-        }
-        .onChange(of: viewModel.meeting) { updatedMeeting in
-            if let updatedMeeting {
-                if updatedMeeting.hostUID != "" {
-                    onUpdate(updatedMeeting)
-                }
+            // 클릭해서 DetailMeetingView가 보여질 때는 removeListener() 호출하지 않음
+            if !viewModel.isDetailViewVisible {
+                viewModel.removeListener()
             }
         }
-        .onChange(of: viewModel.deletedMeeting) { _ in
-            onDelete()
-        }
+        // .onChange(of: viewModel.meeting) { updatedMeeting in
+        //     if let updatedMeeting {
+        //         if updatedMeeting.hostUID != "" {
+        //             onUpdate(updatedMeeting)
+        //         }
+        //     }
+        // }
+        // .onChange(of: viewModel.deletedMeeting) { _ in
+        //     onDelete()
+        // }
     }
 }

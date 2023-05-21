@@ -56,6 +56,16 @@ struct User: Identifiable, Codable, FirestoreConvertible {
 
         self.signUpDate = signUpDate
     }
+    static func getUserNameImage(data: [String: Any], id: String) -> User {
+        guard let userName = data["userName"] as? String
+        else {return nil }
+        
+        let userEmail = data["userEmail"] as? String? ?? nil
+        let userImageData = data["userImage"] as? String? ?? nil
+        let userImage = userImageData!=nil ? URL(string: userImageData) : nil
+
+        return User(id: id, userName: userName, userImage: userImage)
+    }
     
     var firestoreData: [String : Any] {
         return firestoreDataGoogleUser

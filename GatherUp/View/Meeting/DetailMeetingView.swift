@@ -9,10 +9,12 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct DetailMeetingView: View {
-    @StateObject var viewModel: MeetingViewModel = .init()
+    // @StateObject var viewModel: MeetingViewModel = .init()
+    @ObservedObject var viewModel: MeetingViewModel //수정
 
-    var meeting: Meeting
-    @Environment(\.dismiss) private var dismiss
+    // var meeting: Meeting
+    let meetingID: String
+    // @Environment(\.dismiss) private var dismiss
     
     @State private var isEdit: Bool = false
     @State private var editTitle: String? = nil
@@ -116,7 +118,7 @@ struct DetailMeetingView: View {
                     } else {
                         Button(action: {
                             viewModel.leaveMeeting(meetingID: meeting.id!, memberUID: viewModel.currentUID)
-                            dismiss()
+                            // dismiss()
                         }){
                             CustomButtonText(text: "모임 나가기", backgroundColor: .red)
                         }
@@ -127,17 +129,21 @@ struct DetailMeetingView: View {
             
         }
         .onAppear{
-            editMeetingDate = meeting.meetingDate
+            // editMeetingDate = meeting.meetingDate
+            // viewModel.fetchUserData(meeting.hostUID)
+            // viewModel.meetingListener(meetingID: meeting.id!)
+            // viewModel.membersListener(meetingID: meeting.id!)
             viewModel.fetchUserData(meeting.hostUID)
             viewModel.meetingListener(meetingID: meeting.id!)
             viewModel.membersListener(meetingID: meeting.id!)
         }
         .onDisappear{
             viewModel.removeListeners()
+            viewModel.detailViewDisappear()
         }
-        .onChange(of: viewModel.deletedMeeting) { _ in
-            dismiss()
-        }
+        // .onChange(of: viewModel.deletedMeeting) { _ in
+        //     dismiss()
+        // }
     }
 }
 
