@@ -246,6 +246,15 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
 
         return data
     }
+    // 모임에 유저이름 이미지 넣기
+    static func putHostData(meeting: Meeting, user: User) -> Meeting {
+        var meeting = meeting
+        meeting.hostName = user.userName
+        meeting.hostImage = user.userImage
+
+        return meeting
+    }
+
     // 수정 모임 업데이트 - 객체 안만들고 Firestore 바로 저장하기
     // static func firestoreUpdateMeeting(title: String? = nil, description: String? = nil, place: String? = nil, numbersOfMembers: Int? = nil, meetingDate: Date? = nil) -> [String: Any] {
     //     var data: [String: Any] = [:]
