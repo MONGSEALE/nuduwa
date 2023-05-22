@@ -19,7 +19,6 @@ struct User: Identifiable, Codable, FirestoreConvertible {
     var userEmail: String?
     var userImage: URL?
     var userGoogleData: UserProviderData?
-
     var signUpDate: Timestamp
     
     init(id: String? = nil, userName: String, userEmail: String? = nil, userImage: URL? = nil, userGoogleData: UserProviderData? = nil, signUpDate: Timestamp){
@@ -46,7 +45,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
 
         self.signUpDate = signUpDate
     }
-    static func getAllData(data: [String: Any], id: String) -> User? {
+    static let getAllData: ([String: Any], String) -> User? = { data, id in
         guard let userName = data["userName"] as? String,
               let signUpDate = data["signUpDate"] as? Timestamp
         else {return nil }
@@ -95,7 +94,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         
         return data
     }
-    
+    // 구글로그인 할때 유저정보 저장
      static func newGoogleUser(userGoogleData: UserProviderData) -> User {
          let name = userGoogleData.name ?? ""
          let email = userGoogleData.email
@@ -115,6 +114,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
     }
      */
 }
+// sns로그인 할때 제공되는 데이터
 struct UserProviderData: Codable {
     var uid: String?
     var name: String?

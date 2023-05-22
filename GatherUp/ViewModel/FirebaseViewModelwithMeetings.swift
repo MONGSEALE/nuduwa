@@ -13,11 +13,10 @@ import FirebaseFirestore
 
 class FirebaseViewModelwithMeetings: FirebaseViewModel {
 
-    
-    
     @Published var members: [Member] = []
     @Published var meetings: [Meeting] = []     // 모임 배열
-    @Published var joinMeetingIDs: [String] = []     // 가입모임ID 배열
+    
+    @Published var meetingsList: [MeetingList] = []  //수정
 
     //나중에 하위 클래스로 이동
     @Published var meeting: Meeting?
@@ -66,8 +65,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
         Task{
             do{
                 guard let currentUID = currentUID,
-                      let user = try await getUser(currentUID) else{return}
-                print("저장1")
+                      let user = try await getUser(currentUID) else{print("조인미팅오류");return}
 
                 let meetingsDoc = db.collection(strMeetings).document(meetingID)
                 let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strMeetingList)
@@ -112,6 +110,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                             let meetingList = MeetingList(meetingID: meetingID, meetingDate: meetingDate, hostUID: hostUID)
                             try await joinMeetingsCol.addDocument(data: meetingList.firestoreData)
                         } catch {
+                            print("joinMeetingsCol추가실패")
                             throw error
                         }
                     }
@@ -122,6 +121,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                             let message = Message(text, uid: "SYSTEM", isSystemMessage: true)
                             try await meetingsDoc.collection(self.strMessage).addDocument(data: message.firestoreData)
                         } catch {
+                            print("Message추가실패")
                             throw error
                         }
                     }
@@ -156,6 +156,55 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
             }
         }
         listeners[col.path] = listener
+    }
+    /// FireStore와 meetings 배열 실시간 연동
+    func meetingsListListener(){
+        print("meetingsListListener")
+        isLoading = false
+        Task{
+            do{
+                guard let currentUID = currentUID else{return}
+                let query = db.collection(strUsers).document(currentUID).collection(strMeetingList)
+                    .whereField("isEnd", isEqualTo: false)
+                    // .order(by: "meetingDate", descending: true)
+                let listener = query.addSnapshotListener { querySnapshot, error in
+                    if let error = error {print("에러!meetingsListener:\(error)");return}
+                    
+                    var meetings: [Meeting] = []
+                    
+                    guard let documents = querySnapshot?.documents else{return}
+                    self.meetingsList = documents.compactMap { document -> MeetingList? in
+                        document.data(as: MeetingList.self)
+                    }.sorted(by: { meeting1, meeting2 in
+                       if meeting1.hostUID == currentUID && meeting2.hostUID != currentUID {
+                            return true // meeting1의 hostUID가 currentUID와 같을 때 meeting1을 앞으로 정렬
+                        } else if meeting1.hostUID != currentUID && meeting2.hostUID == currentUID {
+                            return false // meeting2의 hostUID가 currentUID와 같을 때 meeting2를 앞으로 정렬
+                        } else {
+                            // hostUID가 같은 경우 meetingDate 필드를 기준으로 내림차순 정렬
+                            return meeting1.meetingDate > meeting2.meetingDate
+                        }   
+                    })                 
+                }
+                listeners[query.description] = listener
+            }catch{
+                await handleError(error)
+            }
+        }
+    }
+
+    /// meetingDate 지나면 지도에서 안보이게
+    func pastMeeting(meetingID: String) {
+        Task{
+            do{
+                let doc = db.collection(strMeetings).document(meetingID)
+
+                try await doc.updateData(Meeting.firestorePastMeeting)
+
+            }catch{
+                print("지난모임오류")
+            }
+        }
     }
 }
 

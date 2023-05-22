@@ -36,12 +36,12 @@ struct ReusableProfileContent: View {
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)
                             }else{
-                                    WebImage(url: user.userImage).placeholder{ProgressView()}
-                                        .resizable()
-                                        .frame(width: 50,height: 50)
-                                        .aspectRatio(contentMode: .fill)
-                                        .clipShape(Circle())
-                                        .padding(.leading, -20)
+                                WebImage(url: user.userImage).placeholder{ProgressView()}
+                                    .resizable()
+                                    .frame(width: 50,height: 50)
+                                    .aspectRatio(contentMode: .fill)
+                                    .clipShape(Circle())
+                                    .padding(.leading, -20)
                             }
                                 
                             if isEdit {
@@ -170,16 +170,6 @@ struct ReusableProfileContent: View {
             }
         }
     }
-//    func image(from asset: PHAsset, completion: @escaping (UIImage?) -> Void) {
-//        let options = PHImageRequestOptions()
-//        options.isSynchronous = true
-//        options.deliveryMode = .highQualityFormat
-//        options.isNetworkAccessAllowed = true
-//        let imageManager = PHImageManager.default()
-//        imageManager.requestImage(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFill, options: options) { (image, info) in
-//            completion(image)
-//        }
-//    }
 }
 
 
@@ -193,20 +183,20 @@ struct EditTextProfile: View {
       if isEditable {
           if (item == "자기소개"){
               TextEditor(text: Binding<String>(
-                                              get: { self.editText ?? "" },
-                                              set: { self.editText = $0.isEmpty ? nil : $0 }
-                                          ))
-                                  .frame(height: 150) // or whatever fixed height you want
-                                  .border(Color.gray, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)
-                                  .padding()
-                                  .onAppear{
-                                      editText = text
-                                  }
-                                  .onDisappear{
-                                      if editText == text{
-                                          editText = nil
-                                      }
-                                  }
+                            get: { self.editText ?? "" },
+                            set: { self.editText = $0.isEmpty ? nil : $0 }
+                        ))
+                .frame(height: 150) // or whatever fixed height you want
+                .border(Color.gray, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)
+                .padding()
+                .onAppear{
+                    editText = text
+                }
+                .onDisappear{
+                    if editText == text{
+                        editText = nil
+                    }
+                }
           }
           else if(item == "닉네임"){
               TextField(item, text: Binding<String>(
