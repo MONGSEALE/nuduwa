@@ -35,37 +35,34 @@ struct MeetingCardView: View {
                     Text(viewModel.user?.userName ?? "")
                         .font(.callout)
                         .foregroundColor(.black)
-                    Text("\(meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))에 생성됨")
-                        .font(.caption2)
-                        .foregroundColor(.gray)
-                    Text(meeting.title)
-                        .font(.system(size: 20))
-                        .fontWeight(.semibold)
-                        .foregroundColor(.black)
-                } else {
-                    ProgressView()
+                    if let meeting = viewModel.meeting {
+                        Text("\(meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))에 생성됨")
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                        Text(meeting.title)
+                            .font(.system(size: 20))
+                            .fontWeight(.semibold)
+                            .foregroundColor(.black)
+                    } else {
+                        ProgressView()
+                    }
                 }
-                if meeting.hostUID == viewModel.currentUID ?? ""{
-                    Spacer()
-                        Text("MINE")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .padding(.horizontal, 36)
-                            .padding(.vertical, 8)
-                            .padding(.leading, 10)
-                          
+                Spacer()
+                Text("MINE")
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .padding(.horizontal, 36)
+                    .padding(.vertical, 8)
+                    .padding(.leading, 10)
+                    .background(
+                        RibbonShape()
+                            .fill(Color.blue)
+                    )
+                    .foregroundColor(.white)
+                    .rotationEffect(Angle(degrees: 45), anchor: .center)
+                    .offset(x: 28)
                     
-                            .background(
-                                RibbonShape()
-                                    .fill(Color.blue)
-                            )
-                            .foregroundColor(.white)
-                            .rotationEffect(Angle(degrees: 45), anchor: .center)
-                                                 .offset(x: 28)
-                     
                 }
-            }
-            
         }
         .hAlign(.leading)
         

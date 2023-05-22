@@ -14,7 +14,7 @@ struct DetailMeetingView: View {
     // var meeting: Meeting
     let meetingID: String
     let hostUID: String
-    // @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var dismiss
     
     @State private var isEdit: Bool = false
     @State private var editTitle: String? = nil
