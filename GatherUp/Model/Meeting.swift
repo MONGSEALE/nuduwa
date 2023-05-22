@@ -164,24 +164,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
 
         return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, meetingDate: meetingDate, type: type)
     }
-    // 모임 위치가 겹쳤을 경우 MapAnnotation용 구조체
-    // static func piledMapAnnotation(id: String, location: CLLocationCoordinate2D, geoHash: String?) -> Meeting {
-    //     let id = id
-    //     let title: String = ""
-    //     let description: String = ""
-    //     let place : String = ""
-    //     let numbersOfMembers : Int = 0
-    
-    //     let location: CLLocationCoordinate2D = location
-    //     let geoHash: String? = geoHash
-        
-    //     let publishedDate: Date = Date()
-    //     let meetingDate: Date = Date()
 
-    //     let type: MeetingType = .piled
-
-    //     return Meeting(id: id, title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
-    // }
     static func piledMapAnnotation(meeting: Meeting) -> Meeting {
         var meeting = meeting
         meeting.type = .piled
@@ -260,28 +243,12 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         return meeting
     }
 
-    // 수정 모임 업데이트 - 객체 안만들고 Firestore 바로 저장하기
-    // static func firestoreUpdateMeeting(title: String? = nil, description: String? = nil, place: String? = nil, numbersOfMembers: Int? = nil, meetingDate: Date? = nil) -> [String: Any] {
-    //     var data: [String: Any] = [:]
-
-    //     if let title {
-    //         data["title"] = title
-    //     }
-    //     if let description {
-    //         data["description"] = description
-    //     }
-    //     if let place {
-    //         data["place"] = place
-    //     }
-    //     if let numbersOfMembers {
-    //         data["numbersOfMembers"] = numbersOfMembers
-    //     }
-    //     if let meetingDate {
-    //         data["meetingDate"] = meetingDate
-    //     }
-
-    //     return data
-    // }
+    // 모임시간 지난 모임 업데이트 - 객체 안만들고 Firestore 바로 저장하기
+    static func firestorePastMeeting() -> [String: Any] {
+        return [
+            "geoHast": nil
+        ]
+    }
 
     // var firestoreCancle: [String: Any] {
     //     return [
