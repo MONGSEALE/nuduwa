@@ -22,13 +22,13 @@ struct User: Identifiable, Codable, FirestoreConvertible {
 
     var signUpDate: Timestamp
     
-    init(id: String? = nil, userName: String, userEmail: String? = nil, userImage: URL? = nil, userGoogleData: UserProviderData? = nil){
+    init(id: String? = nil, userName: String, userEmail: String? = nil, userImage: URL? = nil, userGoogleData: UserProviderData? = nil, signUpDate: Timestamp){
         self.id = id ?? UUID().uuidString
         self.userName = userName
         self.userEmail = userEmail
         self.userGoogleData = userGoogleData
         self.userImage = userImage
-        self.signUpDate = Timestamp(date: Date())
+        self.signUpDate = signUpDate
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -41,20 +41,34 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         self.userName = userName
         self.userEmail = data["userEmail"] as? String? ?? nil
         let userImage = data["userImage"] as? String? ?? nil
-        if let userImage {
-            self.userImage = URL(string: userImage)
-        } else {
-            self.userImage = nil
-        }
-
-        let userGoogleData = data["userGoogleData"] as? UserProviderData? ?? nil
-        if let data = userGoogleData {
-            self.userGoogleData = UserProviderData(uid: data.uid, name: data.name, email: data.email, image: data.image)
-        } else {
-            self.userGoogleData = nil
-        }   
+        self.userImage = URL(string: userImage ?? "")
+        self.userGoogleData = nil
 
         self.signUpDate = signUpDate
+    }
+    static func getAllData(data: [String: Any], id: String) -> User? {
+        guard let userName = data["userName"] as? String,
+              let signUpDate = data["signUpDate"] as? Timestamp
+        else {return nil }
+        
+        let userEmail = data["userEmail"] as? String? ?? nil
+        let userImageData = data["userImage"] as? String? ?? nil
+        let userImage = URL(string: userImageData ?? "")
+
+        let userGoogleData = data["userGoogleData"] as? UserProviderData? ?? nil
+
+        return User(id: id, userName: userName, userEmail: userEmail, userImage: userImage, userGoogleData: userGoogleData, signUpDate: signUpDate)
+    }
+    static func getUserNameImage(data: [String: Any], id: String) -> User? {
+        guard let userName = data["userName"] as? String,
+              let signUpDate = data["signUpDate"] as? Timestamp
+        else {return nil }
+        
+        let userEmail = data["userEmail"] as? String? ?? nil
+        let userImageData = data["userImage"] as? String? ?? nil
+        let userImage = URL(string: userImageData ?? "")
+
+        return User(id: id, userName: userName, userImage: userImage, signUpDate: signUpDate)
     }
     
     var firestoreData: [String : Any] {
@@ -78,39 +92,18 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         if let googleData = userGoogleData {
             data["userGoogleData"] = [ "googleUID": googleData.uid, "name": googleData.name, "email": googleData.email, "image": googleData.image?.absoluteString ]
         }
-        // if let userGoogleEmail = userGoogleEmail {
-        //     data["userEmail"] = userGoogleEmail
-        //     data["userGoogleEmail"] = userGoogleEmail
-        // }
-        // if let userImage = userImage {
-        //     data["userImage"] = userImage.absoluteString
-        // }
         
         return data
-    }
-    
-    static func convertUserData(_ userData: UserData) -> User {
-        return User(id: userData.id, userName: userData.userName, userImage: userData.userImage)
     }
     
      static func newGoogleUser(userGoogleData: UserProviderData) -> User {
          let name = userGoogleData.name ?? ""
          let email = userGoogleData.email
          let image = userGoogleData.image
+         let signUpDate = Timestamp(date: Date())
          
-         return User(userName: name, userEmail: email, userImage: image, userGoogleData: userGoogleData)
+         return User(userName: name, userEmail: email, userImage: image, userGoogleData: userGoogleData, signUpDate: signUpDate)
      }
-    
-    // system 메시지
-//    static func systemMessage(_ text: String) -> [String: Any] {
-//        return [
-//            "text": text,
-//            "senderUID": "SYSTEM",
-//            "timestamp" : FieldValue.serverTimestamp(),
-//            "isSystemMessage": true
-//        ]
-//    }
-
     /*
     enum CodingKeys: CodingKey {
         case id
@@ -129,24 +122,24 @@ struct UserProviderData: Codable {
     var image: URL?
 }
 
-struct UserData: Identifiable, Codable {
-    @DocumentID var id: String?
+// struct UserData: Identifiable, Codable {
+//     @DocumentID var id: String?
 
-    var userName: String
-    var userImage: URL?
+//     var userName: String
+//     var userImage: URL?
 
-    // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
-    init?(data: [String: Any]) {
-        guard let id = data["id"] as? String,
-              let userName = data["userName"] as? String
-        else { return nil }
+//     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
+//     init?(data: [String: Any]) {
+//         guard let id = data["id"] as? String,
+//               let userName = data["userName"] as? String
+//         else { return nil }
         
-        self.id = id
-        self.userName = userName
-        let userImage = data["userImage"] as? String? ?? nil
-        if let userImage {
-            self.userImage = URL(string: userImage)
-        }
+//         self.id = id
+//         self.userName = userName
+//         let userImage = data["userImage"] as? String? ?? nil
+//         if let userImage {
+//             self.userImage = URL(string: userImage)
+//         }
 
-    }
-}
+//     }
+// }

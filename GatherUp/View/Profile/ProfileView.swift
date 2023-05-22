@@ -16,42 +16,17 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack{
             VStack{
-                if (viewModel.user != nil && !viewModel.isLoading) {
-                    ReusableProfileContent(isEdit: $isEdit, user: viewModel.user!){ updateName, updateImage in
-                        if updateName != nil || updateImage != nil{
-                            viewModel.editUser(userName: updateName, userImage: updateImage)
+//                if (!viewModel.isLoading) {
+                    if let user = viewModel.user {
+                        ReusableProfileContent(isEdit: $isEdit, user: user){ updateName, updateImage in
+                            if updateName != nil || updateImage != nil{
+                                viewModel.editUser(userName: updateName, userImage: updateImage)
+                            }
                         }
                     }
-                }else{
-                    ProgressView()
-                }
-            }
-            
-            .navigationTitle("내 정보")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button("프로필 편집", action: {isEdit = true})
-                        Button("로그아웃", action: viewModel.logOutUser)
-                        Button("계정 삭제", role: .destructive, action: viewModel.deleteAccount)
-                    } label: {
-                        Image(systemName: "ellipsis")
-                            .rotationEffect(.init(degrees: 90))
-                            .tint(.black)
-                            .scaleEffect(0.8)
-                    }
-                }
-            }
-            .toolbar{
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink {
-                        SearchUserView()
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                            .tint(.black)
-                            .scaleEffect(0.9)
-                    }
-                }
+//                }else{
+//                    ProgressView()
+//                }
             }
             .overlay {
                 LoadingView(show: $viewModel.isLoading)

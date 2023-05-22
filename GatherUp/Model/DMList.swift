@@ -11,49 +11,56 @@ import FirebaseFirestoreSwift
 
 struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
     @DocumentID var id: String?
-    let chatterUID: String
-    let DMPeopleID: String
+    let receiverUID: String
+    // let DMPeopleID: String
+    let dmPeopleRef: DocumentReference
     var unreadMessages: Int
-    var latestMessage: Date
-
-    let timestamp: Timestamp
+    let latestMessage: Date
+    // let latestReadTime: Date
 
     // 기본 생성자
-    init(chatterUID: String, DMPeopleID: String, unreadMessages: Int? = nil, latestMessage: Date? = nil) {
+    init(receiverUID: String, dmPeopleRef: DocumentReference) {
         self.id = UUID().uuidString
-        self.chatterUID = chatterUID
-        self.DMPeopleID = DMPeopleID
-        self.unreadMessages = unreadMessages ?? 0
-        self.latestMessage = latestMessage ?? Date()
-        self.timestamp = Timestamp(date: Date())
+        self.receiverUID = receiverUID
+        self.dmPeopleRef = dmPeopleRef
+        self.unreadMessages = 0
+        self.latestMessage = Date()
     }
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any], id: String) {
-        guard let chatterUID = data["chatterUID"] as? String,
-              let DMPeopleID = data["DMPeopleID"] as? String,
+        guard let receiverUID = data["receiverUID"] as? String,
+              let dmPeopleRef = data["dmPeopleRef"] as? DocumentReference,
               let unreadMessages = data["unreadMessages"] as? Int,
-              let latestMessage = data["latestMessage"] as? Timestamp,
-              let timestamp = data["timestamp"] as? Timestamp
+              let latestMessage = data["latestMessage"] as? Timestamp
         else { return nil }
         
         self.id = id
-        self.chatterUID = chatterUID
-        self.DMPeopleID = DMPeopleID
+        self.receiverUID = receiverUID
+        self.dmPeopleRef = dmPeopleRef
         self.unreadMessages = unreadMessages
         self.latestMessage = latestMessage.dateValue()
-        self.timestamp = timestamp
     }
     
-    // Firestore에 저장할 필드
+    // Firestore에 저장할 필드 - unreadMessages와 latestMessage는 채팅 치면 생성
     var firestoreData: [String: Any] {
         return [
-            "chatterUID": chatterUID,
-            "DMPeopleID": DMPeopleID,
-            "unreadMessages" : unreadMessages,
-            "latestMessage": Date(),
-            "timestamp" : FieldValue.serverTimestamp()
+            "receiverUID": receiverUID,
+            "dmPeopleRef": dmPeopleRef
         ]
     }
-    // unreadMessages +1
+
+    // update Message
+    static var firestoreUpdate: [String: Any] {
+        return [
+            "unreadMessages": FieldValue.increment(Int64(1)),
+            "latestMessage": FieldValue.serverTimestamp()
+        ]
+    }
+    // update unread
+    static var readDM: [String: Any] {
+        return [
+            "unreadMessages": 0
+        ]
+    }
     
 }

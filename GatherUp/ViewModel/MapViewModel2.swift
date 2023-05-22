@@ -16,68 +16,87 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
 
 //    @Published var meetings: [Meeting] = []     // 모임 배열
     private var fetchedMeetings: [String:[Meeting]] = [:]     // 서버에서 가져오는 모임 배열
-    private var setMeetings: Set<Meeting> = []                // newMeeting 추가전 모임 배열(Set)
+    private var filteredMeetings: [Meeting] = []                // newMeeting 추가전 모임 배열
     @Published var newMeeting: Meeting?                       // 새로 추가하는 모임(서버 저장전)
-                         // 모임
     @Published var bigIconMeetings: [String:[Meeting]] = [:]  // 중첩 아이콘 클릭시 나타낼 모임
 
-    private var checkRegion: MKCoordinateRegion?
+    @Published var category: Meeting.Category? = nil
+
+    private var checkRegion: MKCoordinateRegion?    // 쿼리 리셋기준 위치
     
     @Published var isOverlap: Bool = false  // 모임 중복 생성 확인
-        
+    
     override init() {
         super.init()
         checkedOverlap()
     }
 
     /// 서버 모임과 새로 추가하는 모임(서버 저장전) 배열 합치기
-    func combineNewMeetings(){
+    private func combineNewMeetings(){
         print("combineNewMeetings")
-        meetings = newMeeting == nil ? Array(setMeetings) : Array(setMeetings) + [newMeeting!]
+
+        if let newMeeting {
+            meetings = [newMeeting] + filteredMeetings
+        } else {
+            meetings = filteredMeetings
+        }
     }
 
     /// 가까이 있는 모임들 하나로 합치고 정렬
-    func mergeMeetings(latitudeDelta: Double){
+    private func mergeMeetings(latitudeDelta: Double){
         print("mergeMeetings")
-
-        var setFetchedMeetings: Set<Meeting> = Set(fetchedMeetings.values.flatMap { $0 })
-        bigIconMeetings = [:]
-        let delta = latitudeDelta * 0.05   // 지도세로길이 * 0.1 이하로 가까이 있으면 중첩
-        // let copySet = setFetchedMeetings  // for문용으로 복사
         
-        for meeting1 in setFetchedMeetings {
-            guard setFetchedMeetings.contains(meeting1) else { continue }     // 중첩돼서 지운 모임이면 continue
-            let latitude = meeting1.latitude
-            let longitude = meeting1.longitude
-            
-            var nearbyMeetings: [Meeting] = []
-            for meeting2 in setFetchedMeetings.subtracting([meeting1]) {
-                // delta값으로 meeting1과 meeting2가 가까이 있는지 비교
-                if (latitude-delta < meeting2.latitude) &&
-                    (meeting2.latitude < latitude+delta) &&
-                    (longitude-delta < meeting2.longitude) &&
-                        (meeting2.longitude < longitude+delta)
-                {
-                    nearbyMeetings.append(meeting2)  // 가까이 있으면 bigIconMeetings에 저장
-                    setFetchedMeetings.remove(meeting2)  // 그리고 원래 Meetings에선 삭제
+        let delta = latitudeDelta * 0.05   // 지도세로길이 * 0.1 이하로 가까이 있으면 중첩
+        // fetchedMeetings에서 혹시 모를 중복값 제거하고 1차원 배열로 변경
+        var mergedMeetings = Array(Set(fetchedMeetings.values
+            .flatMap { $0 }
+            .filter { meeting in
+                if let category = category {
+                    return meeting.category == category
+                } else {
+                    return true
                 }
             }
-            // meeting1과 가까이 있는 모임 있으면 meeting1도 bigIconMeetings에 저장후 원래 Meetings에선 삭제하고 type.piled Meeting 저장
-            if !nearbyMeetings.isEmpty {
-                bigIconMeetings[meeting1.id!, default: []] = [meeting1] + nearbyMeetings
-                let meeting = Meeting.piledMapAnnotation(meeting: meeting1)
-//                let meeting = Meeting(id: meeting1.id, title: "", description: "", place: "", numbersOfMembers: 0, latitude: meeting1.latitude, longitude: meeting1.longitude, hostUID: "", type: .piled)
-                setFetchedMeetings.remove(meeting1)
-                setFetchedMeetings.insert(meeting)
+        ))
+        var piledMeetings: [String:[Meeting]] = [:]   // bigIconMeetings에 넣을 값
+        var removedMeetings: [Meeting] = []   // 제거할 임시 모임배열
+
+        for (index,meeting1) in mergedMeetings.enumerated() {
+            print("반복문1")
+            if removedMeetings.contains(meeting1) { continue } // 중첩돼서 지운 모임이면 continue
+            let latitude = meeting1.latitude
+            let longitude = meeting1.longitude
+
+            for j in index+1 ..< mergedMeetings.count {
+                print("반복문2")
+                let meeting2 = mergedMeetings[j]
+                if removedMeetings.contains(meeting2) { continue } // 중첩돼서 지운 모임이면 continue
+                // delta값으로 meeting1과 meeting2가 가까이 있는지 비교
+                if abs(latitude - meeting2.latitude) < delta &&
+                abs(longitude - meeting2.longitude) < delta {
+                    print("중첩")
+                    piledMeetings[meeting1.id!, default: []].append(meeting2)  // 가까이 있으면 piledMeetings에 저장
+                    removedMeetings.append(meeting2)  // 삭제할 요소를 따로 저장
+                }
+            }
+            // meeting1과 가까이 있는 모임 있으면 meeting1도 piledMeetings에 저장후 타입값 변경
+            if piledMeetings[meeting1.id!] != nil {
+                piledMeetings[meeting1.id!]?.insert(meeting1, at: 0)
+                mergedMeetings[index].type = .piled
             }
         }
-        setMeetings = setFetchedMeetings
+
+        // 삭제할 요소를 한꺼번에 배열에서 제거
+        mergedMeetings.removeAll(where: { removedMeetings.contains($0) })
+    
+        filteredMeetings = mergedMeetings
+        bigIconMeetings = piledMeetings
         combineNewMeetings()
     }
 
     ///  지도 위치 체크해서 리스너 쿼리 변경
     func checkedLocation(region: MKCoordinateRegion) {
-        print("checkedLocation")
+//        print("checkedLocation, 현재 리스너갯수: \(listeners.count)")
         if let checkRegion = checkRegion {
             let changedLatitude = abs(checkRegion.span.latitudeDelta - region.span.latitudeDelta) > region.span.latitudeDelta / 3
             let changedLongitude = abs(checkRegion.span.longitudeDelta - region.span.longitudeDelta) > region.span.longitudeDelta / 3
@@ -92,61 +111,54 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
     /// FireStore와 meetings 배열 실시간 연동
     func mapMeetingsListener(region: MKCoordinateRegion){
         print("mapMeetingsListener")
-        Task{
-            do{
-                checkRegion = region
+        checkRegion = region
 
-                let metersPerDegree: Double = 111_319.9 // 지구의 반지름 (m) * 2 * pi / 360
-                let latitudeDeltaInMeters = region.span.latitudeDelta * metersPerDegree * 4
-                
-                let queryBounds = GFUtils.queryBounds(forLocation: region.center,
-                                                    withRadius: latitudeDeltaInMeters)
-                
-                var queries: [String:Query] = [:]
-                queryBounds.forEach{ bound in
-                    queries[bound.startValue + bound.endValue] = self.db
-                        .collection(self.strMeetings)
-                        .order(by: "geoHash")
-                        .start(at: [bound.startValue])
-                        .end(at: [bound.endValue])
-                }
-
-                // 리스너 제거
-                let removedKeys = fetchedMeetings.keys.filter { !queries.keys.contains($0) }
-                for key in removedKeys {
-                    listeners[key]?.remove()
-                    listeners.removeValue(forKey: key)
-                    fetchedMeetings.removeValue(forKey: key)
-                }
-                // let filteredMeetings = fetchedMeetings.filter { !queries.keys.contains($0.key) }
-                // fetchedMeetings = filteredMeetings
-                
-                for (key,query) in queries {
-                    let listener = query.addSnapshotListener { (querySnapshot, error) in
-                        self.fetchedMeetings[key] = []
-                        guard let documents = querySnapshot?.documents else {
-                            print("mapMeetingsListener 에러1: \(String(describing: error))")
-                            return
-                        }
-                        print("documents: \(documents)")
-                        self.fetchedMeetings[key] = documents.compactMap{ documents -> Meeting? in
-                            try? documents.data(as: Meeting.self)
-                        }
-                        self.mergeMeetings(latitudeDelta: region.span.latitudeDelta)
-                    }
-                    listeners[query.description] = listener
-                    print("쿼리:\(query.description)")
-                }
-            }catch{
-                await handleError(error)
-            }
+        let metersPerDegree: Double = 111_319.9 // 지구의 반지름 (m) * 2 * pi / 360
+        let latitudeDeltaInMeters = region.span.latitudeDelta * metersPerDegree * 3
+        // region.center에서 latitudeDeltaInMeters범위만큼 해당하는 geoHash값 저장
+        let queryBounds = GFUtils.queryBounds(forLocation: region.center,
+                                            withRadius: latitudeDeltaInMeters)
+        // queryBounds를 사용해 Firestore 쿼리 만들기
+        var queries: [String:Query] = [:]
+        queryBounds.forEach{ bound in
+            queries[bound.startValue + bound.endValue] = self.db
+                .collection(self.strMeetings)
+                .order(by: "geoHash")
+                .start(at: [bound.startValue])
+                .end(at: [bound.endValue])
         }
+
+        // 안쓰는 리스너 제거
+        let removedKeys = fetchedMeetings.keys.filter { !queries.keys.contains($0) }
+        for key in removedKeys {
+            listeners[key]?.remove()
+            listeners.removeValue(forKey: key)
+            fetchedMeetings.removeValue(forKey: key)
+        }
+        // let filteredMeetings = fetchedMeetings.filter { !queries.keys.contains($0.key) }
+        // fetchedMeetings = filteredMeetings
+        
+        for (key,query) in queries {
+            let listener = query.addSnapshotListener { (querySnapshot, error) in
+                self.fetchedMeetings[key] = []
+                guard let documents = querySnapshot?.documents else {
+                    print("mapMeetingsListener 에러1: \(String(describing: error))")
+                    return
+                }
+                self.fetchedMeetings[key] = documents.compactMap{ documents -> Meeting? in
+                    documents.data(as: Meeting.self)
+                }
+                print("미팅:\(self.fetchedMeetings.values.count)")
+                self.mergeMeetings(latitudeDelta: region.span.latitudeDelta)
+            }
+            listeners[key] = listener
+        }
+        
     }
 
     /// 모임 추가시(서버 저장전)
     func addMapAnnotation(newMapAnnotation: CLLocationCoordinate2D){
         print("addMapAnnotation")
-        // newMeeting = Meeting(title: "", description: "", place: "", numbersOfMembers: 0, latitude: newMapAnnotation.latitude, longitude: newMapAnnotation.longitude, hostUID: "", type: .new)
         newMeeting = Meeting.createMapAnnotation(newMapAnnotation)
         combineNewMeetings()
     }
@@ -170,10 +182,11 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                 meeting.hostUID = currentUID
                 let document = try await db.collection(strMeetings).addDocument(data: meeting.firestoreData)
                 let meetingID = document.documentID
-                self.joinMeeting(meetingID: meetingID, numbersOfMembers: 0)
+                joinMeeting(meetingID: meetingID, meetingDate: meeting.meetingDate, hostUID: currentUID, numbersOfMembers: 0)
                 
-                isLoading = false
-                
+                await MainActor.run{
+                    isLoading = false
+                }
             } catch {
                 await handleError(error)
             }
@@ -187,10 +200,12 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         Task{
             do{
                 guard let currentUID = currentUID else{return}
-                let doc = db.collection(strMeetings).whereField("hostUID", isEqualTo: currentUID)
-                let query = try? await doc.getDocuments()
+                let doc = db.collection(strUsers).document(currentUID).collection(strMeetingList)
+                    .whereField("hostUID", isEqualTo: currentUID)
+                    .whereField("isEnd", isEqualTo: false)
+                let query = try await doc.getDocuments()
                 
-                if let query = query, !query.isEmpty {
+                if !query.isEmpty {
                     await MainActor.run{
                         self.isOverlap = true
                         print("작성자 중복!")
@@ -207,6 +222,12 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
             }
         }
         
+    }
+
+    /// 모임 category로 필터
+    func filterMeetingsByCategory(category: Meeting.Category?, latitudeDelta: Double) {
+        self.category = category
+        mergeMeetings(latitudeDelta: latitudeDelta)
     }
     
     

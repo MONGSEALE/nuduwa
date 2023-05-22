@@ -12,23 +12,23 @@ import Firebase
 import FirebaseAuth
 
 struct DMView: View {
-    @StateObject private var viewModel = DMViewModel()
+    @StateObject private var viewModel: DMViewModel = .init()
     
-    @Environment(\.dismiss) private var dismiss
     @State private var messageText: String = ""
     let receiverID: String
+    let dmPeopleDocRef: DocumentReference?
     @Binding var showDMView: Bool
     
     var body: some View {
-        NavigationView{
+        NavigationView{ //NavigationView 필요없으면 제거
             VStack {
-                ScrollView{
-                    ScrollViewReader { scrollViewProxy in
+                ScrollViewReader { scrollViewProxy in
+                    ScrollView{
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(viewModel.messages.indices, id: \.self) { index in
                                 let message = viewModel.messages[index]
                                 let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
-                                
+                                // 날짜 출력
                                 if isNewDay(previousMessage: previousMessage, currentMessage: message) {
                                     Text(formatDate(message.timestamp))
                                         .font(.caption)
@@ -40,14 +40,23 @@ struct DMView: View {
                                 let isCurrentUser = message.senderUID == viewModel.currentUID
                                 
                                 DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
-//                                    .onAppear {
-//                                        if message.id == viewModel.messages.last?.id && viewModel.paginationDoc != nil {
-//                                            guard let docID = viewModel.dmPeopleID else{return}
-//                                            viewModel.fetchPrevMessage(dmPeopleID: docID)
-//                                        }
-//                                    }
+                                   .onAppear {
+                                        if message.id == viewModel.messages.last?.id {
+                                            viewModel.readLastDM()
+                                        }
+                                        
+                                        if message.id == viewModel.messages.first?.id && viewModel.paginationDoc != nil && viewModel.isReady != nil {
+                                            guard let docRef = viewModel.dmPeopleRef else{return}
+                                            viewModel.fetchPrevMessage(dmPeopleRef: docRef)
+                                        }
+                                   }
                             }
                         }
+                        .onAppear {
+                                    if let lastMessageIndex = viewModel.messages.indices.last {
+                                        scrollViewProxy.scrollTo(lastMessageIndex, anchor: .bottom)
+                                    }
+                                }
                         .onChange(of: viewModel.messages) { messages in
                             if let lastMessageIndex = messages.indices.last {
                                 withAnimation {
@@ -55,20 +64,29 @@ struct DMView: View {
                                 }
                             }
                         }
+                        .onAppear{
+                            scrollViewProxy.scrollTo(0, anchor: .bottom)
+                        }
                     }
                 }
                 Spacer()
                 HStack{
                     CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $messageText)
                     Button{
-                        viewModel.sendDM(message: messageText, receiverID: receiverID)
-                        messageText = ""
+                        if viewModel.dmPeopleRef != nil{
+                            viewModel.sendDM(message: messageText)
+                            messageText = ""
+                        }
                     }label: {
-                        Image(systemName: "paperplane.fill")
-                            .foregroundColor(.white)
-                            .padding(10)
-                            .background(Color("lightblue"))
-                            .cornerRadius(50)
+                        if viewModel.dmPeopleRef != nil{
+                            Image(systemName: "paperplane.fill")
+                                .foregroundColor(.white)
+                                .padding(10)
+                                .background(Color("lightblue"))
+                                .cornerRadius(50)
+                        } else {
+                            ProgressView()
+                        }
                     }
                 }
                 .padding(.horizontal)
@@ -91,17 +109,16 @@ struct DMView: View {
                     }
                 }
             }
+            // .onChange(of: viewModel.dmPeopleRef){ id in
+            //     viewModel.dmListener(dmPeopleRef: id)
+            // }
             .onAppear {
-                viewModel.startListeningDM(chatterUID: receiverID)
-                viewModel.fetchUserData(receiverID)
+                viewModel.setDMRoom(receiverUID: receiverID)
+                viewModel.fetchUser(receiverID)
             }
             .onDisappear {
-                print("바이")
-                viewModel.fetchChatRoomID(receiverID: receiverID) { chatRoomID in
-                    // 새로운 메시지가 도착하면 unreadMessages를 0으로 설정
-                    guard let senderID = viewModel.currentUID else{return}
-                    viewModel.resetUnreadMessages(userID: senderID, chatRoomID: chatRoomID)
-                }
+                print("디스어피어")
+                viewModel.ifNoChatRemoveDoc()
                 viewModel.removeListeners()
             }
             
@@ -130,11 +147,10 @@ struct DMView: View {
 
 struct DMMessageRow: View {
   
-    @State var message : Message
-    @State var identifying:Bool
+    let message : Message
+    let identifying: Bool
     let name: String?
     let image: URL?
-    
 
     var body: some View {
         HStack{
@@ -155,14 +171,12 @@ struct DMMessageRow: View {
                     }
                     .background(Color.blue.clipShape(ChatBubble()))
                     .padding(5)
-                    
-                    // Text(formatTimestamp(message.timestamp))
+                
                     Text(formatTimestamp(message.timestamp))
                         .font(.caption2)
                         .foregroundColor(.gray)
                         .padding(.leading,15)
-                }
-                )
+                })
                 Spacer()
             }
             else{
@@ -183,7 +197,6 @@ struct DMMessageRow: View {
                         .padding(.trailing,15)
                 }
             }
-            
         }
     }
     // Function to format the timestamp
@@ -193,11 +206,7 @@ struct DMMessageRow: View {
         let date = timestamp.dateValue()
         return dateFormatter.string(from: date)
     }
-    
-    
-
 }
-
 
 struct DMChatBubble: Shape {
     func path(in rect: CGRect) -> Path{

@@ -23,7 +23,7 @@ struct SlideOverView<Content: View>: View {
                     }
                 
                 content
-                    .frame(width: UIScreen.main.bounds.width * 0.8)
+                    .frame(width: UIScreen.main.bounds.width * 0.8,height: UIScreen.main.bounds.height * 0.9)
                     .background(Color(.systemGroupedBackground))
                     .cornerRadius(20)
                     .padding(.trailing)

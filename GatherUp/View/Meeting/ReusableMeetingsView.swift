@@ -10,7 +10,6 @@ import SwiftUI
 struct ReusableMeetingsView: View {
     @StateObject var viewModel: MeetingViewModel = .init()
     let title: String
-    var passedMeeting: Bool = false
     
     var body: some View {
         NavigationStack{
@@ -19,7 +18,7 @@ struct ReusableMeetingsView: View {
                 ProgressView()
                     .padding(.top,30)
             } else {
-                if viewModel.meetings.isEmpty{
+                if viewModel.userMeetings.isEmpty{
                     /// 모임 배열이 비어있을때
                     Text("가입한 모임이 없습니다")
                         .font(.caption)
@@ -27,18 +26,13 @@ struct ReusableMeetingsView: View {
                         .padding(.top,30)
                 }else{
                     ScrollView{
-                        ForEach(viewModel.meetings){ meeting in
-                            NavigationLink(destination: DetailMeetingView(meeting: meeting)){
-                                MeetingCardView(meeting: meeting) { updatedMeeting in
-                                    /// 모임 내용이 업데이트 되었을때 viewModel.meetings 배열값을 수정하여 실시간 업데이트
-                                    viewModel.updateLocalMeetingDataFromServer(updatedMeeting: updatedMeeting)
-                                } onDelete: {
-                                    /// 모임이 삭제되었을때 실시간 삭제
-                                    withAnimation(.easeInOut(duration: 0.25)){
-                                        viewModel.deleteLocalMeetingDataFromServer(deletedMeetingID: meeting.id!)
-                                    }
-                                }
-                            }
+                        ForEach(viewModel.userMeetings){ userMeeting in
+//                            let itemViewModel: MeetingViewModel = .init() //수정
+                            NavigationLink(
+                                destination: DetailMeetingView(meetingID: userMeeting.meetingID, hostUID: userMeeting.hostUID)
+                            ){
+                                MeetingCardView(meetingID: userMeeting.meetingID, hostUID: userMeeting.hostUID)
+
                             Divider()
                         }
                         .navigationTitle(title)
@@ -50,7 +44,7 @@ struct ReusableMeetingsView: View {
             }
         }
         .onAppear{
-            viewModel.meetingsListener()
+            viewModel.userMeetingsListener()
         }
     }
 }

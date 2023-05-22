@@ -18,7 +18,7 @@ class FirebaseViewModel: ObservableObject {
     /// Users 콜렉션
     let strUsers = "Users"
     let strDMList = "DMList"
-    let strJoinMeetings = "JoinMeetings"
+    let strMeetingList = "MeetingList"
     /// Meetings 콜렉션
     let strMeetings = "Meetings"
     let strMembers = "Members"
@@ -42,7 +42,8 @@ class FirebaseViewModel: ObservableObject {
        return Auth.auth().currentUser?.uid
     }
     enum SomeError: Error {
-        case miss
+        case missCurrentUID
+        case missSomething
         case error
     }
     
@@ -59,59 +60,44 @@ class FirebaseViewModel: ObservableObject {
         }
     }
 
-    // 유저 이름과 이미지만 가져오기
-    func fetchUserData(_ userUID: String?) {
-        print("fetchUserData:\(userUID ?? "uidNon")")
-        Task{
-            do{
-                guard let userUID = userUID else{throw SomeError.miss}
-                let userData = try await getUserData(userUID)
-                await MainActor.run{
-                    self.user = User.convertUserData(userData)
-                }
-            }catch{
-                handleErrorTask(error)
-            }
-        }
-    }
-    func getUserData(_ userUID: String?) async throws -> UserData {
-        print("getUserData:\(userUID ?? "uidNon")")
-        do{
-            guard let userUID = userUID else{throw SomeError.miss}
-            let doc = db.collection(strUsers).document(userUID)
-            let userData: UserData? = try await doc.getDocument(as: UserData.self)
-            guard let userData = userData else{throw SomeError.miss}
-            return userData
-        }catch{
-            throw error
-        }
-    }
-
     /// 유저 데이터 한번 가져오기
-    func fetchUser(_ userUID: String?) {
+    func fetchUser(_ userUID: String?, getAllData: Bool = false) {
         print("fetchUser:\(userUID ?? "uidNon")")
         Task{
             do{
-                guard let userUID = userUID else{throw SomeError.miss}
+                guard let userUID = userUID else{throw SomeError.missCurrentUID}
+//                let user = !getAllData ? try await getUser(userUID) : try await getUserAllData(userUID)
                 let user = try await getUser(userUID)
-                self.user = user
+                await MainActor.run{
+                    self.user = user
+                }
             }catch{
                 await handleError(error)
             }
         }
     }
-    func getUser(_ userUID: String?) async throws -> User {
-        print("getUserData")
+    func getUser(_ userUID: String?) async throws -> User? {
+        print("getUser")
         do{
-            guard let userUID = userUID else{throw SomeError.miss}
+            guard let userUID = userUID else{throw SomeError.missCurrentUID}
             let doc = db.collection(strUsers).document(userUID)
-            let user: User? = try await doc.getDocument(as: User.self)
-            guard let user = user else{throw SomeError.miss}
+            let user = try await doc.getDocument(as: User.self)
             return user
         }catch{
             throw error
         }
     }
+//    func getUserAllData(_ userUID: String?) async throws -> User? {
+//        print("getUserAllData")
+//        do{
+//            guard let userUID = userUID else{throw SomeError.missCurrentUID}
+//            let doc = db.collection(strUsers).document(userUID)
+//            let user = try await doc.getDocument(as: User.getAllData)
+//            return user
+//        }catch{
+//            throw error
+//        }
+//    }
 //    func getDocData<T:FirestoreConvertible>(doc: DocumentReference) async throws -> T {
 //        print("getDocData")
 //        do{

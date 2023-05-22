@@ -25,9 +25,6 @@ struct MapView: View {
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
     
-    /// 지도가 움직일때마다 서버에서 가져오는 데이터 변경 관련 변수
-    let timer = DispatchSource.makeTimerSource()
-    
     var body: some View {
         ZStack(alignment:.bottom){
             GeometryReader { geometry in
@@ -56,15 +53,13 @@ struct MapView: View {
                 }
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))
+                .onChange(of: viewModel.region) { region in
+                    serverViewModel.checkedLocation(region: region)
+                }
                 .onAppear{
                     serverViewModel.mapMeetingsListener(region: viewModel.region)              /// Map이 보여지는동안 Firebase와 실시간 연동
-                    serverViewModel.checkedOverlap()    /// Map이 보여지는동안 실시간 중복확인
                     viewModel.checkIfLocationServicesIsEnabled()
-                    setupTimer()
                     serverViewModel.joinMeetingsListener()
-                }
-                .onDisappear{
-                    timer.suspend()
                 }
                 .onTapGesture { tapLocation in
                     if(showAnnotation==true){
@@ -121,8 +116,32 @@ struct MapView: View {
                         }
                     }
                     .padding(15)
-                    
-                   
+                }
+                HStack{
+                    Spacer()
+                    Menu {
+                        ForEach(Meeting.Category.allCases, id: \.self) { item in
+                            Button{
+                                if serverViewModel.category != item {
+                                    serverViewModel.filterMeetingsByCategory(category: item, latitudeDelta: viewModel.region.span.latitudeDelta)
+                                } else {
+                                    serverViewModel.filterMeetingsByCategory(category: nil, latitudeDelta: viewModel.region.span.latitudeDelta)
+                                }
+                            } label: {
+                                Label(item.rawValue, systemImage: (serverViewModel.category?.rawValue ?? "")==item.rawValue ?  "pencil" : "")
+                            }
+
+                        }
+                    } label: {
+                        Text("카테고리필터")
+                            .fontWeight(.bold)
+                            .font(.system(size: 20))
+                            .foregroundColor(Color.white)
+                            .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
+                            .background(Color.yellow) // Moved the background modifier inside the else block
+                            .cornerRadius(20)
+                    }
+                    .padding(.trailing,15)
                 }
                 Spacer()
                
@@ -206,16 +225,6 @@ struct MapView: View {
         let y = Double((frame.height - tapLocation.y) / frame.height) * region.span.latitudeDelta + region.center.latitude - region.span.latitudeDelta / 2
         print("tap:\(tapLocation)")
         return CLLocationCoordinate2D(latitude: y, longitude: x)
-    }
-    
-    func setupTimer() {
-        timer.schedule(deadline: .now(), repeating: 0.2)    //repeating(초단위)의 시간 간격으로 timer.setEventHandler 실행
-        timer.setEventHandler {
-            DispatchQueue.main.async {
-                serverViewModel.checkedLocation(region: viewModel.region)
-            }
-        }
-        timer.resume()
     }
 }
         
@@ -322,12 +331,12 @@ extension MKCoordinateRegion {
 }
 
 /// MKCoordinateRegion 타입을 .onChange에서 사용가능하게 확장하는 코드. 현재 필요없어서 주석처리
-//extension MKCoordinateRegion: Equatable {
-//    public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
-//        return lhs.center.latitude == rhs.center.latitude &&
-//               lhs.center.longitude == rhs.center.longitude &&
-//               lhs.span.latitudeDelta == rhs.span.latitudeDelta &&
-//               lhs.span.longitudeDelta == rhs.span.longitudeDelta
-//    }
-//}
+extension MKCoordinateRegion: Equatable {
+   public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
+       return lhs.center.latitude == rhs.center.latitude &&
+              lhs.center.longitude == rhs.center.longitude &&
+              lhs.span.latitudeDelta == rhs.span.latitudeDelta &&
+              lhs.span.longitudeDelta == rhs.span.longitudeDelta
+   }
+}
 

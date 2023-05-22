@@ -60,29 +60,73 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     }
     
     /// 모임 참가하기
-    func joinMeeting(meetingID: String, numbersOfMembers: Int){
+    func joinMeeting(meetingID: String, meetingDate: Date, hostUID: String, numbersOfMembers: Int){
         print("joinMeeting")
         isLoading = true
         Task{
             do{
-                guard let currentUID = currentUID else{return}
-                let userData = try await getUserData(currentUID)
+                guard let currentUID = currentUID,
+                      let user = try await getUser(currentUID) else{return}
+                print("저장1")
 
                 let meetingsDoc = db.collection(strMeetings).document(meetingID)
-                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
+                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strMeetingList)
+                let membersCol = db.collection(strMeetings).document(meetingID).collection(strMembers)
+            
+                let member = Member(memberUID: currentUID)
                 
-                if members.count < numbersOfMembers || numbersOfMembers == 0 {
-                    let member = Member(memberUID: currentUID)
-                    let meetingList = MeetingList(meetingID: meetingID)
-                    let text = "\(userData.userName)님이 채팅에 참가하셨습니다."
-                    let message = Message(text, uid: "SYSTEM", isSystemMessage: true)
+                // 모임-멤버 컬렉션에 유저추가
+                let docRef = try await meetingsDoc.collection(strMembers).addDocument(data: member.firestoreData)
+                
+                if numbersOfMembers != 0 {
+                    // numbersOfMembers가 0이면 최초생성
+                    // 멤버수가 최대멤버수 초과하지 않았는지 다시 확인
+                    let membersSnapshot = try await membersCol.getDocuments()
+                    let fetchedMembers = membersSnapshot.documents.compactMap{ document -> Member? in
+                        document.data(as: Member.self)
+                    }
                     
-                    try await meetingsDoc.collection(strMembers).addDocument(data: member.firestoreData)
-                    try await joinMeetingsCol.addDocument(data: meetingList.firestoreData)
-                    try await meetingsDoc.collection(self.strMessage).addDocument(data: message.firestoreData)
-                }else{
-                    print("모임 참가 실패")
+                    let currentDate = fetchedMembers.first(where: { $0.memberUID == currentUID })?.joinDate
+                    guard let currentDate = currentDate else{return}
+                    let filteredMembers = fetchedMembers.filter { member in
+                        return member.joinDate < currentDate
+                    }
+                    if filteredMembers.count >= numbersOfMembers {
+                        // 멤버수가 최대멤버수 초과했을때 멤버 삭제
+                        try await docRef.delete()
+                        print("모임 참가 실패")
+                        //참가 실패시 에러핸들 구현
+                        await MainActor.run {
+                            isLoading = false
+                        }
+                        return
+                    }
                 }
+                    
+                // 멤버수가 최대멤버수 초과하지 않았을때
+                // 비동기로 2개 작업 동시 실행
+                await withThrowingTaskGroup(of: Void.self) { group in
+                    // UserMeeting 컬렉션에 모임 추가
+                    group.addTask {
+                        do {
+                            let meetingList = MeetingList(meetingID: meetingID, meetingDate: meetingDate, hostUID: hostUID)
+                            try await joinMeetingsCol.addDocument(data: meetingList.firestoreData)
+                        } catch {
+                            throw error
+                        }
+                    }
+                    // 모임-메시지 컬렉션에 메시지 추가
+                    group.addTask {
+                        do {
+                            let text = "\(user.userName)님이 채팅에 참가하셨습니다."
+                            let message = Message(text, uid: "SYSTEM", isSystemMessage: true)
+                            try await meetingsDoc.collection(self.strMessage).addDocument(data: message.firestoreData)
+                        } catch {
+                            throw error
+                        }
+                    }
+                }
+                
                 //참가 실패시 에러핸들 구현
                 await MainActor.run {
                     isLoading = false
@@ -97,7 +141,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     func joinMeetingsListener(){
         guard let currentUID = currentUID else{return}
 
-        let col = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
+        let col = db.collection(strUsers).document(currentUID).collection(strMeetingList)
 
         let listener = col.addSnapshotListener { querySnapshot, error in
             if let error = error{

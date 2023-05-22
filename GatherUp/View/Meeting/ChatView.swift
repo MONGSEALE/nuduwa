@@ -24,52 +24,22 @@ struct ChatView: View {
     @State private var showMemberList = false
     @State private var xOffset: CGFloat = UIScreen.main.bounds.width
     
+  
+    
     var body: some View {
         ZStack{
             VStack{
-                HStack{
+                if(showMemberList==true){
                     Spacer()
-                        .frame(width: 20)
-                    Button(action: {
-                        self.presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "arrowshape.turn.up.backward")
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.black.opacity(0.6))
-                            .clipShape(Circle())
-                    }
-                    Spacer()
-                        .frame(width: 10)
-                    Text(meetingTitle)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    Spacer()
-                    Button(action: {
-                     
-                        withAnimation(.easeInOut) {
-                            self.showMemberList.toggle()
-                        }
-                    }) {
-                        Image(systemName: "list.bullet")
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.black.opacity(0.6))
-                            .clipShape(Circle())
-                    }
-                    .padding(.trailing)
-                    Spacer()
-                        .frame(width: 5)
+                        .frame(height: 38)
                 }
-                .padding(.vertical, 10)
-                .background(Color("lightpink"))
                 ScrollView{
                     ScrollViewReader { scrollViewProxy in
                         VStack {
                             ForEach(chatViewModel.messages.indices, id: \.self) { index in
                                 let currentMessage = chatViewModel.messages[index]
                                 let previousMessage = index > 0 ? chatViewModel.messages[index - 1] : nil
-
+                                
                                 if isNewDay(previousMessage: previousMessage, currentMessage: currentMessage) {
                                     Text(formatDate(currentMessage.timestamp))
                                         .font(.caption2)
@@ -122,13 +92,38 @@ struct ChatView: View {
                 .cornerRadius(50)
                 .padding()
             }
+            .navigationBarTitle("\(meetingTitle) (\(members.values.count))", displayMode: .inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        self.presentationMode.wrappedValue.dismiss()
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.left")
+                            Text("뒤로")
+                        }
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing){
+                    Button(action: {
+                        withAnimation(.easeInOut) {
+                            self.showMemberList = true
+                        }
+                    }) {
+                        Image(systemName: "list.bullet")
+                    }
+                }
+            }
             MemberList(meetingID: meetingID, members: Array(members.values), hostUID: hostUID ,userUID: chatViewModel.currentUID!)
                            .slideOverView(isPresented: $showMemberList)
+                           .onDisappear{
+                               showMemberList = false
+                           }
         }
+        .navigationBarHidden(showMemberList)
         .onAppear{
             chatViewModel.messagesListener(meetingID: meetingID)     // 채팅들이 화면에 보이게함
         }
-        
     }
     func formatDate(_ timestamp: Timestamp) -> String {
         let dateFormatter = DateFormatter()

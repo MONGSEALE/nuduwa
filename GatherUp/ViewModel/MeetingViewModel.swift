@@ -15,12 +15,14 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     
 
     private var fetchedMeetings: [Meeting] = []         // 서버에서 가져오는 모임 배열
-    @Published var deletedMeeting: Bool = false
+    
+
+    @Published var userMeetings: [MeetingList] = []  //수정
     
     @Published var dicMembers: [String: Member] = [:]
-    @Published var dicMembersData: [String: UserData] = [:]
-
-    @Published var isDelete: Bool = false
+    @Published var dicMembersData: [String: User] = [:]
+    // @Published var deletedMeeting: Bool = false
+    // @Published var isDelete: Bool = false
 
     /// 찾기쉽게 members 배열을 딕셔너리로 변환
     override func convertMembers(meetingID: String){
@@ -64,7 +66,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
             Task{
                 do{
                     print("uid:\(uid)")
-                    dicMembersData[uid] = try await getUserData(uid)
+                    dicMembersData[uid] = try await getUser(uid)
 //                    guard let memberData = dicMembersData[uid] else{return}
                     await MainActor.run{
                         dicMembers[uid]?.memberName = dicMembersData[uid]?.userName
@@ -94,48 +96,74 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     /// FireStore와 meetings 배열 실시간 연동
     func meetingsListener(){
         print("meetingsListener")
+        guard let currentUID = currentUID else{return}
+        let query = db.collectionGroup(strMembers).whereField("memberUID", isEqualTo: currentUID)
+        if listeners[query.description] != nil {print("리스너이미실행중");return}
+        isLoading = false
+        
+        let listener = query.addSnapshotListener { querySnapshot, error in
+            if let error = error {print("에러!meetingsListener:\(error)");return}
+            
+            var meetings: [Meeting] = []
+
+            guard let querySnapshot = querySnapshot else{return}
+            for diff in querySnapshot.documentChanges{
+                if (diff.type == .modified) {
+                    let meetingID = diff.document.reference.parent.parent?.documentID
+                    guard let meetingID = meetingID else{continue}
+                    self.fetchMeeting(meetingID)
+                }
+                if (diff.type == .removed) {
+                    print("Removed city: \(diff.document.data())")
+                }
+            }
+            
+//                        guard let documents = querySnapshot.documents else{return}
+            for document in querySnapshot.documents {
+                if let meetingDocument = document.reference.parent.parent {
+                    meetingDocument.getDocument{ meetingSnapshot, error in
+                        if let meeting = meetingSnapshot!.data(as: Meeting.self) {
+                            meetings.append(meeting)
+                        }
+                        print("모임:\(meetings)")
+                        self.sortMeeting(meetings)
+                        self.isLoading = false
+                    }
+                }
+                
+            }
+        }
+        listeners[query.description] = listener
+        
+    }
+     /// FireStore와 meetings 배열 실시간 연동
+    func userMeetingsListener(){
+        print("userMeetingsListener")
         isLoading = false
         Task{
             do{
                 guard let currentUID = currentUID else{return}
-                let query = db.collectionGroup(strMembers).whereField("memberUID", isEqualTo: currentUID)
+                let query = db.collection(strUsers).document(currentUID).collection(strMeetingList)
+                    .whereField("isEnd", isEqualTo: false)
+                    // .order(by: "meetingDate", descending: true)
                 let listener = query.addSnapshotListener { querySnapshot, error in
                     if let error = error {print("에러!meetingsListener:\(error)");return}
                     
                     var meetings: [Meeting] = []
-
-                    guard let querySnapshot = querySnapshot else{return}
-                    for diff in querySnapshot.documentChanges{
-                        if (diff.type == .modified) {
-                            let meetingID = diff.document.reference.parent.parent?.documentID
-                            guard let meetingID = meetingID else{continue}
-                            self.fetchMeeting(meetingID)
-                        }
-                        if (diff.type == .removed) {
-                            print("Removed city: \(diff.document.data())")
-                        }
-                    }
                     
-//                        guard let documents = querySnapshot.documents else{return}
-                    for document in querySnapshot.documents {
-                        if let meetingDocument = document.reference.parent.parent {
-                            do {
-                                try meetingDocument.getDocument{ meetingSnapshot, error in
-                                    if let meeting = try? meetingSnapshot!.data(as: Meeting.self) {
-                                        meetings.append(meeting)
-                                    }
-                                    print("모임:\(meetings)")
-                                    self.sortMeeting(meetings)
-                                    self.isLoading = false
-                                }
-                                
-                            } catch {
-                                print("meetingDocument 데이터 가져오기 오류:", error)
-                                self.isLoading = false
-                            }
-                        }
-                        
-                    }
+                    guard let documents = querySnapshot?.documents else{return}
+                    self.userMeetings = documents.compactMap { document -> MeetingList? in
+                        document.data(as: MeetingList.self)
+                    }.sorted(by: { meeting1, meeting2 in
+                       if meeting1.hostUID == currentUID && meeting2.hostUID != currentUID {
+                            return true // meeting1의 hostUID가 currentUID와 같을 때 meeting1을 앞으로 정렬
+                        } else if meeting1.hostUID != currentUID && meeting2.hostUID == currentUID {
+                            return false // meeting2의 hostUID가 currentUID와 같을 때 meeting2를 앞으로 정렬
+                        } else {
+                            // hostUID가 같은 경우 meetingDate 필드를 기준으로 내림차순 정렬
+                            return meeting1.meetingDate > meeting2.meetingDate
+                        }   
+                    })                 
                 }
                 listeners[query.description] = listener
             }catch{
@@ -174,7 +202,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                 let query = doc.collection(strMembers)
                             .whereField("memberUID", isEqualTo: memberUID)
 
-                let member = try await getUserData(memberUID)
+                guard let member = try await getUser(memberUID) else{return}  //오류메시지 출력해야함
 
                 let querySnapshot = try await query.getDocuments()
 
@@ -280,6 +308,58 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         isLoading = false
         let doc = db.collection(strMeetings).document(meetingID)
         
+        let listener = doc.addSnapshotListener{ snapshot, error in
+            if let error = error {
+                self.handleErrorTask(error)
+                return
+            }
+            guard let snapshot = snapshot else{
+                print("모임삭제됨")
+                self.isLoading = false
+                return
+            }
+            guard let data = snapshot.data(as: Meeting.self) else{
+                print("오류")
+                return
+            }
+            print("모임\(data)")
+            Task{
+                await MainActor.run{
+                    self.meeting = data
+                    self.isLoading = false
+                }
+            }
+        }
+        listeners[doc.description] = listener
+    }
+    // 모임 host 이름과 이미지 가져오기
+    func fetchHostData()  {
+        Task{
+            do{
+                meeting = try await getHostData(meeting: meeting)
+            }catch{
+                print("오류!")
+            }
+        }
+    }
+    // 모임 host 이름과 이미지 가져오기
+    func getHostData(meeting: Meeting?) async throws -> Meeting? {
+        guard let meeting = meeting else{throw SomeError.error}
+        do{
+            guard let host = try await getUser(meeting.hostUID) else{throw SomeError.error}
+            return Meeting.putHostData(meeting: meeting, user: host)
+        }catch{
+            throw error
+        }
+    }
+}
+
+/*
+func meetingListener(meetingID: String){
+        print("meetingListener")
+        isLoading = false
+        let doc = db.collection(strMeetings).document(meetingID)
+        
         let listener = doc.addSnapshotListener({ snapshot, error in
             if let error = error {
                 self.handleErrorTask(error)
@@ -301,5 +381,4 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         })
         listeners[doc.description] = listener
     }
-}
-
+    */
