@@ -26,28 +26,10 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
     
     @Published var isOverlap: Bool = false  // 모임 중복 생성 확인
     
-    // 쓰로틀링용 변수
-//    private var lastThrottleTime: DispatchTime = .now()
-//    private let throttleInterval: TimeInterval = 0.2
-        
     override init() {
         super.init()
         checkedOverlap()
     }
-
-    // throttleInterval 초동안 여러번 호출되면 1번만 실행
-//    private func mergeMeetingsThrottled(latitudeDelta: Double) {
-//        print("Throttled")
-//        let currentTime = DispatchTime.now()
-//        let elapsedTime = currentTime.uptimeNanoseconds - lastThrottleTime.uptimeNanoseconds
-//
-//        // 일정 시간(throttleInterval) 이상 경과한 경우에만 함수 실행
-//        if elapsedTime >= UInt64(throttleInterval * 1_000_000_000) {
-//            print("실행")
-//            lastThrottleTime = currentTime
-//            self.mergeMeetings(latitudeDelta: latitudeDelta)
-//        }
-//    }
 
     /// 서버 모임과 새로 추가하는 모임(서버 저장전) 배열 합치기
     private func combineNewMeetings(){
@@ -110,32 +92,6 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         filteredMeetings = mergedMeetings
         bigIconMeetings = piledMeetings
         combineNewMeetings()
-        /*
-        for meeting1 in setFetchedMeetings {
-            guard setFetchedMeetings.contains(meeting1) else { continue }     // 중첩돼서 지운 모임이면 continue
-            let latitude = meeting1.latitude
-            let longitude = meeting1.longitude
-            
-            var nearbyMeetings: [Meeting] = []
-            for meeting2 in setFetchedMeetings.subtracting([meeting1]) {
-                // delta값으로 meeting1과 meeting2가 가까이 있는지 비교
-                if abs(latitude - meeting2.latitude) < delta && 
-                   abs(longitude - meeting2.longitude) < delta {
-
-                    nearbyMeetings.append(meeting2)  // 가까이 있으면 bigIconMeetings에 저장
-                    setFetchedMeetings.remove(meeting2)  // 그리고 원래 Meetings에선 삭제
-                }
-            }
-            // meeting1과 가까이 있는 모임 있으면 meeting1도 bigIconMeetings에 저장후 원래 Meetings에선 삭제하고 type.piled Meeting 저장
-            if !nearbyMeetings.isEmpty {
-                bigIconMeetings[meeting1.id!, default: []] = [meeting1] + nearbyMeetings
-                let meeting = Meeting.piledMapAnnotation(meeting: meeting1)
-
-                setFetchedMeetings.remove(meeting1)
-                setFetchedMeetings.insert(meeting)
-            }
-        }
-        */
     }
 
     ///  지도 위치 체크해서 리스너 쿼리 변경

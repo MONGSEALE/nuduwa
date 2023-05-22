@@ -65,62 +65,54 @@ class ProfileViewModel: FirebaseViewModel {
                 } else {
                     print("엘스")
                 }
-//                if let userImage = userImage {
-////                    isAnotherLoading["userImage"] = true
-////                    let maxFileSize: Int = 100_000 // 최대 파일 크기 (예: 0.1MB)
-////                    var compressionQuality: CGFloat = 1.0 // 초기 압축 품질
-////
-////                    print("1")
-////
-////                    guard let image = try await userImage.loadTransferable(type: Data.self) else{return}
-////                    var jpegImage: UIImage?
-////                    var imageData: Data?
-////                    print("2")
-////                    if let uiImage = UIImage(data: image) {
-////                        jpegImage = uiImage
-////                    } else if let pngData = UIImage(data: image)?.pngData() {
-////                        if let uiImage = UIImage(data: pngData) {
-////                            jpegImage = uiImage
-////                        }
-////                    } else {
-////                        isAnotherLoading["userImage"] = false
-////                        check()
-////                        return
-////                    }
-////                    print("3")
-////                    if let jpegData = jpegImage?.jpegData(compressionQuality: compressionQuality), jpegData.count > maxFileSize {
-////                        imageData = jpegData
-////                        while imageData!.count > maxFileSize && compressionQuality > 0.1 {
-////                            compressionQuality -= 0.1
-////                            imageData = jpegImage?.jpegData(compressionQuality: compressionQuality)
-////                        }
-////                    } else {
-////                        isAnotherLoading["userImage"] = false
-////                        check()
-////                        return
-////                    }
-//                    print("4")
-//                    // Firebase Storage에 이미지 업로드를 위해 해당 이미지 데이터를 사용합니다.
-//                    guard let imageData = try await userImage.loadTransferable(type: Data.self) else{
-//                         print("에러 imageData")
-//                         return
-//                     }
-////                    if let imageData = imageData {
-//                        let storageRef = Storage.storage().reference().child("Profile_Images").child(currentUID)
+                if let userImage = userImage {
+//                    isAnotherLoading["userImage"] = true
+//                    let maxFileSize: Int = 100_000 // 최대 파일 크기 (예: 0.1MB)
+//                    var compressionQuality: CGFloat = 1.0 // 초기 압축 품질
 //
-//                        storageRef.putData(imageData)
-//                        let downloadURL = try await storageRef.downloadURL()
-//                        
-//                        try await db.collection(strUsers).document(currentUID).updateData(["userImage": downloadURL.absoluteString])
+//                    print("1")
+//
+//                    guard let image = try await userImage.loadTransferable(type: Data.self) else{return}
+//                    var jpegImage: UIImage?
+//                    var imageData: Data?
+//                    print("2")
+//                    if let uiImage = UIImage(data: image) {
+//                        jpegImage = uiImage
+//                    } else if let pngData = UIImage(data: image)?.pngData() {
+//                        if let uiImage = UIImage(data: pngData) {
+//                            jpegImage = uiImage
+//                        }
+//                    } else {
 //                        isAnotherLoading["userImage"] = false
 //                        check()
-////                    } else {
-////                        isAnotherLoading["userImage"] = false
-////                        check()
-////                        return
-////                    }
-//                    print("5")
-//                }
+//                        return
+//                    }
+//                    print("3")
+//                    if let jpegData = jpegImage?.jpegData(compressionQuality: compressionQuality), jpegData.count > maxFileSize {
+//                        imageData = jpegData
+//                        while imageData!.count > maxFileSize && compressionQuality > 0.1 {
+//                            compressionQuality -= 0.1
+//                            imageData = jpegImage?.jpegData(compressionQuality: compressionQuality)
+//                        }
+//                    } else {
+//                        isAnotherLoading["userImage"] = false
+//                        check()
+//                        return
+//                    }
+                    print("4")
+                    // Firebase Storage에 이미지 업로드를 위해 해당 이미지 데이터를 사용합니다.
+                    guard let imageData = try await userImage.loadTransferable(type: Data.self) else{
+                         print("에러 imageData")
+                         return
+                     }
+                        let storageRef = Storage.storage().reference().child("Profile_Images").child(currentUID)
+
+                        storageRef.putData(imageData)
+                        let downloadURL = try await storageRef.downloadURL()
+                        
+                        try await db.collection(strUsers).document(currentUID).updateData(["userImage": downloadURL.absoluteString])
+                    print("5")
+                }
             }catch{
                 await handleError(error)
             }

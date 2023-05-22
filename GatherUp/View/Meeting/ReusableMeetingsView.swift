@@ -27,24 +27,14 @@ struct ReusableMeetingsView: View {
                 }else{
                     ScrollView{
                         ForEach(viewModel.userMeetings){ userMeeting in
-                            let sharedViewModel: MeetingViewModel = .init() //수정
+                            let itemViewModel: MeetingViewModel = .init() //수정
                             NavigationLink(
-                                destination: DetailMeetingView(viewModel: sharedViewModel, meetingID: userMeeting.meetingID)
+                                destination: DetailMeetingView(viewModel: itemViewModel, meetingID: userMeeting.meetingID)
                             ){
-                                MeetingCardView(viewModel: sharedViewModel, meetingID: userMeeting.meetingID, hostUID: userMeeting.hostUID)
-                                // { updatedMeeting in
-                                //     /// 모임 내용이 업데이트 되었을때 viewModel.meetings 배열값을 수정하여 실시간 업데이트
-                                //     viewModel.updateLocalMeetingDataFromServer(updatedMeeting: updatedMeeting)
-                                // } onDelete: {
-                                //     /// 모임이 삭제되었을때 실시간 삭제
-                                //     withAnimation(.easeInOut(duration: 0.25)){
-                                //         viewModel.deleteLocalMeetingDataFromServer(deletedMeetingID: meeting.id!)
-                                //     }
-                                // }
-                                .onTapGesture {
-                                    // 클릭시 MeetingCardView의 .onDisappear가 호출되기 전에 수행할 동작
-                                    sharedViewModel.detailViewAppear()
-                                }
+                                MeetingCardView(meeting: itemViewModel.meeting, isHost: itemViewModel.meeting?.hostUID == viewModel.currentUID)
+                                    .onAppear {
+                                        viewModel.meetingListener(meetingID: userMeeting.meetingID)
+                                    }
                             }
                             Divider()
                         }
@@ -57,7 +47,6 @@ struct ReusableMeetingsView: View {
             }
         }
         .onAppear{
-            // viewModel.meetingsListener()
             viewModel.userMeetingsListener()
         }
     }

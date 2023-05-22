@@ -23,14 +23,6 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     @Published var dicMembersData: [String: User] = [:]
     // @Published var deletedMeeting: Bool = false
     // @Published var isDelete: Bool = false
-    var isDetailViewVisible: Bool = false
-
-    func detailViewAppear() {
-        isDetailViewVisible = true
-    }
-    func detailViewDisappear() {
-        isDetailViewVisible = false
-    }
 
     /// 찾기쉽게 members 배열을 딕셔너리로 변환
     override func convertMembers(meetingID: String){
@@ -330,8 +322,13 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                 print("오류")
                 return
             }
-            self.meeting = data
-            self.isLoading = false
+            print("모임\(data)")
+            Task{
+                await MainActor.run{
+                    self.meeting = data
+                    self.isLoading = false
+                }
+            }
         }
         listeners[doc.description] = listener
     }

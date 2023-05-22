@@ -129,21 +129,13 @@ struct DetailMeetingView: View {
             
         }
         .onAppear{
-            // editMeetingDate = meeting.meetingDate
-            // viewModel.fetchUser(meeting.hostUID)
-            // viewModel.meetingListener(meetingID: meeting.id!)
-            // viewModel.membersListener(meetingID: meeting.id!)
             viewModel.fetchUser(meeting.hostUID)
-            viewModel.meetingListener(meetingID: meeting.id!)
+//            viewModel.meetingListener(meetingID: meeting.id!)
             viewModel.membersListener(meetingID: meeting.id!)
         }
-        .onDisappear{
-            viewModel.removeListeners()
-            viewModel.detailViewDisappear()
-        }
-        // .onChange(of: viewModel.deletedMeeting) { _ in
-        //     dismiss()
-        // }
+//        .onDisappear{
+//            viewModel.removeListeners()
+//        }
     }
 }
 
