@@ -27,14 +27,11 @@ struct ReusableMeetingsView: View {
                 }else{
                     ScrollView{
                         ForEach(viewModel.userMeetings){ userMeeting in
-                            let itemViewModel: MeetingViewModel = .init() //수정
+//                            let itemViewModel: MeetingViewModel = .init() //수정
                             NavigationLink(
-                                destination: DetailMeetingView(viewModel: itemViewModel, meetingID: userMeeting.meetingID)
+                                destination: DetailMeetingView(meetingID: userMeeting.meetingID, hostUID: userMeeting.hostUID)
                             ){
-                                MeetingCardView(meeting: itemViewModel.meeting, isHost: itemViewModel.meeting?.hostUID == viewModel.currentUID)
-                                    .onAppear {
-                                        viewModel.meetingListener(meetingID: userMeeting.meetingID)
-                                    }
+                                MeetingCardView(meetingID: userMeeting.meetingID, hostUID: userMeeting.hostUID)
                             }
                             Divider()
                         }

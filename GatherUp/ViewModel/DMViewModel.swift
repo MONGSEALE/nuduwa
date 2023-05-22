@@ -24,6 +24,7 @@ class DMViewModel: FirebaseViewModel {
     var isReading: Bool = false                         // 채팅방 들어갔는지 확인변수
     var isReady: Bool = false
     
+    
     // var dmList: DMList? = nil
     // var isFirstDM: Bool = false
     // var unreadCount: Int = 0
@@ -32,6 +33,7 @@ class DMViewModel: FirebaseViewModel {
         print("removeListeners")
         super.removeListeners()
         messages.removeAll()
+        chattingRooms.removeAll()
     }
 
     func readLastDM(){
@@ -322,10 +324,26 @@ class DMViewModel: FirebaseViewModel {
         
         let listener = dmListCol.addSnapshotListener{ querySnapshot, error in
             if let error = error {self.handleErrorTask(error);return}
+            guard let querySnapshot else{return}
             
-            self.chattingRooms = querySnapshot?.documents.compactMap{ document -> DMList? in
-                document.data(as: DMList.self)
-            }.sorted{ $0.latestMessage > $1.latestMessage} ?? []
+            querySnapshot.documentChanges.forEach { diff in
+                if (diff.type == .added) {
+                    guard let data = diff.document.data(as: DMList.self) else{return}
+                    print("추가: \(diff.document.data())")
+                    self.chattingRooms.append(data)
+                }
+                
+                if (diff.type == .modified) {
+                    guard let data = diff.document.data(as: DMList.self) else{return}
+                    print("변경: \(diff.document.data())")
+                    self.chattingRooms.append(data)
+                }
+            }
+            self.chattingRooms = self.chattingRooms.sorted{ $0.latestMessage > $1.latestMessage}
+            
+//            self.chattingRooms = querySnapshot?.documents.compactMap{ document -> DMList? in
+//                document.data(as: DMList.self)
+//            }.sorted{ $0.latestMessage > $1.latestMessage} ?? []
             self.isLoading = false
         }
         listeners[dmListCol.path] = listener

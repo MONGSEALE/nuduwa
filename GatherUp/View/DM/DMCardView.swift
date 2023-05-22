@@ -13,7 +13,7 @@ struct DMCardView: View {
     @StateObject var viewModel: DMViewModel = .init()
     
     let chattingRoom: DMList
-    @Binding var showDM: Bool
+    @State var showDM: Bool = false
     
     var body: some View {
         HStack(spacing: 16) {

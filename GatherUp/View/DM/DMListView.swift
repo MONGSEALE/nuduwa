@@ -13,8 +13,6 @@ import SDWebImageSwiftUI
 struct DMListView: View {
     
     @StateObject private var viewModel: DMViewModel = .init()
-
-    @State private var showDM: Bool = false  // DMCardView가 리로딩 될때 DMView가 꺼지지 않도록 여기서 초기화
     
     var body: some View {
         NavigationStack{  //NavigationStack 필요없으면 제거
@@ -46,7 +44,7 @@ struct DMListView: View {
                             .padding(.top,30)
                     }else{
                         ForEach(viewModel.chattingRooms) { chattingRoom in
-                            DMCardView(chattingRoom: chattingRoom, showDM: $showDM)
+                            DMCardView(chattingRoom: chattingRoom)
                                 .padding(.bottom,5)
                             Divider()
                         }

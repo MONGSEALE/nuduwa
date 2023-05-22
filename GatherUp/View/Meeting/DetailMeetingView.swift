@@ -9,11 +9,11 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct DetailMeetingView: View {
-    // @StateObject var viewModel: MeetingViewModel = .init()
-    @ObservedObject var viewModel: MeetingViewModel //수정
+     @StateObject var viewModel: MeetingViewModel = .init()
 
     // var meeting: Meeting
     let meetingID: String
+    let hostUID: String
     // @Environment(\.dismiss) private var dismiss
     
     @State private var isEdit: Bool = false
@@ -34,7 +34,7 @@ struct DetailMeetingView: View {
     }
   
     var body: some View {
-        let isHost = viewModel.meeting?.hostUID == viewModel.currentUID
+        let isHost = hostUID == viewModel.currentUID
         let meeting = viewModel.meeting ?? Meeting.updateMeeting()  //nil이면 텅빈 모임
 
         NavigationStack{
@@ -129,9 +129,9 @@ struct DetailMeetingView: View {
             
         }
         .onAppear{
-            viewModel.fetchUser(meeting.hostUID)
-//            viewModel.meetingListener(meetingID: meeting.id!)
-            viewModel.membersListener(meetingID: meeting.id!)
+            viewModel.fetchUser(hostUID)
+            viewModel.meetingListener(meetingID: meetingID)
+            viewModel.membersListener(meetingID: meetingID)
         }
 //        .onDisappear{
 //            viewModel.removeListeners()
