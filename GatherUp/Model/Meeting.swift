@@ -117,7 +117,12 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         self.hostImage = nil
 
         self.type = .basic
-        self.category = Category(rawValue: category)
+        
+        if let category {
+            self.category = Category(rawValue: category)
+        } else {
+            self.category = nil
+        }
     }
     
     // Firestore에 저장할 필드
@@ -216,7 +221,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         let hostUID: String = " "
 
         let type: MeetingType = .basic
-        let catgory: Category? = category
+        let category: Category? = category
 
         return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, meetingDate: meetingDate, hostUID: hostUID, type: type, category: category)
     }
@@ -241,7 +246,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
             data["meetingDate"] = meetingDate
         }
         if category != nil {
-            data["category"] = category.rawValue
+            data["category"] = category?.rawValue
         }
 
         return data

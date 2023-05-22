@@ -15,6 +15,7 @@ struct MeetingCardView: View {
     
     // var meeting: Meeting
     let meetingID: String
+    let hostUID: String
     /// - Callbacks
     // var onUpdate: (Meeting)->()
     // var onDelete: ()->()
@@ -28,29 +29,33 @@ struct MeetingCardView: View {
                 .clipShape(Circle())
             
             VStack(alignment: .leading, spacing: 6){
-                HStack(){
-                    Text(meeting.title)
+                if let meeting = viewModel.meeting {
+                    HStack(){
+                        Text(meeting.title)
+                            .font(.callout)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.black)
+                        Text(meeting.meetingDate.formatted(date: .abbreviated, time: .shortened))
+                            .font(.callout)
+                            .foregroundColor(.black)
+                    }
+                    Text(viewModel.user?.userName ?? "")
                         .font(.callout)
-                        .fontWeight(.semibold)
                         .foregroundColor(.black)
-                    Text(meeting.meetingDate.formatted(date: .abbreviated, time: .shortened))
-                        .font(.callout)
+                    Text(meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                    
+                    Text(meeting.description)
+                        .textSelection(.enabled)
+                        .padding(.vertical,8)
                         .foregroundColor(.black)
+                } else {
+                    ProgressView()
                 }
-                Text(viewModel.user?.userName ?? "")
-                    .font(.callout)
-                    .foregroundColor(.black)
-                Text(viewModel.meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-                
-                Text(viewModel.meeting.description)
-                    .textSelection(.enabled)
-                    .padding(.vertical,8)
-                    .foregroundColor(.black)
             }
             
-            if viewModel.meeting.hostUID == viewModel.currentUID ?? ""{
+            if hostUID == viewModel.currentUID ?? ""{
                 VStack(){
                     Text("MINE")
                         .font(.caption)
@@ -69,14 +74,14 @@ struct MeetingCardView: View {
         
         .onAppear {
             // viewModel.meeting = meeting
-            viewModel.fetchUser(meeting.hostUID)
+            viewModel.fetchUser(hostUID)
             // viewModel.meetingListener(meetingID: meeting.id!)
             viewModel.meetingListener(meetingID: meetingID)
         }
         .onDisappear {
             // 클릭해서 DetailMeetingView가 보여질 때는 removeListener() 호출하지 않음
             if !viewModel.isDetailViewVisible {
-                viewModel.removeListener()
+                viewModel.removeListeners()
             }
         }
         // .onChange(of: viewModel.meeting) { updatedMeeting in

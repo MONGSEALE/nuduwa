@@ -63,7 +63,7 @@ struct ReusableProfileContent: View {
                         
                         
                         VStack(alignment: .leading, spacing: 6){
-                            EditText(text: user.userName ?? "", editText: $editName, item: "닉네임을 입력해주세요", isEditable: isEdit)
+                            EditText(text: user.userName , editText: $editName, item: "닉네임을 입력해주세요", isEditable: isEdit)
                                 .font(.title3)
                                 .fontWeight(.semibold)
                             Text(user.userEmail ?? "")
@@ -107,7 +107,8 @@ struct ReusableProfileContent: View {
                         if editName != "" {
                             let name = editName==user.userName ? nil : editName
                             onEdit(name, photoItem)
-                            isEdit.toggle()
+                            isEdit = false
+                            editName = nil
                         }
                     }){
                         CustomButtonText(text: "수정 완료", backgroundColor: .blue)
@@ -115,7 +116,7 @@ struct ReusableProfileContent: View {
                     Button(action: {
                         imageData = nil
                         photoItem = nil
-                        isEdit.toggle()
+                        isEdit = false
                     }){
                         CustomButtonText(text: "수정 취소", backgroundColor: .red)
                     }
@@ -125,15 +126,15 @@ struct ReusableProfileContent: View {
             
         }
     }
-    func image(from asset: PHAsset, completion: @escaping (UIImage?) -> Void) {
-        let options = PHImageRequestOptions()
-        options.isSynchronous = true
-        options.deliveryMode = .highQualityFormat
-        options.isNetworkAccessAllowed = true
-        let imageManager = PHImageManager.default()
-        imageManager.requestImage(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFill, options: options) { (image, info) in
-            completion(image)
-        }
-    }
+//    func image(from asset: PHAsset, completion: @escaping (UIImage?) -> Void) {
+//        let options = PHImageRequestOptions()
+//        options.isSynchronous = true
+//        options.deliveryMode = .highQualityFormat
+//        options.isNetworkAccessAllowed = true
+//        let imageManager = PHImageManager.default()
+//        imageManager.requestImage(for: asset, targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFill, options: options) { (image, info) in
+//            completion(image)
+//        }
+//    }
 }
 

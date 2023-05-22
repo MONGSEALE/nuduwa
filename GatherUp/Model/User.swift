@@ -22,13 +22,13 @@ struct User: Identifiable, Codable, FirestoreConvertible {
 
     var signUpDate: Timestamp
     
-    init(id: String? = nil, userName: String, userEmail: String? = nil, userImage: URL? = nil, userGoogleData: UserProviderData? = nil){
+    init(id: String? = nil, userName: String, userEmail: String? = nil, userImage: URL? = nil, userGoogleData: UserProviderData? = nil, signUpDate: Timestamp){
         self.id = id ?? UUID().uuidString
         self.userName = userName
         self.userEmail = userEmail
         self.userGoogleData = userGoogleData
         self.userImage = userImage
-        self.signUpDate = Timestamp(date: Date())
+        self.signUpDate = signUpDate
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -41,33 +41,34 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         self.userName = userName
         self.userEmail = data["userEmail"] as? String? ?? nil
         let userImage = data["userImage"] as? String? ?? nil
-        self.userImage = userImage!=nil ? URL(string: userImage) : nil
+        self.userImage = URL(string: userImage ?? "")
         self.userGoogleData = nil
 
         self.signUpDate = signUpDate
     }
     static func getAllData(data: [String: Any], id: String) -> User? {
         guard let userName = data["userName"] as? String,
-            let signUpDate = data["signUpDate"] as? Timestamp
+              let signUpDate = data["signUpDate"] as? Timestamp
         else {return nil }
         
         let userEmail = data["userEmail"] as? String? ?? nil
         let userImageData = data["userImage"] as? String? ?? nil
-        let userImage = userImageData!=nil ? URL(string: userImageData) : nil
+        let userImage = URL(string: userImageData ?? "")
 
         let userGoogleData = data["userGoogleData"] as? UserProviderData? ?? nil
 
-        return User(id: id, userName: userName, userEmail: userEmail, userImage: userImage, userGoogleData: userGoogleData)
+        return User(id: id, userName: userName, userEmail: userEmail, userImage: userImage, userGoogleData: userGoogleData, signUpDate: signUpDate)
     }
-    static func getUserNameImage(data: [String: Any], id: String) -> User {
-        guard let userName = data["userName"] as? String
+    static func getUserNameImage(data: [String: Any], id: String) -> User? {
+        guard let userName = data["userName"] as? String,
+              let signUpDate = data["signUpDate"] as? Timestamp
         else {return nil }
         
         let userEmail = data["userEmail"] as? String? ?? nil
         let userImageData = data["userImage"] as? String? ?? nil
-        let userImage = userImageData!=nil ? URL(string: userImageData) : nil
+        let userImage = URL(string: userImageData ?? "")
 
-        return User(id: id, userName: userName, userImage: userImage)
+        return User(id: id, userName: userName, userImage: userImage, signUpDate: signUpDate)
     }
     
     var firestoreData: [String : Any] {
@@ -99,8 +100,9 @@ struct User: Identifiable, Codable, FirestoreConvertible {
          let name = userGoogleData.name ?? ""
          let email = userGoogleData.email
          let image = userGoogleData.image
+         let signUpDate = Timestamp(date: Date())
          
-         return User(userName: name, userEmail: email, userImage: image, userGoogleData: userGoogleData)
+         return User(userName: name, userEmail: email, userImage: image, userGoogleData: userGoogleData, signUpDate: signUpDate)
      }
     /*
     enum CodingKeys: CodingKey {

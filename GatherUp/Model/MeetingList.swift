@@ -12,7 +12,7 @@ import FirebaseFirestoreSwift
 struct MeetingList: Identifiable, Codable, FirestoreConvertible {
     @DocumentID var id: String?
 
-    let meetingID: STring
+    let meetingID: String
     let isEnd: Bool
     var meetingDate: Date
     var joinDate: Date
@@ -56,9 +56,9 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
         ]
     }
 
-    static func createMeeting(_ meetingID: String) -> MeetingList {
-        return MeetingList(meetingID: meetingID, isHost: true)
-    }
+//    static func createMeeting(_ meetingID: String) -> MeetingList {
+//        return MeetingList(meetingID: meetingID, isHost: true)
+//    }
     /*
     // member가 가입
     static func member(_ meetingID: String) -> [String: Any] {

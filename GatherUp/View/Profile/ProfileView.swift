@@ -16,17 +16,18 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack{
             VStack{
-                if (viewModel.user != nil && !viewModel.isLoading) {
-                    ReusableProfileContent(isEdit: $isEdit, user: viewModel.user!){ updateName, updateImage in
-                        if updateName != nil || updateImage != nil{
-                            viewModel.editUser(userName: updateName, userImage: updateImage)
+//                if (!viewModel.isLoading) {
+                    if let user = viewModel.user {
+                        ReusableProfileContent(isEdit: $isEdit, user: user){ updateName, updateImage in
+                            if updateName != nil || updateImage != nil{
+                                viewModel.editUser(userName: updateName, userImage: updateImage)
+                            }
                         }
                     }
-                }else{
-                    ProgressView()
-                }
+//                }else{
+//                    ProgressView()
+//                }
             }
-            
             .navigationTitle("내 정보")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -53,9 +54,9 @@ struct ProfileView: View {
                     }
                 }
             }
-            .overlay {
-                LoadingView(show: $viewModel.isLoading)
-            }
+//            .overlay {
+//                LoadingView(show: $viewModel.isLoading)
+//            }
             .alert(viewModel.errorMessage, isPresented: $viewModel.showError) {
                 
             }

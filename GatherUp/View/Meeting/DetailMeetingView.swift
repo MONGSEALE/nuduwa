@@ -27,14 +27,14 @@ struct DetailMeetingView: View {
     
     /// 시간 설정 제한 범위
     var dateRange: ClosedRange<Date>{
-        let min = Calendar.current.date(byAdding: .minute, value: 0, to: viewModel.meeting.publishedDate)!
-        let max = Calendar.current.date(byAdding: .day, value: 6, to: viewModel.meeting.publishedDate)!
+        let min = Calendar.current.date(byAdding: .minute, value: 0, to: viewModel.meeting?.publishedDate ?? Date())!
+        let max = Calendar.current.date(byAdding: .day, value: 6, to: viewModel.meeting?.publishedDate ?? Date())!
         
         return min...max
     }
   
     var body: some View {
-        let isHost = viewModel.meeting.hostUID == viewModel.currentUID
+        let isHost = viewModel.meeting?.hostUID == viewModel.currentUID
         let meeting = viewModel.meeting ?? Meeting.updateMeeting()  //nil이면 텅빈 모임
 
         NavigationStack{

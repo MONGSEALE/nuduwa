@@ -134,22 +134,22 @@ struct MeetingSetSheetView: View {
                 }
                 if showPlacePopUp {
                     VStack(spacing: 0) {
-                                     Text("장소를 상세히 입력해주세요!")
-                                         .foregroundColor(.white)
-                                         .padding(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
-                                         .background(Color.black.opacity(0.8))
-                                         .cornerRadius(8)
-                        
-                        
-                                     Rectangle()
-                                         .fill(Color.black.opacity(0.8))
-                                         .frame(width: 12, height: 12)
-                                         .rotationEffect(.degrees(45))
-                                         .offset(x: 20, y: -6)
-                                 }
-                                 .offset(y: -110)
-                                 .animation(.easeInOut(duration: 0.2))
-                            }
+                             Text("장소를 상세히 입력해주세요!")
+                                 .foregroundColor(.white)
+                                 .padding(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                                 .background(Color.black.opacity(0.8))
+                                 .cornerRadius(8)
+                
+                
+                             Rectangle()
+                                 .fill(Color.black.opacity(0.8))
+                                 .frame(width: 12, height: 12)
+                                 .rotationEffect(.degrees(45))
+                                 .offset(x: 20, y: -6)
+                         }
+                         .offset(y: -110)
+                         .animation(.easeInOut(duration: 0.2))
+                    }
             }
             .navigationBarTitle("")
             .navigationBarItems(
@@ -188,23 +188,40 @@ struct PopupError: View {
 }
 
 struct ChoiceMeetingCategoryView: View {
-    @Binding var category: Meeting.Category??
+    @Binding var category: Meeting.Category?
 
     var body: some View {
         HStack(spacing: 12) {
             ForEach(Meeting.Category.allCases, id: \.self) { item in
-                Button{
-                    if self.category != item {
-                        self.category = item
-                    } else {
-                        self.category = nil
+                Text(item.rawValue)
+                    .foregroundColor(category == item ? .blue : .gray)
+                    .onTapGesture {
+                        if category != item {
+                            category = item
+                        } else {
+                            category = nil
+                        }
                     }
-                    
-                } label: {
-                    Text(item.rawValue)
-                }
-                .background((self.category?.rawValue ?? "")==item.rawValue ? Color.blue : Color.gray)
+//                CategoryButton(item: item, category: $category)
             }
+        }
+    }
+}
+struct CategoryButton: View {
+    let item: Meeting.Category
+    @Binding var category: Meeting.Category?
+    
+    var body: some View {
+        Button{
+            if category != item {
+                category = item
+            } else {
+                category = nil
+            }
+            print("카테고리:\(category)")
+        } label: {
+            Text(item.rawValue)
+                .foregroundColor(category == item ? .blue : .gray)
         }
     }
 }

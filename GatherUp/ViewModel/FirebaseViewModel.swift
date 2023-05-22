@@ -18,7 +18,7 @@ class FirebaseViewModel: ObservableObject {
     /// Users 콜렉션
     let strUsers = "Users"
     let strDMList = "DMList"
-    let strJoinMeetings = "JoinMeetings"
+    let strMeetingList = "MeetingList"
     /// Meetings 콜렉션
     let strMeetings = "Meetings"
     let strMembers = "Members"
@@ -66,8 +66,11 @@ class FirebaseViewModel: ObservableObject {
         Task{
             do{
                 guard let userUID = userUID else{throw SomeError.missCurrentUID}
-                let user = !getAllData ? try await getUser(userUID) : try await getUserAllData(userUID)
-                self.user = user
+//                let user = !getAllData ? try await getUser(userUID) : try await getUserAllData(userUID)
+                let user = try await getUser(userUID)
+                await MainActor.run{
+                    self.user = user
+                }
             }catch{
                 await handleError(error)
             }
@@ -84,17 +87,17 @@ class FirebaseViewModel: ObservableObject {
             throw error
         }
     }
-    func getUserAllData(_ userUID: String?) async throws -> User? {
-        print("getUserAllData")
-        do{
-            guard let userUID = userUID else{throw SomeError.missCurrentUID}
-            let doc = db.collection(strUsers).document(userUID)
-            let user = try await doc.getDocument(as: User.getAllData)
-            return user
-        }catch{
-            throw error
-        }
-    }
+//    func getUserAllData(_ userUID: String?) async throws -> User? {
+//        print("getUserAllData")
+//        do{
+//            guard let userUID = userUID else{throw SomeError.missCurrentUID}
+//            let doc = db.collection(strUsers).document(userUID)
+//            let user = try await doc.getDocument(as: User.getAllData)
+//            return user
+//        }catch{
+//            throw error
+//        }
+//    }
 //    func getDocData<T:FirestoreConvertible>(doc: DocumentReference) async throws -> T {
 //        print("getDocData")
 //        do{

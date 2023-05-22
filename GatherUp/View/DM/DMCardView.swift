@@ -58,13 +58,13 @@ struct DMCardView: View {
         }
         .onAppear{
             viewModel.fetchUser(chattingRoom.receiverUID)
-            viewModel.dmListener(dmPeopleDocRef: chattingRoom.dmPeopleDocRef)
+            viewModel.dmListener(dmPeopleRef: chattingRoom.dmPeopleRef)
         }
         .onDisappear{
             viewModel.removeListeners()
         }
         .fullScreenCover(isPresented: $showDM){
-            DMView(receiverID: chattingRoom.receiverUID, dmPeopleDocRef: chattingRoom.dmPeopleDocRef, showDMView: $showDM)
+            DMView(receiverID: chattingRoom.receiverUID, dmPeopleDocRef: chattingRoom.dmPeopleRef, showDMView: $showDM)
         }
     }
         

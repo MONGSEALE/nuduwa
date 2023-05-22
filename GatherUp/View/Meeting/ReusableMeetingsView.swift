@@ -29,9 +29,9 @@ struct ReusableMeetingsView: View {
                         ForEach(viewModel.userMeetings){ userMeeting in
                             let sharedViewModel: MeetingViewModel = .init() //수정
                             NavigationLink(
-                                destination: DetailMeetingView(meetingID: userMeeting.meetingID, viewModel: sharedViewModel)
+                                destination: DetailMeetingView(viewModel: sharedViewModel, meetingID: userMeeting.meetingID)
                             ){
-                                MeetingCardView(meetingID: userMeeting.meetingID, viewModel: sharedViewModel) 
+                                MeetingCardView(viewModel: sharedViewModel, meetingID: userMeeting.meetingID, hostUID: userMeeting.hostUID)
                                 // { updatedMeeting in
                                 //     /// 모임 내용이 업데이트 되었을때 viewModel.meetings 배열값을 수정하여 실시간 업데이트
                                 //     viewModel.updateLocalMeetingDataFromServer(updatedMeeting: updatedMeeting)

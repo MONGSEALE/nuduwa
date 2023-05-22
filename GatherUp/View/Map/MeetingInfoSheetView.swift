@@ -125,8 +125,8 @@ struct MeetingInfoSheetView: View {
         .onDisappear{
             viewModel.removeListeners()
         }
-        .onChange(of: viewModel.isDelete) { isDelete in
-            if isDelete {
+        .onChange(of: viewModel.meeting) { meeting in
+            if meeting == nil {
                 dismiss()
             }
         }

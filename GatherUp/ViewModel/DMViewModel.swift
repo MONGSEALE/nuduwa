@@ -58,12 +58,12 @@ class DMViewModel: FirebaseViewModel {
         }
     }
     /// DMList 경로와 dmPeopleRef 가져오는 함수
-    private func getDMListDoc(uid: String, otherUID: String) async throws -> (DocumentReference?,DocumentReference?) {
+    private func getDMListDoc(uid: String, otherUID: String) async throws -> (DocumentReference?,DocumentReference?)? {
         do{
             let query = db.collection(strUsers).document(uid).collection(strDMList).whereField("receiverUID", isEqualTo: otherUID)
             let snapshot = try await query.getDocuments()
             let doc = snapshot.documents.first
-            let docRef = doc?.reference
+            guard let docRef = doc?.reference else{return nil}
             let dmPeopleRef = doc?.get("dmPeopleRef") as? DocumentReference
             
             return (docRef, dmPeopleRef)
@@ -84,33 +84,15 @@ class DMViewModel: FirebaseViewModel {
             var dmPeopleDocRef: DocumentReference?
             var currentDocRef: DocumentReference?
             var receiverDocRef: DocumentReference?
-
-            // 비동기로 2개작업 동시에 실행
-            try await withThrowingTaskGroup(of: Void.self) { group in
-                // 사용자 DMList 경로와 dmPeopleRef 가져오기
-                group.addTask {
-                    do {
-                        let data = try await getDMListDoc(uid: currentUID, otherUID: receiverUID)
-                        if let data = data {
-                            currentDocRef = data.0
-                            dmPeopleDocRef = data.1
-                        }
-                    } catch {
-                        throw error
-                    }
-                }
-                // 상대방 DMList 경로와 dmPeopleRef 가져오기
-                group.addTask {
-                    do {
-                        let data = try await getDMListDoc(uid: receiverUID, otherUID: currentUID)
-                        if let data = data {
-                            receiverDocRef = data.0
-                            dmPeopleDocRef = data.1
-                        }
-                    } catch {
-                        throw error
-                    }
-                }
+            
+            if let data = try await self.getDMListDoc(uid: currentUID, otherUID: receiverUID) {
+                currentDocRef = data.0
+                dmPeopleDocRef = data.1
+            }
+        
+            if let data = try await getDMListDoc(uid: receiverUID, otherUID: currentUID) {
+                receiverDocRef = data.0
+                dmPeopleDocRef = data.1
             }
 
             if currentDocRef != nil && receiverDocRef != nil{
@@ -121,7 +103,7 @@ class DMViewModel: FirebaseViewModel {
                 // 상대방 DMList에 사용자와의 DM데이터 문서 생성
                 print("사용자만 DMList에 상대방 DM데이터 있음")
                 guard let dmPeopleDocRef = dmPeopleDocRef else{throw SomeError.missSomething}
-                let receiverDMList = DMList(receiverUID: currentUID, dmPeopleDocRef: dmPeopleDocRef)
+                let receiverDMList = DMList(receiverUID: currentUID, dmPeopleRef: dmPeopleDocRef)
                 let receiverDMListRef = try await dmListReceiverCol.addDocument(data: receiverDMList.firestoreData)
                 // DMListDocRef 저장
                 receiverDocRef = receiverDMListRef
@@ -130,7 +112,7 @@ class DMViewModel: FirebaseViewModel {
                 // 사용자 DMList에 상대방과의 DM데이터 문서 생성
                 print("상대방만 DMList에 사용자 DM데이터 있음")
                 guard let dmPeopleDocRef = dmPeopleDocRef else{throw SomeError.missSomething}
-                let currentDMList = DMList(receiverUID: receiverUID, dmPeopleDocRef: dmPeopleDocRef)
+                let currentDMList = DMList(receiverUID: receiverUID, dmPeopleRef: dmPeopleDocRef)
                 let currentDMListRef = try await dmListCorrentCol.addDocument(data: currentDMList.firestoreData)
                 // DMListDocRef 저장
                 currentDocRef = currentDMListRef
@@ -142,7 +124,7 @@ class DMViewModel: FirebaseViewModel {
 
                 if let dmPeopleDoc = dmPeopleSnapshot.documents.first {
                     // 상대방과 이전에 대화기록 있을때
-                    dmPeopleDocRef = dmPeopleDoc.rereference
+                    dmPeopleDocRef = dmPeopleDoc.reference
                 } else {
                     // 상대방과 첫 DM일때, DMPeople에 문서 생성
                     let dmPeople = DMPeople(chattersUID: [currentUID,receiverUID])
@@ -151,16 +133,17 @@ class DMViewModel: FirebaseViewModel {
                 }
                 guard let dmPeopleDocRef = dmPeopleDocRef else{throw SomeError.missSomething}
                 // 사용자 DMList에 상대방과의 DM데이터 문서 생성
-                let currentDMList = DMList(receiverUID: receiverUID, dmPeopleDocRef: dmPeopleDocRef)
+                let currentDMList = DMList(receiverUID: receiverUID, dmPeopleRef: dmPeopleDocRef)
                 let currentDMListRef = try await dmListCorrentCol.addDocument(data: currentDMList.firestoreData)
                 // 상대방 DMList에 사용자와의 DM데이터 문서 생성
-                let receiverDMList = DMList(receiverUID: currentUID, dmPeopleDocRef: dmPeopleDocRef)
+                let receiverDMList = DMList(receiverUID: currentUID, dmPeopleRef: dmPeopleDocRef)
                 let receiverDMListRef = try await dmListReceiverCol.addDocument(data: receiverDMList.firestoreData)
                 // DMListDocRef 저장
                 currentDocRef = currentDMListRef
                 receiverDocRef = receiverDMListRef
             }
-            guard let receiverDocRef = receiverDocRef,
+            guard let dmPeopleDocRef = dmPeopleDocRef,
+                  let receiverDocRef = receiverDocRef,
                   let currentDocRef = currentDocRef else{throw SomeError.missSomething}
             return (dmPeopleDocRef, currentDocRef, receiverDocRef)
         }catch{
@@ -196,7 +179,7 @@ class DMViewModel: FirebaseViewModel {
                 // DMPeople - DM에 메시지 생성
                 let _ = try await dmCol.addDocument(data: messageData.firestoreData)
                 // 비동기로 2개작업 동시에 실행
-                try await withThrowingTaskGroup(of: Void.self) { group in
+                await withThrowingTaskGroup(of: Void.self) { group in
                     // 사용자 DMList 업데이트
                     group.addTask {
                         do {
@@ -232,7 +215,7 @@ class DMViewModel: FirebaseViewModel {
                 
                 if snapshot.isEmpty{
                     // 비동기로 3개작업 동시에 실행
-                    try await withThrowingTaskGroup(of: Void.self) { group in
+                    await withThrowingTaskGroup(of: Void.self) { group in
                         // 사용자 DMList 삭제
                         group.addTask {
                             do {
@@ -304,7 +287,7 @@ class DMViewModel: FirebaseViewModel {
             // 첫 실행이면 paginationDoc에 저장
             if self.paginationDoc == nil{
                 self.paginationDoc = document
-                fetchPrevMessage(dmPeopleRef: dmPeopleRef)
+                self.fetchPrevMessage(dmPeopleRef: dmPeopleRef)
             }
             self.messages.append(data)
             self.readDM()
@@ -319,10 +302,10 @@ class DMViewModel: FirebaseViewModel {
             do{
                 if currentDMListDocRef == nil {
                     let doc = try await getDMListDoc(uid: currentUID, otherUID: receiverUID)
-                    self.currentDMListDocRef = doc?.docRef
+                    self.currentDMListDocRef = doc?.0
                 }
                 guard let currentDMListDocRef = currentDMListDocRef else{throw SomeError.missSomething}
-                docDelete(docRef: currentDMListDocRef)
+                try await currentDMListDocRef.delete()
             }catch{
                 print("오류")
             }
@@ -342,7 +325,7 @@ class DMViewModel: FirebaseViewModel {
             
             self.chattingRooms = querySnapshot?.documents.compactMap{ document -> DMList? in
                 document.data(as: DMList.self)
-            }.sorted{ $0.latestMessage > $1.latestMessage}
+            }.sorted{ $0.latestMessage > $1.latestMessage} ?? []
             self.isLoading = false
         }
         listeners[dmListCol.path] = listener
