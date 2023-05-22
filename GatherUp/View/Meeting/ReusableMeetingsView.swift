@@ -32,7 +32,7 @@ struct ReusableMeetingsView: View {
                                 destination: DetailMeetingView(meetingID: userMeeting.meetingID, hostUID: userMeeting.hostUID)
                             ){
                                 MeetingCardView(meetingID: userMeeting.meetingID, hostUID: userMeeting.hostUID)
-                            }
+
                             Divider()
                         }
                         .navigationTitle(title)

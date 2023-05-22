@@ -24,6 +24,7 @@ struct DetailMeetingView: View {
     @State private var editMeetingDate: Date? = nil
     
     @State private var toChatView: Bool = false
+ 
     
     /// 시간 설정 제한 범위
     var dateRange: ClosedRange<Date>{
@@ -43,91 +44,139 @@ struct DetailMeetingView: View {
                     .padding(.top,30)
             }else{
                 ScrollView(.vertical, showsIndicators: false){
-                    LazyVStack{
+                    LazyVStack(spacing:30){
                         HStack(spacing: 12){
                             WebImage(url: viewModel.user?.userImage ?? meeting.hostImage).placeholder{ProgressView()}
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
-                                .frame(width: 100, height: 100)
+                                .frame(width: 50, height: 50)
                                 .clipShape(Circle())
                             
+                            
                             VStack(alignment: .leading, spacing: 6){
-                                EditText(text: meeting.title, editText: $editTitle, item: "모임 제목",isEditable: isEdit)
-                                    .font(.title3)
-                                    .fontWeight(.semibold)
                                 Text(viewModel.user?.userName ?? meeting.hostName ?? "")
                                     .font(.callout)
-                                Text(meeting.meetingDate.formatted(date: .numeric, time: .shortened))
+                                Text("\(meeting.meetingDate.formatted(date: .numeric, time: .shortened))에 생성됨")
                                     .font(.caption2)
                                     .foregroundColor(.gray)
                             }
                             .hAlign(.leading)
                         }
-                        EditText(text: meeting.description, editText: $editDescription, item: "모임 내용", isEditable: isEdit)
+                        EditTextMeeting(text: meeting.title, editText: $editTitle, item: "모임 제목",isEditable: isEdit)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        EditTextMeeting(text: meeting.description, editText: $editDescription, item: "모임 내용", isEditable: isEdit)
                             .textSelection(.enabled)
-                            .padding(.vertical,8)
-                            .hAlign(.leading)
-                        if isHost && isEdit {
-                            Section(header:Text("시간 설정")){
-                                DatePicker("",selection: Binding<Date>(
-                                    get: { self.editMeetingDate ?? meeting.meetingDate },
-                                    set: { self.editMeetingDate = $0 }
-                                ), in:dateRange)
-                                    .datePickerStyle(GraphicalDatePickerStyle())
-                            }
-                        }
-                        HStack{
-                            Text("참여자:")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        EditTextMeeting(text: meeting.place , editText: $editPlace , item:"모임 장소",isEditable: isEdit)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        EditDatePicker(date: meeting.meetingDate, editDate: $editMeetingDate, item:"모임 시간",isEditable:isEdit, range: dateRange)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        
+                        
+                        VStack {
+                            Text("참여자")
                                 .font(.caption2)
-                            ForEach(Array(viewModel.dicMembers.values)){ member in
-                                MemberImageButton(member: member, isCurrent: member.memberUID == viewModel.currentUID)
+                            HStack{
+                                ForEach(Array(viewModel.dicMembers.values)){ member in
+                                    MemberImageButton(member: member, isCurrent: member.memberUID == viewModel.currentUID)
+                                }
+                            }
+                                .frame(maxWidth: 340 , alignment: .center)
+                        }
+                        .padding(.horizontal,5)
+                        .padding(.vertical,20)
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        
+                        Button{
+                            toChatView = true
+                        } label: {
+                            Text("채팅 참가")
+                                .font(.callout)
+                                .foregroundColor(.white)
+                                .padding(.horizontal,150)
+                                .padding(.vertical,10)
+                                .background(.blue,in: RoundedRectangle(cornerRadius: 10))
+                        }
+                        .padding(.top, -10)
+                        .fullScreenCover(isPresented: $toChatView) {
+                            NavigationView {
+                                ChatView(meetingID: meeting.id!, meetingTitle: meeting.title, hostUID: meeting.hostUID, members: $viewModel.dicMembers)
                             }
                         }
+
+
                     }
                 }
-                .padding(20)
+                .padding(10)
                 
-                Button{
-                    toChatView = true
-                } label: {
-                    Text("채팅 참가")
-                        .font(.callout)
-                        .foregroundColor(.white)
-                        .padding(.horizontal,30)
-                        .padding(.vertical,10)
-                        .background(.blue,in: Capsule())
-                }
-                .sheet(isPresented: $toChatView){
-                    ChatView(meetingID:meeting.id!,meetingTitle: meeting.title, hostUID: meeting.hostUID, members: $viewModel.dicMembers)
-                }
+             
+                
                 
                 /// Host 여부에 따라 버튼 보이기
-                Group{
-                    if isHost {
-                        EditButtonStack(isEdit: $isEdit) {
-                            if viewModel.meeting != nil{
-                                viewModel.editMeeting(title: editTitle, description: editDescription, place: editPlace, numbersOfMembers: editNumbersOfMembers, meetingDate: editMeetingDate)
-                            }
-                        } onCancle: {
-                            editTitle = meeting.title
-                            editDescription = meeting.description
-                            editMeetingDate = meeting.meetingDate
-                        } onDelete: {
-                            viewModel.deleteMeeting(meetingID: meeting.id!)
-                        }
-                    } else {
-                        Button(action: {
-                            viewModel.leaveMeeting(meetingID: meeting.id!, memberUID: viewModel.currentUID)
-                            // dismiss()
-                        }){
-                            CustomButtonText(text: "모임 나가기", backgroundColor: .red)
-                        }
-                    }
-                }
-                .padding(.bottom, 15)
+              
             }
             
         }
+        .toolbar {
+            
+            ToolbarItem(placement: .navigationBarLeading) {
+                   if isEdit {
+                       Button{
+                           isEdit.toggle()
+                       } label :{
+                           Image(systemName: "chevron.left")
+                           Text("수정 취소")
+                       }
+                   } else {
+                       // 기존에 있던 내용 (예: "<내모임"으로 되돌아가는 버튼)
+                   }
+               }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        if(isEdit==false){
+                            Menu {
+                                Group{
+                                    if isHost{
+                                        Button("모임 수정", action: {
+                                            isEdit.toggle()
+                                        })
+                                        Button("모임 삭제", role: .destructive, action: {
+                                            viewModel.deleteMeeting(meetingID: meeting.id!)
+                                            dismiss()
+                                            
+                                        })
+                                    }
+                                    else{
+                                        Button("모임 나가기", action: {
+                                            viewModel.leaveMeeting(meetingID: meeting.id!, memberUID: viewModel.currentUID)
+                                            dismiss()
+                                        })
+                                    }
+                                }
+                                
+                                
+                            } label: {
+                                Image(systemName: "list.bullet")
+                            }
+                        }
+                        else{
+                            Button{
+                                if viewModel.meeting != nil{
+                                                   viewModel.editMeeting(title: editTitle, description: editDescription, place: editPlace, numbersOfMembers: editNumbersOfMembers, meetingDate: editMeetingDate)
+                                }
+                                               isEdit.toggle()
+                            } label: {
+                                Text("수정 완료")
+                            }
+                        }
+                    }
+                }
+        .navigationBarBackButtonHidden(isEdit)
         .onAppear{
             viewModel.fetchUser(hostUID)
             viewModel.meetingListener(meetingID: meetingID)
@@ -139,7 +188,7 @@ struct DetailMeetingView: View {
     }
 }
 
-struct EditText: View {
+struct EditTextMeeting: View {
     let text: String
     @Binding var editText: String?
     let item: String
@@ -163,68 +212,68 @@ struct EditText: View {
                 }
               }
       } else {
-          Text(text)
-              .font(.title)
-              .fontWeight(.bold)
-              .padding()
+          if (item == "모임 내용"){
+              HStack(alignment: .top){
+                      Image(systemName: "highlighter")
+                      Text(text)
+                          .font(.body)
+              }
+              .padding(.vertical,6)
+          }
+          else if(item == "모임 장소"){
+              HStack(alignment: .top){
+                      Image(systemName: "mappin.and.ellipse")
+                  Text(text)
+                      .font(.body)
+              }
+              .padding(.vertical,6)
+          }
+          else{
+              Text("    \(text)")
+                  .font(.title)
+                  .fontWeight(.bold)
+                  .padding(.vertical,6)
+          }
       }
     }
 }
 
-struct EditButtonStack: View {
-    
-    @Binding var isEdit: Bool
-    
-    var onEdit: ()->()
-    var onCancle: ()->()
-    var onDelete: ()->()
-    
+struct EditDatePicker: View {
+    let date: Date
+    @Binding var editDate: Date?
+    let item: String
+    let isEditable: Bool
+    let range: ClosedRange<Date>?
+
     var body: some View {
-        HStack{
-            if isEdit{
-                Button(action: {
-                    onEdit()
-                    isEdit.toggle()
-                }){
-                    CustomButtonText(text: "수정 완료", backgroundColor: .blue)
+        if isEditable {
+            DatePicker(item, selection: Binding<Date>(
+                get: { self.editDate ?? self.date },
+                set: { self.editDate = $0 }
+            ), in: range ?? Date()...Date().addingTimeInterval(60*60*24*365))
+                .datePickerStyle(GraphicalDatePickerStyle())
+                .padding()
+                .onAppear{
+                    editDate = date
                 }
-//                .disabled((title == "")||(description == ""))
-                Button(action: {
-                    onCancle()
-                    isEdit.toggle()
-                }){
-                    CustomButtonText(text: "수정 취소", backgroundColor: .red)
+                .onDisappear{
+                    if editDate == date{
+                        editDate = nil
+                    }
                 }
-            } else {
-                Button(action: {
-                    isEdit.toggle()
-                }){
-                    CustomButtonText(text: "모임 수정", backgroundColor: .blue)
-                }
-                Button(action: {
-                    onDelete()
-                }){
-                    CustomButtonText(text: "모임 삭제", backgroundColor: .red)
-                }
+        } else {
+            HStack(alignment: .top){
+                    Image(systemName: "calendar")
+                
+                Text("\(date, format: .dateTime.month().day().hour().minute())에 만나요!")
+                    .font(.body)
             }
+            .padding(.vertical,6)
         }
     }
 }
 
 
-struct CustomButtonText: View {
-    let text: String
-    let backgroundColor: Color
-    
-    var body: some View {
-      Text(text)
-        .font(.callout)
-        .foregroundColor(.white)
-        .padding(.horizontal,30)
-        .padding(.vertical,10)
-        .background(backgroundColor,in: Capsule())
-    }
-}
 
 struct MemberImageButton: View {
     let member: Member
@@ -243,8 +292,12 @@ struct MemberImageButton: View {
                 .sheet(isPresented: $showProfile){
                     MemberProfileView(member: member, isCurrent: isCurrent)
                 }
-
         }
-            
     }
 }
+
+
+
+
+
+

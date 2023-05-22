@@ -52,6 +52,11 @@ struct DMView: View {
                                    }
                             }
                         }
+                        .onAppear {
+                                    if let lastMessageIndex = viewModel.messages.indices.last {
+                                        scrollViewProxy.scrollTo(lastMessageIndex, anchor: .bottom)
+                                    }
+                                }
                         .onChange(of: viewModel.messages) { messages in
                             if let lastMessageIndex = messages.indices.last {
                                 withAnimation {
