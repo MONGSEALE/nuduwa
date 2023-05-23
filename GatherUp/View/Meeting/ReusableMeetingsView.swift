@@ -18,7 +18,7 @@ struct ReusableMeetingsView: View {
                 ProgressView()
                     .padding(.top,30)
             } else {
-                if viewModel.userMeetings.isEmpty{
+                if viewModel.meetingsList.isEmpty{
                     /// 모임 배열이 비어있을때
                     Text("가입한 모임이 없습니다")
                         .font(.caption)
@@ -26,26 +26,24 @@ struct ReusableMeetingsView: View {
                         .padding(.top,30)
                 }else{
                     ScrollView{
-                        ForEach(viewModel.userMeetings){ userMeeting in
+                        ForEach(viewModel.meetingsList){ meeting in
                             //                            let itemViewModel: MeetingViewModel = .init() //수정
                             NavigationLink(
-                                destination: DetailMeetingView(meetingID: userMeeting.meetingID, hostUID: userMeeting.hostUID)
+                                destination: DetailMeetingView(meetingID: meeting.meetingID, hostUID: meeting.hostUID)
                             ){
-                                MeetingCardView(meetingID: userMeeting.meetingID, hostUID: userMeeting.hostUID)
-                                
-                                Divider()
+                                MeetingCardView(meetingID: meeting.meetingID, hostUID: meeting.hostUID)
                             }
                             .navigationTitle(title)
                             .navigationBarTitleDisplayMode(.inline)
                             .listStyle(.plain)
+//                            Divider()
                         }
-                        .padding(15)
                     }
                 }
             }
         }
         .onAppear{
-            viewModel.userMeetingsListener()
+            viewModel.meetingsListListener()
         }
     }
 }

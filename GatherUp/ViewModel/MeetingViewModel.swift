@@ -17,7 +17,6 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     private var fetchedMeetings: [Meeting] = []         // 서버에서 가져오는 모임 배열
     
 
-    @Published var userMeetings: [MeetingList] = []  //수정
     
     @Published var dicMembers: [String: Member] = [:]
     @Published var dicMembersData: [String: User] = [:]
@@ -136,41 +135,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         listeners[query.description] = listener
         
     }
-     /// FireStore와 meetings 배열 실시간 연동
-    func userMeetingsListener(){
-        print("userMeetingsListener")
-        isLoading = false
-        Task{
-            do{
-                guard let currentUID = currentUID else{return}
-                let query = db.collection(strUsers).document(currentUID).collection(strMeetingList)
-                    .whereField("isEnd", isEqualTo: false)
-                    // .order(by: "meetingDate", descending: true)
-                let listener = query.addSnapshotListener { querySnapshot, error in
-                    if let error = error {print("에러!meetingsListener:\(error)");return}
-                    
-                    var meetings: [Meeting] = []
-                    
-                    guard let documents = querySnapshot?.documents else{return}
-                    self.userMeetings = documents.compactMap { document -> MeetingList? in
-                        document.data(as: MeetingList.self)
-                    }.sorted(by: { meeting1, meeting2 in
-                       if meeting1.hostUID == currentUID && meeting2.hostUID != currentUID {
-                            return true // meeting1의 hostUID가 currentUID와 같을 때 meeting1을 앞으로 정렬
-                        } else if meeting1.hostUID != currentUID && meeting2.hostUID == currentUID {
-                            return false // meeting2의 hostUID가 currentUID와 같을 때 meeting2를 앞으로 정렬
-                        } else {
-                            // hostUID가 같은 경우 meetingDate 필드를 기준으로 내림차순 정렬
-                            return meeting1.meetingDate > meeting2.meetingDate
-                        }   
-                    })                 
-                }
-                listeners[query.description] = listener
-            }catch{
-                await handleError(error)
-            }
-        }
-    }
+     
 
     /// 모임 데이터 가져오기
     func fetchMeeting(_ meetingID: String){

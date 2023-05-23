@@ -42,7 +42,7 @@ class DMViewModel: FirebaseViewModel {
 
     /// 채팅방 들어갔을때 실행하는 함수
     func setDMRoom(receiverUID: String) {
-        guard let currentUID = currentUID else{return}
+//        guard let currentUID = currentUID else{return}
         isLoading = true
         Task{
             do{
@@ -199,6 +199,7 @@ class DMViewModel: FirebaseViewModel {
                         }
                     }
                 }
+                readDM()
             }catch{
                 print("오류!sendDM")
             }
@@ -326,24 +327,35 @@ class DMViewModel: FirebaseViewModel {
             if let error = error {self.handleErrorTask(error);return}
             guard let querySnapshot else{return}
             
-            querySnapshot.documentChanges.forEach { diff in
-                if (diff.type == .added) {
-                    guard let data = diff.document.data(as: DMList.self) else{return}
-                    print("추가: \(diff.document.data())")
-                    self.chattingRooms.append(data)
-                }
-                
-                if (diff.type == .modified) {
-                    guard let data = diff.document.data(as: DMList.self) else{return}
-                    print("변경: \(diff.document.data())")
-                    self.chattingRooms.append(data)
-                }
+//            querySnapshot.documentChanges.forEach { diff in
+//                if (diff.type == .added) {
+//                    guard let data = diff.document.data(as: DMList.self) else{return}
+//                    print("추가: \(diff.document.data())")
+//                    if self.chattingRooms.contains(where: {$0.dmPeopleRef != data.dmPeopleRef} ) {
+//                        self.chattingRooms.append(data)
+//                    }
+//
+//                }
+//
+//                if (diff.type == .modified) {
+//                    guard let data = diff.document.data(as: DMList.self) else{return}
+//                    print("변경: \(diff.document.data())")
+//                    self.chattingRooms.append(data)
+//                }
+//            }
+//            self.chattingRooms = self.chattingRooms.sorted{ $0.latestMessage > $1.latestMessage}
+//            print("chattingRooms\(self.chattingRooms)")
+//            for document in querySnapshot.documents {
+//                guard let data = document.data(as: DMList.self) else{continue}
+//                print("data\(data)")
+//                if !self.chattingRooms.contains(where: {$0.dmPeopleRef == data.dmPeopleRef} ) {
+//                    self.chattingRooms.append(data)
+//                }
+//            }
+//            self.chattingRooms = self.chattingRooms.sorted{ $0.latestMessage > $1.latestMessage}
+            self.chattingRooms = querySnapshot.documents.compactMap{ document -> DMList? in
+                document.data(as: DMList.self)
             }
-            self.chattingRooms = self.chattingRooms.sorted{ $0.latestMessage > $1.latestMessage}
-            
-//            self.chattingRooms = querySnapshot?.documents.compactMap{ document -> DMList? in
-//                document.data(as: DMList.self)
-//            }.sorted{ $0.latestMessage > $1.latestMessage} ?? []
             self.isLoading = false
         }
         listeners[dmListCol.path] = listener

@@ -16,17 +16,15 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack{
             VStack{
-//                if (!viewModel.isLoading) {
-                    if let user = viewModel.user {
-                        ReusableProfileContent(isEdit: $isEdit, user: user){ updateName, updateImage in
-                            if updateName != nil || updateImage != nil{
-                                viewModel.editUser(userName: updateName, userImage: updateImage)
-                            }
+                if let user = viewModel.user {
+                    ReusableProfileContent(isEdit: $isEdit, user: user){ updateName, updateImage in
+                        if updateName != nil || updateImage != nil{
+                            viewModel.editUser(userName: updateName, userImage: updateImage)
                         }
                     }
-//                }else{
-//                    ProgressView()
-//                }
+                }else{
+                    ProgressView()
+                }
             }
             .overlay {
                 LoadingView(show: $viewModel.isLoading)

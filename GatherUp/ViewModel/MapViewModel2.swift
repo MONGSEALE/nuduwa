@@ -110,7 +110,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
     }
     /// FireStore와 meetings 배열 실시간 연동
     func mapMeetingsListener(region: MKCoordinateRegion){
-        print("mapMeetingsListener")
+        print("mapMeetingsListener, 현재 리스너갯수: \(listeners.count)")
         checkRegion = region
 
         let metersPerDegree: Double = 111_319.9 // 지구의 반지름 (m) * 2 * pi / 360
@@ -145,11 +145,22 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                     print("mapMeetingsListener 에러1: \(String(describing: error))")
                     return
                 }
-                self.fetchedMeetings[key] = documents.compactMap{ documents -> Meeting? in
-                    documents.data(as: Meeting.self)
+                self.fetchedMeetings[key] = documents.compactMap{ document -> Meeting? in
+                    guard let meetingData = document.data(as: Meeting.self) else {
+                        return nil
+                    }
+                    // 현재 날짜와 비교하여 지난 모임인지 확인
+                    if meetingData.meetingDate.compare(Date()) == .orderedAscending {
+                        self.pastMeeting(meetingID: meetingData.id!)
+                        return nil // 지난 모임은 제외
+                    }
+                    return meetingData
                 }
                 print("미팅:\(self.fetchedMeetings.values.count)")
-                self.mergeMeetings(latitudeDelta: region.span.latitudeDelta)
+                // 마지막 이벤트 후에만 mergeMeetings 호출
+                if key == queries.keys.sorted().last {
+                    self.mergeMeetings(latitudeDelta: region.span.latitudeDelta)
+                }
             }
             listeners[key] = listener
         }

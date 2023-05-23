@@ -127,6 +127,7 @@ class LoginViewModel: FirebaseViewModel {
                 }
                 
                 print("Success Google")
+                listenForUserChanges()
                 await MainActor.run(body: {
                     isLoading = false
                 })
