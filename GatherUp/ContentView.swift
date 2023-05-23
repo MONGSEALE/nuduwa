@@ -39,9 +39,7 @@ struct ContentView: View {
                             }
                     }
                     .fullScreenCover(isPresented: $showDMView){
-//                            DMView(receiverID: room.receiverUID, dmPeopleDocRef: room.dmPeopleRef, showDMView: $showDMView)
-                        DMView(receiverID: $receiverID,  showDMView: $showDMView)
-                        
+                        DMView(receiverID: $receiverID,  showDMView: $showDMView)                        
                     }
                 } else {
                     Login()
