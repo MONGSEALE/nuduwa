@@ -28,15 +28,7 @@ struct DMView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(viewModel.messages.indices, id: \.self) { index in
                                 let message = viewModel.messages[index]
-                                let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
-                                // 날짜 출력
-                                if isNewDay(previousMessage: previousMessage, currentMessage: message) {
-                                    Text(formatDate(message.timestamp)).flippedUpsideDown()
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                        .padding(.top)
-                                        .frame(maxWidth:.infinity)
-                                }
+                                let previousMessage = index > 0 || index==viewModel.messages.last ? viewModel.messages[index - 1] : nil
                                 
                                 let isCurrentUser = message.senderUID == viewModel.currentUID
                                 
@@ -51,6 +43,15 @@ struct DMView: View {
                                             viewModel.fetchPrevMessage(dmPeopleRef: docRef)
                                         }
                                     }
+
+                                // 날짜 출력
+                                if isNewDay(previousMessage: previousMessage, currentMessage: message) {
+                                    Text(formatDate(message.timestamp)).flippedUpsideDown()
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                        .padding(.top)
+                                        .frame(maxWidth:.infinity)
+                                }
                             }
                         }
                     }.flippedUpsideDown()
@@ -114,7 +115,7 @@ struct DMView: View {
         }
     }
     func isNewDay(previousMessage: Message?, currentMessage: Message) -> Bool {
-        guard let previousMessage = previousMessage else { return true }
+        guard let previousMessage = previousMessage else { return false }
         
         let calendar = Calendar.current
         let previousDate = previousMessage.timestamp.dateValue()
