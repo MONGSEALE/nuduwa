@@ -18,75 +18,43 @@ struct DMView: View {
     @Binding var receiverID: String?
 //    let receiverID: String?
     @Binding var showDMView: Bool
+    @State private var count: Int = 0 //테스트용 변수
     
     var body: some View {
         if let receiverID {
             NavigationView{ //NavigationView 필요없으면 제거
-                VStack {/*
-                    List{
-                        ForEach(viewModel.messages.indices, id: \.self) { index in
-                            let message = viewModel.messages[index]
-                            let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
-                            // 날짜 출력
-                            if isNewDay(previousMessage: previousMessage, currentMessage: message) {
-                                Text(formatDate(message.timestamp)).flippedUpsideDown()
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                                    .padding(.top)
-                                    .frame(maxWidth:.infinity)
-                            }
-                            
-                            let isCurrentUser = message.senderUID == viewModel.currentUID
-                            
-                            DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage).flippedUpsideDown()
-                                .onAppear {
-                                    print("message:\(message.text)")
-                                    if message.id == viewModel.messages.last?.id {
-                                        viewModel.readLastDM()
-                                    }
-                                    
-                                    if message.id == viewModel.messages.first?.id && viewModel.paginationDoc != nil && viewModel.isReady != nil {
-                                        guard let docRef = viewModel.dmPeopleRef else{return}
-                                        viewModel.fetchPrevMessage(dmPeopleRef: docRef)
-                                    }
+                VStack {                    
+                    ScrollView{
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(viewModel.messages.indices, id: \.self) { index in
+                                let message = viewModel.messages[index]
+                                let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
+                                // 날짜 출력
+                                if isNewDay(previousMessage: previousMessage, currentMessage: message) {
+                                    Text(formatDate(message.timestamp)).flippedUpsideDown()
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                        .padding(.top)
+                                        .frame(maxWidth:.infinity)
                                 }
+                                
+                                let isCurrentUser = message.senderUID == viewModel.currentUID
+                                
+                                DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage).flippedUpsideDown()
+                                    .onAppear {
+                                        count += 1
+                                        print("온어피어호출수:\(count)")
+                                        print("messageCount:\(viewModel.messages.count)")
+                                        
+                                        if message.id == viewModel.messages.last?.id && viewModel.paginationDoc != nil  {
+                                            guard let docRef = viewModel.dmPeopleRef else{return}
+                                            viewModel.fetchPrevMessage(dmPeopleRef: docRef)
+                                        }
+                                    }
+                            }
                         }
                     }.flippedUpsideDown()
-                    */
                     
-                    ScrollViewReader { scrollViewProxy in
-                        ScrollView{
-                            VStack(alignment: .leading, spacing: 8) {
-                                ForEach(viewModel.messages.indices, id: \.self) { index in
-                                    let message = viewModel.messages[index]
-                                    let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
-                                    // 날짜 출력
-                                    if isNewDay(previousMessage: previousMessage, currentMessage: message) {
-                                        Text(formatDate(message.timestamp)).flippedUpsideDown()
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                            .padding(.top)
-                                            .frame(maxWidth:.infinity)
-                                    }
-                                    
-                                    let isCurrentUser = message.senderUID == viewModel.currentUID
-                                    
-                                    DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage).flippedUpsideDown()
-                                        .onAppear {
-                                            print("message:\(message.text)")
-                                            if message.id == viewModel.messages.last?.id {
-                                                viewModel.readLastDM()
-                                            }
-                                            
-                                            if message.id == viewModel.messages.first?.id && viewModel.paginationDoc != nil && viewModel.isReady != nil {
-                                                guard let docRef = viewModel.dmPeopleRef else{return}
-                                                viewModel.fetchPrevMessage(dmPeopleRef: docRef)
-                                            }
-                                        }
-                                }
-                            }
-                        }.flippedUpsideDown()
-                    }
                     Spacer()
                     HStack{
                         CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $messageText)

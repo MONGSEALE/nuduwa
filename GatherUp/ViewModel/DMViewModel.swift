@@ -22,7 +22,6 @@ class DMViewModel: FirebaseViewModel {
     var paginationDoc: QueryDocumentSnapshot? = nil     // Firestore 문서 가져올때 페이지변수
     
     var isReading: Bool = false                         // 채팅방 들어갔는지 확인변수
-    var isReady: Bool = false
     
     
     // var dmList: DMList? = nil
@@ -34,10 +33,6 @@ class DMViewModel: FirebaseViewModel {
         super.removeListeners()
         messages.removeAll()
         chattingRooms.removeAll()
-    }
-
-    func readLastDM(){
-        isReady = true
     }
 
     /// 채팅방 들어갔을때 실행하는 함수
@@ -264,7 +259,6 @@ class DMViewModel: FirebaseViewModel {
                 let prevMessage = doc.documents.compactMap { document -> Message? in
                     document.data(as: Message.self)
                 }
-//                messages.insert(contentsOf: prevMessage.reversed(), at: 0)
                 messages.append(contentsOf: prevMessage)
                 if let lastDoc = doc.documents.last {
                     self.paginationDoc = lastDoc
@@ -293,8 +287,9 @@ class DMViewModel: FirebaseViewModel {
                 self.paginationDoc = document
                 self.fetchPrevMessage(dmPeopleRef: dmPeopleRef)
             }
-            self.messages.insert(data, at: 0)
-//            self.messages.append(data)
+            withAnimation {
+                self.messages.insert(data, at: 0)
+            }
             self.readDM()
         }
         listeners[query.description] = listener
