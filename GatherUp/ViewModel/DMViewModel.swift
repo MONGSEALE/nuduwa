@@ -42,7 +42,7 @@ class DMViewModel: FirebaseViewModel {
 
     /// 채팅방 들어갔을때 실행하는 함수
     func setDMRoom(receiverUID: String) {
-        guard let currentUID = currentUID else{return}
+//        guard let currentUID = currentUID else{return}
         isLoading = true
         Task{
             do{
@@ -199,6 +199,7 @@ class DMViewModel: FirebaseViewModel {
                         }
                     }
                 }
+                readDM()
             }catch{
                 print("오류!sendDM")
             }
