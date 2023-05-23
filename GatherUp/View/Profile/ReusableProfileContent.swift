@@ -30,11 +30,14 @@ struct ReusableProfileContent: View {
                 LazyVStack(){
                     HStack(spacing:0){
                         ZStack{
-                            if let imageData,
+                            if isEdit, let imageData,
                                let uiImage = UIImage(data: imageData) {
                                 Image(uiImage: uiImage)
                                     .resizable()
+                                    .frame(width: 50,height: 50)
                                     .aspectRatio(contentMode: .fill)
+                                    .clipShape(Circle())
+                                    .padding(.leading, -20)
                             }else{
                                 WebImage(url: user.userImage).placeholder{ProgressView()}
                                     .resizable()

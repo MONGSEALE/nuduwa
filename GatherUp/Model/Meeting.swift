@@ -34,7 +34,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     var hostImage: URL?
 
     var type: MeetingType   // 지도에서 겹치는 큰 아이콘 생성용 겸 새로운 모임 분별
-    var category: Category?  // 모임 구분
+    var category: Category? // 모임 구분
     
     enum MeetingType: Codable {
         case basic

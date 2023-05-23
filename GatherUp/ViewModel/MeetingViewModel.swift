@@ -161,48 +161,36 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         isLoading = true
         Task{
             do{
-                guard let memberUID = memberUID else{return}
+                guard let currentUID,
+                      let memberUID else{return}
 
-                let doc = db.collection(strMeetings).document(meetingID)
-                let query = doc.collection(strMembers)
+                let meetingDoc = db.collection(strMeetings).document(meetingID)
+                let memberQuery = meetingDoc.collection(strMembers)
                             .whereField("memberUID", isEqualTo: memberUID)
+                let meetingListQuery = db.collection(strUsers).document(currentUID).collection(strMeetingList).whereField("meetingID", isEqualTo: meetingID)
 
                 guard let member = try await getUser(memberUID) else{return}  //오류메시지 출력해야함
 
-                let querySnapshot = try await query.getDocuments()
-
-                for document in querySnapshot.documents {
-                    try await doc.collection(strMembers).document(document.documentID).delete()
-                }
+                try await memberQuery.getDocuments().documents.first?.reference.delete()
+                
+                try await meetingListQuery.getDocuments().documents.first?.reference.delete()
+                
+//                try await querySnapshot.documents.first?.reference.delete()
+//
+//                for document in querySnapshot.documents {
+//                    try await doc.collection(strMembers).document(document.documentID).delete()
+//                }
+                
+                    
 
                 let text = "\(member.userName)님이 채팅에 나가셨습니다."
                 let message = Message(text, uid: "", isSystemMessage: true)
 
-                try await doc.collection(strMessage).addDocument(data: message.firestoreData)
-                    
+                try await meetingDoc.collection(strMessage).addDocument(data: message.firestoreData)
                 
-                isLoading = false
-                // query.getDocuments { (querySnapshot, error) in
-                //     if let error = error {
-                //         print("에러: \(error)")
-                //         return
-                //     } else {
-                //         guard let documents = querySnapshot?.documents else { return }
-                //         for document in documents {
-                //             doc.collection(self.strMembers).document(document.documentID).delete()
-                //         }
-                //         doc.collection(self.strMessage).addDocument(data: [
-                //             "text": "\(self.user!.userName)님이 채팅에 나가셨습니다.",
-                //             "userId": "SYSTEM",
-                //             "userName": "SYSTEM",
-                //             "timestamp": Timestamp(),
-                //             "isSystemMessage": true
-                //         ])
-                //     }
-                // }
-                // await MainActor.run(body: {
-                //     isLoading = false
-                // })
+                await MainActor.run{
+                    isLoading = false
+                }
             }catch{
                 await handleError(error)
             }
@@ -214,7 +202,10 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         print("deleteMeeting")
         isLoading = true
         Task{
+            guard let currentUID else{return}
             let doc = db.collection(strMeetings).document(meetingID)
+            let meetingListQuery = db.collection(strUsers).document(currentUID).collection(strMeetingList).whereField("meetingID", isEqualTo: meetingID)
+            
             doc.delete{ error in
                 if let error = error{
                     self.handleErrorTask(error)
@@ -239,6 +230,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                     }
                 }
             }
+            try await meetingListQuery.getDocuments().documents.first?.reference.delete()
             await MainActor.run(body: {
                 isLoading = false
             })
