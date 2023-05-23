@@ -264,7 +264,8 @@ class DMViewModel: FirebaseViewModel {
                 let prevMessage = doc.documents.compactMap { document -> Message? in
                     document.data(as: Message.self)
                 }
-                messages.insert(contentsOf: prevMessage.reversed(), at: 0)
+//                messages.insert(contentsOf: prevMessage.reversed(), at: 0)
+                messages.append(contentsOf: prevMessage)
                 if let lastDoc = doc.documents.last {
                     self.paginationDoc = lastDoc
                 }
@@ -292,7 +293,8 @@ class DMViewModel: FirebaseViewModel {
                 self.paginationDoc = document
                 self.fetchPrevMessage(dmPeopleRef: dmPeopleRef)
             }
-            self.messages.append(data)
+            self.messages.insert(data, at: 0)
+//            self.messages.append(data)
             self.readDM()
         }
         listeners[query.description] = listener

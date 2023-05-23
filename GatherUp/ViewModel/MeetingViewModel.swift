@@ -202,38 +202,34 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         print("deleteMeeting")
         isLoading = true
         Task{
-            guard let currentUID else{return}
-            let doc = db.collection(strMeetings).document(meetingID)
-            let meetingListQuery = db.collection(strUsers).document(currentUID).collection(strMeetingList).whereField("meetingID", isEqualTo: meetingID)
-            
-            doc.delete{ error in
-                if let error = error{
-                    self.handleErrorTask(error)
-                }else{
-                    doc.collection(self.strMembers).getDocuments{ querySnapshot, error in
-                        if let error = error{
-                            self.handleErrorTask(error)
-                        }else{
-                            for document in querySnapshot!.documents {
-                                document.reference.delete()
-                            }
-                        }
-                    }
-                    doc.collection(self.strMessage).getDocuments{ querySnapshot, error in
-                        if let error = error{
-                            self.handleErrorTask(error)
-                        }else{
-                            for document in querySnapshot!.documents {
-                                document.reference.delete()
-                            }
-                        }
-                    }
+            do{
+                guard let currentUID else{return}
+                let meetingDoc = db.collection(strMeetings).document(meetingID)
+                let meetingListQuery = db.collection(strUsers).document(currentUID).collection(strMeetingList).whereField("meetingID", isEqualTo: meetingID)
+                
+                let meetingsListDocs = try await meetingListQuery.getDocuments()
+                
+                try await meetingsListDocs.documents.first?.reference.delete()
+                
+                try await meetingDoc.delete()
+
+                let membersDocs = try await meetingDoc.collection(self.strMembers).getDocuments()
+                for document in membersDocs.documents {
+                    try await document.reference.delete()
                 }
+                
+                let meesageDocs = try await meetingDoc.collection(self.strMessage).getDocuments()
+                for document in meesageDocs.documents {
+                    try await document.reference.delete()
+                }
+
+                
+                await MainActor.run(body: {
+                    isLoading = false
+                })
+            }catch{
+                print("모임삭제 오류")
             }
-            try await meetingListQuery.getDocuments().documents.first?.reference.delete()
-            await MainActor.run(body: {
-                isLoading = false
-            })
         }
     }
     

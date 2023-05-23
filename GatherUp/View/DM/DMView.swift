@@ -22,7 +22,38 @@ struct DMView: View {
     var body: some View {
         if let receiverID {
             NavigationView{ //NavigationView 필요없으면 제거
-                VStack {
+                VStack {/*
+                    List{
+                        ForEach(viewModel.messages.indices, id: \.self) { index in
+                            let message = viewModel.messages[index]
+                            let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
+                            // 날짜 출력
+                            if isNewDay(previousMessage: previousMessage, currentMessage: message) {
+                                Text(formatDate(message.timestamp)).flippedUpsideDown()
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                                    .padding(.top)
+                                    .frame(maxWidth:.infinity)
+                            }
+                            
+                            let isCurrentUser = message.senderUID == viewModel.currentUID
+                            
+                            DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage).flippedUpsideDown()
+                                .onAppear {
+                                    print("message:\(message.text)")
+                                    if message.id == viewModel.messages.last?.id {
+                                        viewModel.readLastDM()
+                                    }
+                                    
+                                    if message.id == viewModel.messages.first?.id && viewModel.paginationDoc != nil && viewModel.isReady != nil {
+                                        guard let docRef = viewModel.dmPeopleRef else{return}
+                                        viewModel.fetchPrevMessage(dmPeopleRef: docRef)
+                                    }
+                                }
+                        }
+                    }.flippedUpsideDown()
+                    */
+                    
                     ScrollViewReader { scrollViewProxy in
                         ScrollView{
                             VStack(alignment: .leading, spacing: 8) {
@@ -31,7 +62,7 @@ struct DMView: View {
                                     let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
                                     // 날짜 출력
                                     if isNewDay(previousMessage: previousMessage, currentMessage: message) {
-                                        Text(formatDate(message.timestamp))
+                                        Text(formatDate(message.timestamp)).flippedUpsideDown()
                                             .font(.caption)
                                             .foregroundColor(.gray)
                                             .padding(.top)
@@ -40,8 +71,9 @@ struct DMView: View {
                                     
                                     let isCurrentUser = message.senderUID == viewModel.currentUID
                                     
-                                    DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
+                                    DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage).flippedUpsideDown()
                                         .onAppear {
+                                            print("message:\(message.text)")
                                             if message.id == viewModel.messages.last?.id {
                                                 viewModel.readLastDM()
                                             }
@@ -53,17 +85,7 @@ struct DMView: View {
                                         }
                                 }
                             }
-                            .onChange(of: viewModel.messages) { messages in
-                                if let lastMessageIndex = messages.indices.last {
-                                    withAnimation {
-                                        scrollViewProxy.scrollTo(lastMessageIndex, anchor: .bottom)
-                                    }
-                                }
-                            }
-                            .onAppear{
-                                scrollViewProxy.scrollTo(0, anchor: .bottom)
-                            }
-                        }
+                        }.flippedUpsideDown()
                     }
                     Spacer()
                     HStack{
@@ -241,3 +263,15 @@ struct DMCustomTextFieldRow: View {
 }
 
 
+struct FlippedUpsideDown: ViewModifier {
+   func body(content: Content) -> some View {
+    content
+      .rotationEffect(Angle(radians: Double.pi))
+      .scaleEffect(x: -1, y: 1, anchor: .center)
+   }
+}
+extension View{
+   func flippedUpsideDown() -> some View{
+     self.modifier(FlippedUpsideDown())
+   }
+}
