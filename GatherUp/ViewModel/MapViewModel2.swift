@@ -150,21 +150,19 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                         return nil
                     }
                     // 현재 날짜와 비교하여 지난 모임인지 확인
-                    if let meetingDate = meetingData.meetingDate,
-                    meetingDate.compare(Date()) == .orderedAscending {
-                        self.pastMeeting(meetingID: meetingDate.id)
+                    if meetingData.meetingDate.compare(Date()) == .orderedAscending {
+                        self.pastMeeting(meetingID: meetingData.id!)
                         return nil // 지난 모임은 제외
                     }
                     return meetingData
                 }
                 print("미팅:\(self.fetchedMeetings.values.count)")
                 // 마지막 이벤트 후에만 mergeMeetings 호출
-                if key == queries.keys.last {
+                if key == queries.keys.sorted().last {
                     self.mergeMeetings(latitudeDelta: region.span.latitudeDelta)
                 }
             }
             listeners[key] = listener
-            
         }
         
     }

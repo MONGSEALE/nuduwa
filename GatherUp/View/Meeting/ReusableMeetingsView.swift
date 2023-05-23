@@ -32,14 +32,12 @@ struct ReusableMeetingsView: View {
                                 destination: DetailMeetingView(meetingID: meeting.meetingID, hostUID: meeting.hostUID)
                             ){
                                 MeetingCardView(meetingID: meeting.meetingID, hostUID: meeting.hostUID)
-                                
-                                Divider()
                             }
                             .navigationTitle(title)
                             .navigationBarTitleDisplayMode(.inline)
                             .listStyle(.plain)
+//                            Divider()
                         }
-                        .padding(15)
                     }
                 }
             }

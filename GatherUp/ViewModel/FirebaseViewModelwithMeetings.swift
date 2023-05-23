@@ -66,30 +66,34 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
             do{
                 guard let currentUID = currentUID,
                       let user = try await getUser(currentUID) else{print("조인미팅오류");return}
-
-                let meetingsDoc = db.collection(strMeetings).document(meetingID)
-                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strMeetingList)
+                
                 let membersCol = db.collection(strMeetings).document(meetingID).collection(strMembers)
+                let messageCol = db.collection(strMeetings).document(meetingID).collection(strMessage)
+                let joinMeetingsCol = db.collection(strUsers).document(currentUID).collection(strMeetingList)
             
                 let member = Member(memberUID: currentUID)
                 
                 // 모임-멤버 컬렉션에 유저추가
-                let docRef = try await meetingsDoc.collection(strMembers).addDocument(data: member.firestoreData)
-                
+                let docRef = try await membersCol.addDocument(data: member.firestoreData)
+                print("1")
                 if numbersOfMembers != 0 {
                     // numbersOfMembers가 0이면 최초생성
                     // 멤버수가 최대멤버수 초과하지 않았는지 다시 확인
+                    try await Task.sleep(nanoseconds: 200_000_000) // 유저추가 동기화될때까지 0.2초 대기
+                    
                     let membersSnapshot = try await membersCol.getDocuments()
                     let fetchedMembers = membersSnapshot.documents.compactMap{ document -> Member? in
                         document.data(as: Member.self)
                     }
-                    
+                    print("fetchedMembers:\(fetchedMembers)")
                     let currentDate = fetchedMembers.first(where: { $0.memberUID == currentUID })?.joinDate
-                    guard let currentDate = currentDate else{return}
+                    guard let currentDate = currentDate else{print("3");return}
                     let filteredMembers = fetchedMembers.filter { member in
                         return member.joinDate < currentDate
                     }
+                    print("4")
                     if filteredMembers.count >= numbersOfMembers {
+                        print("5")
                         // 멤버수가 최대멤버수 초과했을때 멤버 삭제
                         try await docRef.delete()
                         print("모임 참가 실패")
@@ -99,16 +103,19 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                         }
                         return
                     }
+                    print("6")
                 }
-                    
+                print("비동기실행전")
                 // 멤버수가 최대멤버수 초과하지 않았을때
                 // 비동기로 2개 작업 동시 실행
                 await withThrowingTaskGroup(of: Void.self) { group in
+                    print("비동기실행")
                     // UserMeeting 컬렉션에 모임 추가
                     group.addTask {
                         do {
                             let meetingList = MeetingList(meetingID: meetingID, meetingDate: meetingDate, hostUID: hostUID)
                             try await joinMeetingsCol.addDocument(data: meetingList.firestoreData)
+                            print("joinMeetingsCol추가")
                         } catch {
                             print("joinMeetingsCol추가실패")
                             throw error
@@ -119,7 +126,8 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                         do {
                             let text = "\(user.userName)님이 채팅에 참가하셨습니다."
                             let message = Message(text, uid: "SYSTEM", isSystemMessage: true)
-                            try await meetingsDoc.collection(self.strMessage).addDocument(data: message.firestoreData)
+                            try await messageCol.addDocument(data: message.firestoreData)
+                            print("Message추가")
                         } catch {
                             print("Message추가실패")
                             throw error
@@ -138,25 +146,6 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
         }
     }
     
-    func joinMeetingsListener(){
-        guard let currentUID = currentUID else{return}
-
-        let col = db.collection(strUsers).document(currentUID).collection(strMeetingList)
-
-        let listener = col.addSnapshotListener { querySnapshot, error in
-            if let error = error{
-                self.handleErrorTask(error)
-                return
-            }
-            guard let querySnapshot = querySnapshot else{
-                return
-            }
-            self.joinMeetingIDs = querySnapshot.documents.compactMap{ documents -> String? in
-                try? documents.data()["meetingID"] as? String
-            }
-        }
-        listeners[col.path] = listener
-    }
     /// FireStore와 meetings 배열 실시간 연동
     func meetingsListListener(){
         print("meetingsListListener")
@@ -195,11 +184,12 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
 
     /// meetingDate 지나면 지도에서 안보이게
     func pastMeeting(meetingID: String) {
+        print("pastMeeting")
         Task{
             do{
                 let doc = db.collection(strMeetings).document(meetingID)
 
-                try await doc.updateData(Meeting.firestorePastMeeting)
+                try await doc.updateData(Meeting.firestorePastMeeting())
 
             }catch{
                 print("지난모임오류")

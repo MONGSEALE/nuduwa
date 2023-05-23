@@ -16,11 +16,13 @@ class ProfileViewModel: FirebaseViewModel {
     
     @Published var userProfilePicData: Data?
     
-    // MARK: Logging User Out
+    // 로그아웃
     func logOutUser() {
         Task{
             do{
+                // Firebase 로그아웃
                 try Auth.auth().signOut()
+                // 구글 로그아웃
                 GIDSignIn.sharedInstance.signOut()
             }catch{
                 await handleError(error)
@@ -28,7 +30,7 @@ class ProfileViewModel: FirebaseViewModel {
         }
     }
     
-    // MARK: Deleting User Entire Account
+    // 계정 삭제
     func deleteAccount() {
         isLoading = true
         Task{

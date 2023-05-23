@@ -45,11 +45,12 @@ struct User: Identifiable, Codable, FirestoreConvertible {
 
         self.signUpDate = signUpDate
     }
+    
     static let getAllData: ([String: Any], String) -> User? = { data, id in
         guard let userName = data["userName"] as? String,
               let signUpDate = data["signUpDate"] as? Timestamp
         else {return nil }
-        
+
         let userEmail = data["userEmail"] as? String? ?? nil
         let userImageData = data["userImage"] as? String? ?? nil
         let userImage = URL(string: userImageData ?? "")
@@ -63,7 +64,6 @@ struct User: Identifiable, Codable, FirestoreConvertible {
               let signUpDate = data["signUpDate"] as? Timestamp
         else {return nil }
         
-        let userEmail = data["userEmail"] as? String? ?? nil
         let userImageData = data["userImage"] as? String? ?? nil
         let userImage = URL(string: userImageData ?? "")
 

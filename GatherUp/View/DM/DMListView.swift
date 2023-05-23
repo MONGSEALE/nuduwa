@@ -13,6 +13,8 @@ import SDWebImageSwiftUI
 struct DMListView: View {
     
     @StateObject private var viewModel: DMViewModel = .init()
+    @Binding var receiverID: String?
+    @Binding var showDMView: Bool
     
     var body: some View {
         NavigationStack{  //NavigationStack 필요없으면 제거
@@ -43,9 +45,13 @@ struct DMListView: View {
                             .foregroundColor(.gray)
                             .padding(.top,30)
                     }else{
-                        ForEach(viewModel.chattingRooms) { chattingRoom in
-                            DMCardView(chattingRoom: chattingRoom)
-                                .padding(.bottom,5)
+                        ForEach(viewModel.chattingRooms, id: \.dmPeopleRef) { chattingRoom in
+                            DMCardView(chattingRoom: chattingRoom){ receiverID in
+                                self.receiverID = receiverID
+                                showDMView = true
+                            }
+                            .padding(.bottom,5)
+                                
                             Divider()
                         }
                         .padding(.horizontal)

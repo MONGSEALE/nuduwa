@@ -246,7 +246,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     // 모임시간 지난 모임 업데이트 - 객체 안만들고 Firestore 바로 저장하기
     static func firestorePastMeeting() -> [String: Any] {
         return [
-            "geoHast": nil
+            "geoHast": FieldValue.delete()
         ]
     }
 

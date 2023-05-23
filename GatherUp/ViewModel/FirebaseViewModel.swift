@@ -87,17 +87,17 @@ class FirebaseViewModel: ObservableObject {
             throw error
         }
     }
-   func getUserAllData(_ userUID: String?) async throws -> User? {
-       print("getUserAllData")
-       do{
-           guard let userUID = userUID else{throw SomeError.missCurrentUID}
-           let doc = db.collection(strUsers).document(userUID)
-           let user = try await doc.getDocument(as: User.getAllData)
-           return user
-       }catch{
-           throw error
-       }
-   }
+//   func getUserAllData(_ userUID: String?) async throws -> User? {
+//       print("getUserAllData")
+//       do{
+//           guard let userUID = userUID else{throw SomeError.missCurrentUID}
+//           let doc = db.collection(strUsers).document(userUID)
+//           let user = try await doc.getDocument(as: User.getAllData.self)
+//           return user
+//       }catch{
+//           throw error
+//       }
+//   }
 //    func getDocData<T:FirestoreConvertible>(doc: DocumentReference) async throws -> T {
 //        print("getDocData")
 //        do{

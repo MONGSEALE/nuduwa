@@ -40,9 +40,11 @@ struct MapView: View {
                                 }
                             }
                         case .piled:
-                            PiledMeetingIconView(showAnnotation: $showAnnotation, meetings: serverViewModel.bigIconMeetings[item.id!]!, isJoinIDs: serverViewModel.meetingsList.map{ $0.meetingID }) { locate in
-                                withAnimation(.easeInOut(duration: 0.25)){
-                                    viewModel.region.center = locate
+                            if let meetings = serverViewModel.bigIconMeetings[item.id!] {
+                                PiledMeetingIconView(showAnnotation: $showAnnotation, meetings: meetings, isJoinIDs: serverViewModel.meetingsList.map{ $0.meetingID }) { locate in
+                                    withAnimation(.easeInOut(duration: 0.25)){
+                                        viewModel.region.center = locate
+                                    }
                                 }
                             }
                         case .new:
@@ -79,6 +81,31 @@ struct MapView: View {
 
             VStack{
                 HStack{
+                    Menu {
+                        ForEach(Meeting.Category.allCases, id: \.self) { item in
+                            // Meeting 구조체 Category에 있는 모든 케이스 반복
+                            Button{
+                                if serverViewModel.category != item {
+                                    serverViewModel.filterMeetingsByCategory(category: item, latitudeDelta: viewModel.region.span.latitudeDelta)
+                                } else {
+                                    serverViewModel.filterMeetingsByCategory(category: nil, latitudeDelta: viewModel.region.span.latitudeDelta)
+                                }
+                            } label: {
+                                // 선택하면 serverViewModel.category?.rawValue ?? "")==item.rawValue 가 true
+                                Label(item.rawValue, systemImage: (serverViewModel.category?.rawValue ?? "")==item.rawValue ?  "pencil" : "")
+                            }
+
+                        }
+                    } label: {
+                        Text("필터")
+                            .fontWeight(.bold)
+                            .font(.system(size: 20))
+                            .foregroundColor(Color.white)
+                            .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
+                            .background(Color.yellow) // Moved the background modifier inside the else block
+                            .cornerRadius(20)
+                    }
+                    .padding(15)
                     Spacer()
                     Button{
 //test 중 비활성화                        /// 모임 중복 생성이면 if문 실행
@@ -115,32 +142,6 @@ struct MapView: View {
                         }
                     }
                     .padding(15)
-                }
-                HStack{
-                    Spacer()
-                    Menu {
-                        ForEach(Meeting.Category.allCases, id: \.self) { item in
-                            Button{
-                                if serverViewModel.category != item {
-                                    serverViewModel.filterMeetingsByCategory(category: item, latitudeDelta: viewModel.region.span.latitudeDelta)
-                                } else {
-                                    serverViewModel.filterMeetingsByCategory(category: nil, latitudeDelta: viewModel.region.span.latitudeDelta)
-                                }
-                            } label: {
-                                Label(item.rawValue, systemImage: (serverViewModel.category?.rawValue ?? "")==item.rawValue ?  "pencil" : "")
-                            }
-
-                        }
-                    } label: {
-                        Text("카테고리필터")
-                            .fontWeight(.bold)
-                            .font(.system(size: 20))
-                            .foregroundColor(Color.white)
-                            .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
-                            .background(Color.yellow) // Moved the background modifier inside the else block
-                            .cornerRadius(20)
-                    }
-                    .padding(.trailing,15)
                 }
                 Spacer()
                

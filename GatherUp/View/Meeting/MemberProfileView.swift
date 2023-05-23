@@ -13,6 +13,8 @@ struct MemberProfileView: View {
     let isCurrent: Bool
 
     @State private var showDMView: Bool = false
+    
+    @State var receiverID: String?
 
     var body: some View {
         ZStack{
@@ -43,7 +45,8 @@ struct MemberProfileView: View {
                             .background(.blue, in: Capsule())
                     }
                     .fullScreenCover(isPresented: $showDMView){
-                        DMView(receiverID: member.memberUID, dmPeopleDocRef: nil, showDMView: $showDMView)
+//                        DMView(receiverID: member.memberUID, dmPeopleDocRef: nil, showDMView: $showDMView)
+                        DMView(receiverID: $receiverID, showDMView: $showDMView)
                             .edgesIgnoringSafeArea(.all)
                             .transition(.move(edge: .trailing))
                             .animation(.easeInOut(duration: 0.3))
@@ -52,5 +55,8 @@ struct MemberProfileView: View {
             }
         }
         .padding(30)
+        .onAppear{
+            receiverID = member.memberUID
+        }
     }
 }
