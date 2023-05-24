@@ -129,26 +129,25 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                     let membersSnapshot = try await membersCol.getDocuments()
 
 
-                    guard let currentDate = membersSnapshot.documents.compactMap({ $0.data(as: Member.self) }).first(where: { $0.memberUID == currentUID })?.joinDate else {
-                        isLoading = false
-                        return
-                    }
+//                    guard let currentDate = membersSnapshot.documents.compactMap({ $0.data(as: Member.self) }).first(where: { $0.memberUID == currentUID })?.joinDate else {
+//                        isLoading = false
+//                        return
+//                    }
+//
+//                    let numberOfFilteredMembers = membersSnapshot.documents.compactMap({ $0.data(as: Member.self) }).filter({ $0.joinDate < currentDate }).count
+//
+//                    print("4")
+//
+//                    if numberOfFilteredMembers >= numbersOfMembers {
+//                        // 원하는 동작 수행
+//                    }
 
-                    let numberOfFilteredMembers = membersSnapshot.documents.compactMap({ $0.data(as: Member.self) }).filter({ $0.joinDate < currentDate }).count
-
-                    print("4")
-
-                    if numberOfFilteredMembers >= numbersOfMembers {
-                        // 원하는 동작 수행
-                    }
-
-                    //
+                    // 멤버정보 배열로 만들어서 저장
                     let fetchedMembers = membersSnapshot.documents.compactMap{ document -> Member? in
                         document.data(as: Member.self)
                     }
-                    // 위에서 membersCol.addDocument가 서버에 저장된 시간 currentDate에 저장
-                    let currentDate = fetchedMembers.first(where: { $0.memberUID == currentUID })?.joinDate
-                    guard let currentDate = currentDate else{isLoading = false;return}
+                    // 위에서 member가 서버에 저장된 시간 currentDate에 저장
+                    guard let currentDate = fetchedMembers.first(where: { $0.memberUID == currentUID })?.joinDate else{isLoading = false;return}
                     // currentDate보다 먼저 참여한 멤버수 저장
                     let membersCount = fetchedMembers.filter({ $0.joinDate < currentDate }).count
 

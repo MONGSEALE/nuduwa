@@ -28,22 +28,22 @@ struct DMView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(viewModel.messages.indices, id: \.self) { index in
                                 let message = viewModel.messages[index]
-                                let previousMessage = index > 0 || index==viewModel.messages.last ? viewModel.messages[index - 1] : nil
-                                
+                                let previousMessage = message==viewModel.messages.last ? nil : viewModel.messages[index + 1]
+
                                 let isCurrentUser = message.senderUID == viewModel.currentUID
-                                
+
                                 DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage).flippedUpsideDown()
                                     .onAppear {
                                         count += 1
                                         print("온어피어호출수:\(count)")
                                         print("messageCount:\(viewModel.messages.count)")
-                                        
+
                                         if message.id == viewModel.messages.last?.id && viewModel.paginationDoc != nil  {
                                             guard let docRef = viewModel.dmPeopleRef else{return}
                                             viewModel.fetchPrevMessage(dmPeopleRef: docRef)
                                         }
                                     }
-
+                                
                                 // 날짜 출력
                                 if isNewDay(previousMessage: previousMessage, currentMessage: message) {
                                     Text(formatDate(message.timestamp)).flippedUpsideDown()
@@ -115,7 +115,7 @@ struct DMView: View {
         }
     }
     func isNewDay(previousMessage: Message?, currentMessage: Message) -> Bool {
-        guard let previousMessage = previousMessage else { return false }
+        guard let previousMessage = previousMessage else { return true }
         
         let calendar = Calendar.current
         let previousDate = previousMessage.timestamp.dateValue()
@@ -244,3 +244,4 @@ extension View{
      self.modifier(FlippedUpsideDown())
    }
 }
+  

@@ -256,14 +256,19 @@ class DMViewModel: FirebaseViewModel {
                 let query = dmPeopleRef.collection(strDM).order(by: "timestamp", descending: true)
                     .start(afterDocument: paginationDoc).limit(to: 30)
                 let doc = try await query.getDocuments()
+                
                 let prevMessage = doc.documents.compactMap { document -> Message? in
                     document.data(as: Message.self)
                 }
+                if prevMessage.last == messages.last{isLoading = false;return}
+                
                 messages.append(contentsOf: prevMessage)
                 if let lastDoc = doc.documents.last {
                     self.paginationDoc = lastDoc
                 }
-                isLoading = false
+                await MainActor.run{
+                    isLoading = false
+                }
             }catch{
                 isLoading = false
                 print("오류fetchPrevMessage")
