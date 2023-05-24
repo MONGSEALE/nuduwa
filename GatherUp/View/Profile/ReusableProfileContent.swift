@@ -15,8 +15,11 @@ struct ReusableProfileContent: View {
     @State var showImagePicker: Bool = false
     @State var isBool = true
     @State var editName: String?
+    @State var editIntroduction: String?
+    @State var editInterests: [Interests] = []
     @State var isEdit: Bool = false
     @State private var progress: CGFloat = 0.7
+    
     
 
 //    var onEdit: (String?, PhotosPickerItem?)->()
@@ -118,7 +121,7 @@ struct ReusableProfileContent: View {
                                 .fontWeight(.semibold)
                             Spacer()
                         }
-                        EditTextProfile(text: "자기소개입니당" , editText: $editName, item: "자기소개", isEditable: isEdit)
+                    EditTextProfile(text: viewModel.user?.introduction ?? "" , editText: $editIntroduction, item: "자기소개", isEditable: isEdit)
                             .font(.body)
                             .fontWeight(.thin)
                         //   .hAlign(.leading)
@@ -131,7 +134,7 @@ struct ReusableProfileContent: View {
                                 .fontWeight(.semibold)
                             Spacer()
                         }
-                        EditInterestProfile(isEditable: isEdit){errorText in
+                    EditInterestProfile(isEditable: isEdit, interests: $editInterests, interestsTest: viewModel.user?.interests ?? []){errorText in
                             errorMessage = errorText
                             withAnimation(.easeInOut){
                                   showPopup = true
@@ -144,6 +147,7 @@ struct ReusableProfileContent: View {
                               }
                         }
                     }
+                
                     .padding(15)
                 }
                 .navigationTitle("내 정보")
@@ -178,6 +182,7 @@ struct ReusableProfileContent: View {
                                     if editName != nil || imageData != nil{
                                         viewModel.editUser(userName: editName, userImage: photoItem)
                                     }
+                                    viewModel.textFunc(introduction: editIntroduction, interests: editInterests)
                                     isEdit.toggle()
                                 }
                             } label: {
@@ -293,93 +298,95 @@ struct EditTextProfile: View {
 struct EditInterestProfile : View{
     var isEditable : Bool
     @State var text = ""
-    @State var interests : [[Interests]] = []
+    @Binding var interests : [Interests]
+    let interestsTest: [String]
 //    @State private var showPopup = false
     var showPopup : (String)->()
     
     
     var body : some View{
-        if(isEditable==true){
-            VStack(spacing:25){
-                VStack(spacing:10){
-                    ForEach(interests.indices,id: \.self){index in
-                        HStack{
-                            ForEach(interests[index].indices,id: \.self){interestIndex in
-                                HStack{
-                                    Text(interests[index][interestIndex].interestText)
-                                    Image(systemName:"xmark")
-                                }
-                                .padding(.vertical,10)
-                                .padding(.horizontal)
-                                .background(Capsule().stroke(Color.black,lineWidth: 1))
-                                .lineLimit(1)
-                                .overlay(
-                                    GeometryReader{reader -> Color in
-                                        
-                                        let maxX = reader.frame(in: .global).maxX
-                                        
-                                        //
-                                        if (maxX > UIScreen.main.bounds.width - 70 && !interests[index][interestIndex].isExceeded){
-                                            DispatchQueue.main.async{
-                                                interests[index][interestIndex].isExceeded = true
-                                                let lastItem =
-                                                interests[index][interestIndex]
-                                                interests.append([lastItem])
-                                                interests[index].remove(at:interestIndex)
+        ZStack{
+            if(isEditable==true){
+                VStack(spacing:25){
+                    VStack(spacing:10){
+                        ForEach(interests.indices,id: \.self){index in
+                            HStack{
+//                                ForEach(interests[index].indices,id: \.self){interestIndex in
+                                    HStack{
+                                        Text(interests[index].interestText)
+                                        Image(systemName:"xmark")
+                                    }
+                                    .padding(.vertical,10)
+                                    .padding(.horizontal)
+                                    .background(Capsule().stroke(Color.black,lineWidth: 1))
+                                    .lineLimit(1)
+                                    .overlay(
+                                        GeometryReader{reader -> Color in
+                                            
+                                            let maxX = reader.frame(in: .global).maxX
+                                            
+                                            //
+                                            if (maxX > UIScreen.main.bounds.width - 70 && !interests[index].isExceeded){
+                                                DispatchQueue.main.async{
+                                                    interests[index].isExceeded = true
+                                                    let lastItem =
+                                                    interests[index]
+                                                    interests.append(lastItem)
+                                                    interests.remove(at:index)
+                                                }
                                             }
-                                        }
-                                        
-                                        return Color.clear
-                                    },
-                                    alignment: .trailing
-                                )
-                                .clipShape(Capsule())
-                                .onTapGesture{
-                                    interests.remove(at:index)
+                                            
+                                            return Color.clear
+                                        },
+                                        alignment: .trailing
+                                    )
+                                    .clipShape(Capsule())
+                                    .onTapGesture{
+                                        interests.remove(at:index)
+                                    }
                                 }
-                            }
+//                            }
                         }
                     }
-                }
-                .padding()
-                .frame(width:UIScreen.main.bounds.width - 30, height: UIScreen.main.bounds.height/3)
-                .background(RoundedRectangle(cornerRadius: 15).stroke(Color.gray.opacity(0.5),lineWidth: 1.5))
-                VStack{
-                    TextField("최대 8글자로 작성해주세요", text: $text)
-                        .onReceive(text.publisher.collect()) {
-                            let filtered = String($0.prefix(8))
-                            if text != filtered {
-                                text = filtered
+                    .padding()
+                    .frame(width:UIScreen.main.bounds.width - 30, height: UIScreen.main.bounds.height/3)
+                    .background(RoundedRectangle(cornerRadius: 15).stroke(Color.gray.opacity(0.5),lineWidth: 1.5))
+                    VStack{
+                        TextField("최대 8글자로 작성해주세요", text: $text)
+                            .onReceive(text.publisher.collect()) {
+                                let filtered = String($0.prefix(8))
+                                if text != filtered {
+                                    text = filtered
+                                }
                             }
-                        }
-                        .padding()
-                        .frame(width:UIScreen.main.bounds.width - 30,height: 50 )
-                        .background(RoundedRectangle(cornerRadius: 15).stroke(Color.gray.opacity(0.5),lineWidth: 1.5))
-                    Button{
-                        if interests.flatMap({ $0 }).count < 8{
-                            if interests.isEmpty{
-                                interests.append([])
+                            .padding()
+                            .frame(width:UIScreen.main.bounds.width - 30,height: 50 )
+                            .background(RoundedRectangle(cornerRadius: 15).stroke(Color.gray.opacity(0.5),lineWidth: 1.5))
+                        Button{
+                            if interests.flatMap({ $0 }).count < 8{
+                                if interests.isEmpty{
+                                    interests = []
+                                }
+                                
+                                withAnimation(.default){
+                                    interests.append(Interests(interestText: text))
+                                    text = ""
+                                }
                             }
-                            
-                            withAnimation(.default){
-                                interests[interests.count - 1].append(Interests(interestText: text))
-                                text = ""
+                            else {
+                                showPopup("최대 8개까지에요")
+                                
+                                //                                    withAnimation(.easeInOut){
+                                //                                    showPopup = true
+                                //                                        }
+                                //
+                                //
+                                //                                           DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                //                                               withAnimation(.easeInOut){
+                                //                                                   showPopup = false
+                                //                                               }
+                                //                                           }
                             }
-                        }
-                        else {
-                            showPopup("최대 8개까지에요")
-                            
-                            //                                    withAnimation(.easeInOut){
-                            //                                    showPopup = true
-                            //                                        }
-                            //
-                            //
-                            //                                           DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            //                                               withAnimation(.easeInOut){
-                            //                                                   showPopup = false
-                            //                                               }
-                            //                                           }
-                                                                   }
                         } label: {
                             Text("추가하기")
                                 .font(.title2)
@@ -408,6 +415,20 @@ struct EditInterestProfile : View{
                 }
                 .padding()
             }
+            else {
+                HStack{
+                    ForEach(interestsTest, id: \.self){ interest in
+                        Text(interest)
+                    }
+                }
+            }
+        }
+        .onAppear{
+            for text in interestsTest{
+                let inter = Interests(interestText: text)
+                interests.append(inter)
+            }
+        }
     }
 }
 

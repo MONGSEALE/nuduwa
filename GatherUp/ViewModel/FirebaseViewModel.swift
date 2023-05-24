@@ -89,7 +89,7 @@ class FirebaseViewModel: ObservableObject {
     }
     /// 유저 데이터 가져와서 리턴하기 - View에서 쓰는 함수는 아니고 ViewModel에서 필요할때 사용, View는 위 fetchUser 함수 쓸것
     func getUser(_ userUID: String?) async throws -> User? {
-        print("getUser")
+        print("getUser:\(userUID)")
         do{
             // currentUID를 nil처리 안하고 바로 쓸 수 있게 String? 타입으로 받음 - 여기서 nil처리
             guard let userUID = userUID else{throw SomeError.missCurrentUID}
@@ -100,6 +100,7 @@ class FirebaseViewModel: ObservableObject {
             
             return user
         }catch{
+            print("getUser에러")
             throw error
         }
     }

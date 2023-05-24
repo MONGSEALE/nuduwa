@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Interests:Identifiable{
+struct Interests:Identifiable, Hashable{
     var id = UUID().uuidString
     var interestText : String
     var isExceeded = false
