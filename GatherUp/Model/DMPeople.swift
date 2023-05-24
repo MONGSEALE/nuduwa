@@ -8,7 +8,7 @@
 import SwiftUI
 import FirebaseFirestoreSwift
 
-struct DMPeople: Identifiable, Codable, Equatable, FirestoreConvertible {
+struct DMPeople : Identifiable, Codable, Equatable, FirestoreConvertible {
     @DocumentID var id: String?
     
     var chattersUID: [String]

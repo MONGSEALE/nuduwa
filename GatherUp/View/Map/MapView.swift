@@ -25,26 +25,27 @@ struct MapView: View {
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
     
+   
+    
     var body: some View {
         ZStack(alignment:.bottom){
             GeometryReader { geometry in
                 /// serverViewModel의 meetings 배열에서 item(=meeting) 하나씩 가져와서 지도에 Pin 표시
-                Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
+                Map(coordinateRegion: $viewModel.region, interactionModes: .zoom, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
                     MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
                         /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
                         switch item.type {
                         case .basic:
-                            MeetingIconView(showAnnotation: $showAnnotation, isJoin: serverViewModel.meetingsList.contains(where: { $0.meetingID == item.id! }), meeting: item) { locate in
+                            MeetingIconView(showAnnotation: $showAnnotation, isJoin: serverViewModel.joinMeetingIDs.contains(item.id!), meeting: item) { locate in
                                 withAnimation(.easeInOut(duration: 0.25)){
                                     viewModel.region.center = locate
                                 }
                             }
+                            
                         case .piled:
-                            if let meetings = serverViewModel.bigIconMeetings[item.id!] {
-                                PiledMeetingIconView(showAnnotation: $showAnnotation, meetings: meetings, isJoinIDs: serverViewModel.meetingsList.map{ $0.meetingID }) { locate in
-                                    withAnimation(.easeInOut(duration: 0.25)){
-                                        viewModel.region.center = locate
-                                    }
+                            PiledMeetingIconView(showAnnotation: $showAnnotation, meetings: serverViewModel.bigIconMeetings[item.id!]!, isJoinIDs: serverViewModel.joinMeetingIDs) { locate in
+                                withAnimation(.easeInOut(duration: 0.25)){
+                                    viewModel.region.center = locate
                                 }
                             }
                         case .new:
@@ -55,13 +56,17 @@ struct MapView: View {
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))
                 .onChange(of: viewModel.region) { region in
+//                    viewModel.region = viewModel.region.clampedLongitudeDelta(minValue: 0.01, maxValue: 0.1)
                     serverViewModel.checkedLocation(region: region)
                 }
                 .onAppear{
                     serverViewModel.mapMeetingsListener(region: viewModel.region)              /// Map이 보여지는동안 Firebase와 실시간 연동
+                    serverViewModel.checkedOverlap()    /// Map이 보여지는동안 실시간 중복확인
                     viewModel.checkIfLocationServicesIsEnabled()
-                    serverViewModel.meetingsListListener()
+                   
+                    serverViewModel.joinMeetingsListener()
                 }
+               
                 .onTapGesture { tapLocation in
                     if(showAnnotation==true){
                         let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
@@ -97,7 +102,7 @@ struct MapView: View {
 
                         }
                     } label: {
-                        Text("필터")
+                        Text(serverViewModel.category?.rawValue ?? "필터")
                             .fontWeight(.bold)
                             .font(.system(size: 20))
                             .foregroundColor(Color.white)
@@ -142,6 +147,8 @@ struct MapView: View {
                         }
                     }
                     .padding(15)
+                    
+                   
                 }
                 Spacer()
                
@@ -226,6 +233,8 @@ struct MapView: View {
         print("tap:\(tapLocation)")
         return CLLocationCoordinate2D(latitude: y, longitude: x)
     }
+    
+   
 }
         
 struct ShowMessage: View {
@@ -250,9 +259,8 @@ struct ShowMessage: View {
 
 class MapViewModel : NSObject, ObservableObject,CLLocationManagerDelegate{
 
-    @Published var region = MKCoordinateRegion(center:CLLocationCoordinate2D(latitude: 37.5665, longitude:126.9780 ),
-                                                   span:MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1))
-
+    @Published var region = MKCoordinateRegion(center:CLLocationCoordinate2D(latitude: 37.5665, longitude:126.9780 ), span:MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1))
+    
     var locationManager : CLLocationManager?
     
     override init() {
@@ -261,25 +269,30 @@ class MapViewModel : NSObject, ObservableObject,CLLocationManagerDelegate{
     }
     
     func requestAllowOnceLocationPermission(){
+        print("6")
         locationManager?.requestLocation()
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations:
     [CLLocation]) {
+        print("5")
         guard let latestLocation = locations.first else{
             return
         }
-        
+
         DispatchQueue.main.async {
             self.region = MKCoordinateRegion(center:latestLocation.coordinate,span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
         }
     }
+       
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print(error.localizedDescription)
     }
     
+    
     func checkIfLocationServicesIsEnabled(){
+        print("2")
         if CLLocationManager.locationServicesEnabled(){
             locationManager = CLLocationManager()
             checkLocationAuthorization()
@@ -291,6 +304,7 @@ class MapViewModel : NSObject, ObservableObject,CLLocationManagerDelegate{
     }
     
     func checkLocationAuthorization(){
+        print("3")
         guard let locationManager = locationManager else {return}
         
         switch locationManager.authorizationStatus{
@@ -309,12 +323,14 @@ class MapViewModel : NSObject, ObservableObject,CLLocationManagerDelegate{
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        if region.span.longitudeDelta > 1 {return}
+        print("1")
+        print("longitudeDelta:\(region.span.longitudeDelta)")
         checkLocationAuthorization()
     }
     
-   
-    
     func centerMapOn(_ coordinate: CLLocationCoordinate2D) {
+        print("4")
         DispatchQueue.main.async {
             self.region = MKCoordinateRegion(center: coordinate, span: self.region.span)
         }
@@ -330,13 +346,26 @@ extension MKCoordinateRegion {
     }
 }
 
-/// MKCoordinateRegion 타입을 .onChange에서 사용가능하게 확장하는 코드. 현재 필요없어서 주석처리
+// MKCoordinateRegion 타입을 .onChange에서 사용가능하게 확장하는 코드. 현재 필요없어서 주석처리
 extension MKCoordinateRegion: Equatable {
-   public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
-       return lhs.center.latitude == rhs.center.latitude &&
-              lhs.center.longitude == rhs.center.longitude &&
-              lhs.span.latitudeDelta == rhs.span.latitudeDelta &&
-              lhs.span.longitudeDelta == rhs.span.longitudeDelta
-   }
+    public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
+        return lhs.center.latitude == rhs.center.latitude &&
+               lhs.center.longitude == rhs.center.longitude &&
+               lhs.span.latitudeDelta == rhs.span.latitudeDelta &&
+               lhs.span.longitudeDelta == rhs.span.longitudeDelta
+    }
 }
 
+extension MKCoordinateRegion {
+    func clampedLongitudeDelta(minValue: CLLocationDegrees, maxValue: CLLocationDegrees) -> MKCoordinateRegion {
+        var clampedSpan = span
+        
+        if clampedSpan.longitudeDelta < minValue {
+            clampedSpan.longitudeDelta = minValue
+        } else if clampedSpan.longitudeDelta > maxValue {
+            clampedSpan.longitudeDelta = maxValue
+        }
+        
+        return MKCoordinateRegion(center: center, span: clampedSpan)
+    }
+}

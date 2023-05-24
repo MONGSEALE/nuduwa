@@ -13,7 +13,11 @@ struct DMCardView: View {
     @StateObject var viewModel: DMViewModel = .init()
     
     let chattingRoom: DMList
-    var showDMView: (String?)->()
+    
+    @State var showDM: Bool = false
+    
+    /// - Callbacks
+    //    var onUpdate: (DM)->()
     
     var body: some View {
         HStack(spacing: 16) {
@@ -46,23 +50,25 @@ struct DMCardView: View {
         }
         .buttonStyle(PlainButtonStyle())
         .onTapGesture {
-            showDMView(chattingRoom.receiverUID)
+            showDM = true
         }
         .contextMenu { // 길게 눌렀을 때 표시할 메뉴
             Button(action: {
-                viewModel.leaveChatroom(receiverUID: chattingRoom.receiverUID) // 채팅방 나가기 메뉴 선택 시 처리
+                viewModel.leaveChatroom(chatroom: chattingRoom) // 채팅방 나가기 메뉴 선택 시 처리
             }) {
                 Text("채팅방 나가기")
                 Image(systemName: "trash")
             }
         }
         .onAppear{
-            viewModel.fetchUser(chattingRoom.receiverUID)
-            viewModel.dmListener(dmPeopleRef: chattingRoom.dmPeopleRef)
+            viewModel.fetchUserData(chattingRoom.chatterUID)
+            viewModel.dmListener(dmPeopleID: chattingRoom.DMPeopleID)
         }
         .onDisappear{
             viewModel.removeListeners()
         }
+        .fullScreenCover(isPresented: $showDM){
+            DMView(receiverID: chattingRoom.chatterUID, showDMView: $showDM)
+        }
     }
-        
 }

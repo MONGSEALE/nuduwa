@@ -18,7 +18,7 @@ struct MeetingSetSheetView: View {
     @State private var selection : Int = 0
     @State private var meetingDate = Date()
     let coordinateCreated: CLLocationCoordinate2D
-    @State private var category: Meeting.Category?
+//    @State private var choiceCategory: String?
     
     let onCreate: (Meeting)->()
     
@@ -112,7 +112,7 @@ struct MeetingSetSheetView: View {
                             )
                         }
 
-                        ChoiceMeetingCategoryView(category: $category)
+//                        ChoiceMeetingCategoryView(choiceCategory: $choiceCategory)
                     }
                     Spacer()
                     Button{
@@ -120,7 +120,7 @@ struct MeetingSetSheetView: View {
                             showErrorMessage(duration: 2)
                         }
                         else{
-                            let newMeeting = Meeting(title: title, description: description, place: place, numbersOfMembers: selection+2, location: coordinateCreated, meetingDate: meetingDate, category: category)
+                            let newMeeting = Meeting(title: title, description: description, place: place, numbersOfMembers: selection+2, location: coordinateCreated, meetingDate: meetingDate)
                             
                             // Meeting(title: title, description: description, place:place, numbersOfMembers:selection+2, latitude:coordinateCreated.latitude, longitude: coordinateCreated.longitude, geoHash: "", meetingDate:meetingDate, hostUID: "")
                             onCreate(newMeeting)
@@ -134,22 +134,22 @@ struct MeetingSetSheetView: View {
                 }
                 if showPlacePopUp {
                     VStack(spacing: 0) {
-                             Text("장소를 상세히 입력해주세요!")
-                                 .foregroundColor(.white)
-                                 .padding(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
-                                 .background(Color.black.opacity(0.8))
-                                 .cornerRadius(8)
-                
-                
-                             Rectangle()
-                                 .fill(Color.black.opacity(0.8))
-                                 .frame(width: 12, height: 12)
-                                 .rotationEffect(.degrees(45))
-                                 .offset(x: 20, y: -6)
-                         }
-                         .offset(y: -110)
-                         .animation(.easeInOut(duration: 0.2))
-                    }
+                                     Text("장소를 상세히 입력해주세요!")
+                                         .foregroundColor(.white)
+                                         .padding(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                                         .background(Color.black.opacity(0.8))
+                                         .cornerRadius(8)
+                        
+                        
+                                     Rectangle()
+                                         .fill(Color.black.opacity(0.8))
+                                         .frame(width: 12, height: 12)
+                                         .rotationEffect(.degrees(45))
+                                         .offset(x: 20, y: -6)
+                                 }
+                                 .offset(y: -110)
+                                 .animation(.easeInOut(duration: 0.2))
+                            }
             }
             .navigationBarTitle("")
             .navigationBarItems(
@@ -188,40 +188,23 @@ struct PopupError: View {
 }
 
 struct ChoiceMeetingCategoryView: View {
-    @Binding var category: Meeting.Category?
+    @Binding var choiceCategory: String?
 
     var body: some View {
         HStack(spacing: 12) {
-            ForEach(Meeting.Category.allCases, id: \.self) { item in
-                Text(item.rawValue)
-                    .foregroundColor(category == item ? .blue : .gray)
-                    .onTapGesture {
-                        if category != item {
-                            category = item
-                        } else {
-                            category = nil
-                        }
+            ForEach(Meeting.Category.allCases, id: \.self) { category in
+                Button{
+                    if choiceCategory != "\(category)" {
+                        choiceCategory = "\(category)"
+                    } else {
+                        choiceCategory = nil
                     }
-//                CategoryButton(item: item, category: $category)
+                    
+                } label: {
+                    Text("\(category.rawValue)")
+                }
+                .background((choiceCategory ?? "")=="\(category)" ? Color.blue : Color.gray)
             }
-        }
-    }
-}
-struct CategoryButton: View {
-    let item: Meeting.Category
-    @Binding var category: Meeting.Category?
-    
-    var body: some View {
-        Button{
-            if category != item {
-                category = item
-            } else {
-                category = nil
-            }
-            print("카테고리:\(category)")
-        } label: {
-            Text(item.rawValue)
-                .foregroundColor(category == item ? .blue : .gray)
         }
     }
 }

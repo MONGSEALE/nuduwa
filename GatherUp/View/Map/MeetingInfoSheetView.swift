@@ -97,7 +97,7 @@ struct MeetingInfoSheetView: View {
                             if viewModel.members.first(where: { $0.memberUID == viewModel.currentUID}) == nil{  // members 배열에 user가 없으면
                                 if viewModel.members.count<numbersOfMembers {  // 모임에 자리가 있으면
                                     Button {
-                                        viewModel.joinMeeting(meetingID: meeting.id!, meetingDate: meeting.meetingDate, hostUID: meeting.hostUID,numbersOfMembers: numbersOfMembers)
+                                        viewModel.joinMeeting(meetingID: meeting.id!, numbersOfMembers: numbersOfMembers)
                                     } label: {
                                         Text("참여하기")
                                     }
@@ -118,15 +118,15 @@ struct MeetingInfoSheetView: View {
             
         }
         .onAppear {
-            viewModel.fetchUser(meeting.hostUID)
+            viewModel.fetchUserData(meeting.hostUID)
             viewModel.meetingListener(meetingID: meeting.id!)
             viewModel.membersListener(meetingID: meeting.id!)
         }
         .onDisappear{
             viewModel.removeListeners()
         }
-        .onChange(of: viewModel.meeting) { meeting in
-            if meeting == nil {
+        .onChange(of: viewModel.isDelete) { isDelete in
+            if isDelete {
                 dismiss()
             }
         }

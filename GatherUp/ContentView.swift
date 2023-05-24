@@ -10,8 +10,6 @@ import SwiftUI
 struct ContentView: View {
     @StateObject var loginViewModel: LoginViewModel = .init()
     @State var isLoading: Bool = true
-    @State var receiverID: String?
-    @State var showDMView: Bool = false
    
     var body: some View {
         ZStack{
@@ -25,23 +23,21 @@ struct ContentView: View {
                             .tabItem{
                                 Label("찾기",systemImage:"map.circle")
                             }
-                        MeetingsView()
+                         MeetingsView()
                             .tabItem{
                                 Label("모임",systemImage: "person.3.sequence")
                             }
-                        DMListView(receiverID: $receiverID, showDMView: $showDMView)
+                        DMListView()
                             .tabItem{
                                 Label("채팅",systemImage: "message")
                             }
-                        ProfileView()
+                        ReusableProfileContent()
                             .tabItem{
                                 Label("내 정보",systemImage:"person.crop.circle")
                             }
                     }
                     .fullScreenCover(isPresented: $showDMView){
-//                            DMView(receiverID: room.receiverUID, dmPeopleDocRef: room.dmPeopleRef, showDMView: $showDMView)
-                        DMView(receiverID: $receiverID,  showDMView: $showDMView)
-                        
+                        DMView(receiverID: $receiverID,  showDMView: $showDMView)                        
                     }
                 } else {
                     Login()
@@ -52,6 +48,13 @@ struct ContentView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {isLoading.toggle()
                 })
         }
+    }
+}
+
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
     }
 }
 
