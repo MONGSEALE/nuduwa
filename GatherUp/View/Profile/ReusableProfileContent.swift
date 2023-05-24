@@ -27,7 +27,8 @@ struct ReusableProfileContent: View {
     
 
     var body: some View {
-        NavigationStack{
+        ZStack{
+            NavigationStack{
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(){
                     HStack(spacing:0){
@@ -41,7 +42,7 @@ struct ReusableProfileContent: View {
                                     .clipShape(Circle())
                                     .padding(.leading, -20)
                             }else{
-                                WebImage(url: user.userImage).placeholder{ProgressView()}
+                                WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
                                     .resizable()
                                     .frame(width: 50,height: 50)
                                     .aspectRatio(contentMode: .fill)

@@ -13,47 +13,52 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
     @DocumentID var id: String?
 
     let meetingID: String
+    let isEnd: Bool
+    var meetingDate: Date
     var joinDate: Date
-    let isHost: Bool
+    let hostUID: String
 
     // 기본 생성자
-    init(meetingID: String, isHost: Bool? = nil) {
+    init(meetingID: String, meetingDate: Date, hostUID: String) {
         self.id = UUID().uuidString
         self.meetingID = meetingID
+        self.isEnd = false
+        self.meetingDate = meetingDate
         self.joinDate = Date()
-        self.isHost = isHost ?? false
+        self.hostUID = hostUID
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any], id: String) {
         guard let meetingID = data["meetingID"] as? String,
-              let joinDate = data["joinDate"] as? Timestamp
+              let isEnd = data["isEnd"] as? Bool,
+              let meetingDate = data["meetingDate"] as? Timestamp,
+              let joinDate = data["joinDate"] as? Timestamp,
+              let hostUID = data["hostUID"] as? String
         else { return nil }
         
         self.id = id
         self.meetingID = meetingID
+        self.isEnd = isEnd
+        self.meetingDate = meetingDate.dateValue()
         self.joinDate = joinDate.dateValue()
-        self.isHost = data["isHost"] as? Bool ?? false
+        self.hostUID = hostUID
     }
     
     // Firestore에 저장할 필드
     var firestoreData: [String: Any] {
-        var data: [String: Any] = [
+        return [
             "meetingID": meetingID,
-            "joinDate": FieldValue.serverTimestamp()
+            "isEnd" : isEnd,
+            "meetingDate" : meetingDate,
+            "joinDate": FieldValue.serverTimestamp(),
+            "hostUID": hostUID
         ]
-        
-        // isHost가 true일 때만 Firestore에 저장
-        if isHost {
-            data["isHost"] = isHost
-        }
-        
-        return data
     }
 
-    static func createMeeting(_ meetingID: String) -> MeetingList {
-        return MeetingList(meetingID: meetingID, isHost: true)
-    }
+//    static func createMeeting(_ meetingID: String) -> MeetingList {
+//        return MeetingList(meetingID: meetingID, isHost: true)
+//    }
     /*
     // member가 가입
     static func member(_ meetingID: String) -> [String: Any] {

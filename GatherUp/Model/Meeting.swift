@@ -42,14 +42,15 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         case piled
     }
     enum Category: String, Codable, CaseIterable {
-        case exercise   // 운동
-        case meal       // 밥
-        case alcohol    // 술
-        case study      // 공부
-        case trip       // 여행
-        case play       // 놀이
-        case volunteer  // 자원봉사
+        case exercise = "Exercise" // 운동
+        case meal = "Meal" // 밥
+        case alcohol = "Alcohol" // 술
+        case study = "Study" // 공부
+        case trip = "Trip" // 여행
+        case play = "Play" // 놀이
+        case volunteer = "Volunteer" // 자원봉사
     }
+
 
     // CLLocationCoordinate2D타입으로 location 가져오기
     var location: CLLocationCoordinate2D {
@@ -57,7 +58,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
     }
     
     // 기본 생성자
-    init(title: String, description: String, place : String, numbersOfMembers : Int, location: CLLocationCoordinate2D, meetingDate: Date, hostUID: String = "", hostName: String? = nil, hostImage: URL? = nil, type: MeetingType? = nil){//}, category: Category? = nil) {
+    init(title: String, description: String, place : String, numbersOfMembers : Int, location: CLLocationCoordinate2D, meetingDate: Date, hostUID: String = "", hostName: String? = nil, hostImage: URL? = nil, type: MeetingType? = nil, category: Category? = nil) {
         self.id = UUID().uuidString
         self.title = title
         self.description = description
@@ -76,7 +77,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         self.hostImage = hostImage
         
         self.type = type ?? .basic
-//        self.category = category
+        self.category = category
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -96,7 +97,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         else { print("오류!아이디:\(id)");return nil }
 
         let geoHash = data["geoHash"] as? String? ?? nil
-//        let category = data["category"] as? Category? ?? nil
+        let category = data["category"] as? String? ?? nil
         
         self.id = id
         self.title = title
@@ -116,7 +117,12 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         self.hostImage = nil
 
         self.type = .basic
-//        self.category = category
+        
+        if let category {
+            self.category = Category(rawValue: category)
+        } else {
+            self.category = nil
+        }
     }
     
     // Firestore에 저장할 필드
@@ -136,9 +142,9 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
             
             "hostUID": hostUID
         ]
-//        if let category {
-//            data["category"] = category
-//        }
+        if let category {
+            data["category"] = category.rawValue
+        }
         return data
     }
     
@@ -158,24 +164,7 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
 
         return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, meetingDate: meetingDate, type: type)
     }
-    // 모임 위치가 겹쳤을 경우 MapAnnotation용 구조체
-    // static func piledMapAnnotation(id: String, location: CLLocationCoordinate2D, geoHash: String?) -> Meeting {
-    //     let id = id
-    //     let title: String = ""
-    //     let description: String = ""
-    //     let place : String = ""
-    //     let numbersOfMembers : Int = 0
-    
-    //     let location: CLLocationCoordinate2D = location
-    //     let geoHash: String? = geoHash
-        
-    //     let publishedDate: Date = Date()
-    //     let meetingDate: Date = Date()
 
-    //     let type: MeetingType = .piled
-
-    //     return Meeting(id: id, title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, geoHash: geoHash, publishedDate: publishedDate, meetingDate: meetingDate, type: type)
-    // }
     static func piledMapAnnotation(meeting: Meeting) -> Meeting {
         var meeting = meeting
         meeting.type = .piled
@@ -197,8 +186,8 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         let type: MeetingType = .new
         let category: Category? = category
 
-        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, meetingDate: meetingDate, type: type)//, category: category)
-    } 
+        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, meetingDate: meetingDate, type: type, category: category)
+    }
 
     // 모임 수정용 Meeting구조체
     static func updateMeeting(title: String? = nil, description: String? = nil, place: String? = nil, numbersOfMembers: Int? = nil, meetingDate: Date? = nil, category: Category? = nil) -> Meeting {
@@ -215,9 +204,9 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         let hostUID: String = " "
 
         let type: MeetingType = .basic
-//        let category: Category? = category
+        let category: Category? = category
 
-        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, meetingDate: meetingDate, hostUID: hostUID, type: type)//, category: category)
+        return Meeting(title: title, description: description, place: place, numbersOfMembers: numbersOfMembers, location: location, meetingDate: meetingDate, hostUID: hostUID, type: type, category: category)
     }
     // 수정 모임 firestore에 업데이트
     var firestoreUpdate: [String: Any] {
@@ -239,31 +228,27 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         if meetingDate != Date(timeIntervalSince1970:0) {
             data["meetingDate"] = meetingDate
         }
+        if category != nil {
+            data["category"] = category?.rawValue
+        }
 
         return data
     }
-    // 수정 모임 업데이트 - 객체 안만들고 Firestore 바로 저장하기
-    // static func firestoreUpdateMeeting(title: String? = nil, description: String? = nil, place: String? = nil, numbersOfMembers: Int? = nil, meetingDate: Date? = nil) -> [String: Any] {
-    //     var data: [String: Any] = [:]
+    // 모임에 유저이름 이미지 넣기
+    static func putHostData(meeting: Meeting, user: User) -> Meeting {
+        var meeting = meeting
+        meeting.hostName = user.userName
+        meeting.hostImage = user.userImage
 
-    //     if let title {
-    //         data["title"] = title
-    //     }
-    //     if let description {
-    //         data["description"] = description
-    //     }
-    //     if let place {
-    //         data["place"] = place
-    //     }
-    //     if let numbersOfMembers {
-    //         data["numbersOfMembers"] = numbersOfMembers
-    //     }
-    //     if let meetingDate {
-    //         data["meetingDate"] = meetingDate
-    //     }
+        return meeting
+    }
 
-    //     return data
-    // }
+    // 모임시간 지난 모임 업데이트 - 객체 안만들고 Firestore 바로 저장하기
+    static func firestorePastMeeting() -> [String: Any] {
+        return [
+            "geoHast": FieldValue.delete()
+        ]
+    }
 
     // var firestoreCancle: [String: Any] {
     //     return [

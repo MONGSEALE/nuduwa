@@ -50,7 +50,7 @@ struct MeetingIconView: View {
             if(showAnnotation==false){
                 showSheet = true
                 onLocate(CLLocationCoordinate2D(latitude: meeting.latitude, longitude: meeting.longitude))
-                viewModel.fetchUserData(meeting.hostUID)
+                viewModel.fetchUser(meeting.hostUID)
             }
         }
         .sheet(isPresented: $showSheet){
@@ -69,7 +69,7 @@ struct MeetingIconView: View {
         }
         .scaleEffect(isClicked ? 1.7: 1.0)
         .onAppear{
-            viewModel.fetchUserData(meeting.hostUID)
+            viewModel.fetchUser(meeting.hostUID)
         }
     }
 }

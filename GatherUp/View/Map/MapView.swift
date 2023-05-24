@@ -25,27 +25,26 @@ struct MapView: View {
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
     
-   
-    
     var body: some View {
         ZStack(alignment:.bottom){
             GeometryReader { geometry in
                 /// serverViewModel의 meetings 배열에서 item(=meeting) 하나씩 가져와서 지도에 Pin 표시
-                Map(coordinateRegion: $viewModel.region, interactionModes: .zoom, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
+                Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
                     MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
                         /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
                         switch item.type {
                         case .basic:
-                            MeetingIconView(showAnnotation: $showAnnotation, isJoin: serverViewModel.joinMeetingIDs.contains(item.id!), meeting: item) { locate in
+                            MeetingIconView(showAnnotation: $showAnnotation, isJoin: serverViewModel.meetingsList.contains(where: { $0.meetingID == item.id! }), meeting: item) { locate in
                                 withAnimation(.easeInOut(duration: 0.25)){
                                     viewModel.region.center = locate
                                 }
                             }
-                            
                         case .piled:
-                            PiledMeetingIconView(showAnnotation: $showAnnotation, meetings: serverViewModel.bigIconMeetings[item.id!]!, isJoinIDs: serverViewModel.joinMeetingIDs) { locate in
-                                withAnimation(.easeInOut(duration: 0.25)){
-                                    viewModel.region.center = locate
+                            if let meetings = serverViewModel.bigIconMeetings[item.id!] {
+                                PiledMeetingIconView(showAnnotation: $showAnnotation, meetings: meetings, isJoinIDs: serverViewModel.meetingsList.map{ $0.meetingID }) { locate in
+                                    withAnimation(.easeInOut(duration: 0.25)){
+                                        viewModel.region.center = locate
+                                    }
                                 }
                             }
                         case .new:
@@ -61,12 +60,9 @@ struct MapView: View {
                 }
                 .onAppear{
                     serverViewModel.mapMeetingsListener(region: viewModel.region)              /// Map이 보여지는동안 Firebase와 실시간 연동
-                    serverViewModel.checkedOverlap()    /// Map이 보여지는동안 실시간 중복확인
                     viewModel.checkIfLocationServicesIsEnabled()
-                   
-                    serverViewModel.joinMeetingsListener()
+                    serverViewModel.meetingsListListener()
                 }
-               
                 .onTapGesture { tapLocation in
                     if(showAnnotation==true){
                         let tapCoordinate = coordinateFromTap(tapLocation, in: geometry, region: viewModel.region)
@@ -147,8 +143,6 @@ struct MapView: View {
                         }
                     }
                     .padding(15)
-                    
-                   
                 }
                 Spacer()
                
@@ -233,8 +227,6 @@ struct MapView: View {
         print("tap:\(tapLocation)")
         return CLLocationCoordinate2D(latitude: y, longitude: x)
     }
-    
-   
 }
         
 struct ShowMessage: View {
@@ -346,14 +338,14 @@ extension MKCoordinateRegion {
     }
 }
 
-// MKCoordinateRegion 타입을 .onChange에서 사용가능하게 확장하는 코드. 현재 필요없어서 주석처리
+/// MKCoordinateRegion 타입을 .onChange에서 사용가능하게 확장하는 코드. 현재 필요없어서 주석처리
 extension MKCoordinateRegion: Equatable {
-    public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
-        return lhs.center.latitude == rhs.center.latitude &&
-               lhs.center.longitude == rhs.center.longitude &&
-               lhs.span.latitudeDelta == rhs.span.latitudeDelta &&
-               lhs.span.longitudeDelta == rhs.span.longitudeDelta
-    }
+   public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
+       return lhs.center.latitude == rhs.center.latitude &&
+              lhs.center.longitude == rhs.center.longitude &&
+              lhs.span.latitudeDelta == rhs.span.latitudeDelta &&
+              lhs.span.longitudeDelta == rhs.span.longitudeDelta
+   }
 }
 
 extension MKCoordinateRegion {
