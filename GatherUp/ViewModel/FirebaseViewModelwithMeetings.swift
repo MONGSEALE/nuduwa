@@ -83,22 +83,6 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
             }
         }
     }
-
-// 오류 안나면 삭제 예정
-    // /// = 서버에서 수정된 모임 meetings 배열에서 수정하기
-    // func updateLocalMeetingDataFromServer(updatedMeeting: Meeting) {
-    //     print("updateLocalMeetingDataFromServer")
-    //     guard let index = meetings.firstIndex(where: { meeting in
-    //         meeting.id == updatedMeeting.id
-    //     }) else {return}
-    //     meetings[index] = updatedMeeting
-    // }
-
-    // /// - 서버에서 삭제된 모임 meetings 배열에서 삭제하기
-    // func deleteLocalMeetingDataFromServer(deletedMeetingID: String) {
-    //     print("deleteLocalMeetingDataFromServer")
-    //     meetings.removeAll{deletedMeetingID == $0.id}
-    // }
     
     /// 모임 참가하기
     func joinMeeting(meetingID: String, meetingDate: Date, hostUID: String, numbersOfMembers: Int){
@@ -124,23 +108,9 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                 if numbersOfMembers != 0 {
                     // numbersOfMembers가 0이면 최초생성이므로 확인작업 패스
                     // 멤버수가 최대멤버수 초과하지 않았는지 다시 확인
-                    try await Task.sleep(nanoseconds: 200_000_000) // 유저추가 동기화될때까지 0.2초 대기
+                    try await Task.sleep(nanoseconds: 500_000_000) // 유저추가 동기화될때까지 0.2초 대기
                     // 멤버정보 가져오기
                     let membersSnapshot = try await membersCol.getDocuments()
-
-
-//                    guard let currentDate = membersSnapshot.documents.compactMap({ $0.data(as: Member.self) }).first(where: { $0.memberUID == currentUID })?.joinDate else {
-//                        isLoading = false
-//                        return
-//                    }
-//
-//                    let numberOfFilteredMembers = membersSnapshot.documents.compactMap({ $0.data(as: Member.self) }).filter({ $0.joinDate < currentDate }).count
-//
-//                    print("4")
-//
-//                    if numberOfFilteredMembers >= numbersOfMembers {
-//                        // 원하는 동작 수행
-//                    }
 
                     // 멤버정보 배열로 만들어서 저장
                     let fetchedMembers = membersSnapshot.documents.compactMap{ document -> Member? in

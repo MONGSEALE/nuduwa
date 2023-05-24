@@ -24,6 +24,9 @@ struct ChatView: View {
     @State private var showMemberList = false
     @State private var xOffset: CGFloat = UIScreen.main.bounds.width
     
+    @Binding var showDMView: Bool
+    @Binding var receiverID: String?
+    
   
     
     var body: some View {
@@ -114,7 +117,7 @@ struct ChatView: View {
                     }
                 }
             }
-            MemberList(meetingID: meetingID, members: Array(members.values), hostUID: hostUID ,userUID: chatViewModel.currentUID!)
+            MemberList(meetingID: meetingID, members: Array(members.values), hostUID: hostUID ,userUID: chatViewModel.currentUID!, receiverID: $receiverID, showDMView: $showDMView)
                            .slideOverView(isPresented: $showMemberList)
                            .onDisappear{
                                showMemberList = false
@@ -149,6 +152,9 @@ struct MemberList: View {
     let hostUID: String
     let userUID: String
     
+    @Binding var receiverID: String?
+    @Binding var showDMView: Bool
+    
     var body: some View {
         VStack {
             HStack {
@@ -162,7 +168,7 @@ struct MemberList: View {
             ScrollView {
                 LazyVStack {
                     ForEach(members) { member in
-                        MemberItemView(meetingID: meetingID, member: member, hostUID: hostUID, userUID: userUID)
+                        MemberItemView(meetingID: meetingID, member: member, hostUID: hostUID, userUID: userUID, receiverID: $receiverID, showDMView: $showDMView)
                     }
                 }
             }
@@ -180,6 +186,10 @@ struct MemberItemView: View {
     let userUID: String
     @State var isShowMember: Bool = false
     @StateObject var viewModel: MeetingViewModel = .init()
+    
+    @Binding var receiverID: String?
+    @Binding var showDMView: Bool
+    
     
     var body: some View {
             HStack {
@@ -210,7 +220,7 @@ struct MemberItemView: View {
                 Spacer()
             }
             .sheet(isPresented: $isShowMember){
-                MemberProfileView(member: member, isCurrent: member.memberUID == viewModel.currentUID)
+                MemberProfileView(member: member, isCurrent: member.memberUID == viewModel.currentUID, receiverID: $receiverID, showDMView: $showDMView)
             }
             .padding(.horizontal)
     }
