@@ -36,6 +36,9 @@ struct ContentView: View {
                                 Label("내 정보",systemImage:"person.crop.circle")
                             }
                     }
+                    .fullScreenCover(isPresented: $showDMView){
+                        DMView(receiverID: $receiverID,  showDMView: $showDMView)                        
+                    }
                 } else {
                     Login()
                 }

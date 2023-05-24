@@ -18,62 +18,65 @@ struct DMView: View {
     @State private var messageText: String = ""
     let receiverID: String
     @Binding var showDMView: Bool
+    @State private var count: Int = 0 //테스트용 변수
     
     var body: some View {
-        NavigationView{
-            VStack {
-                ScrollView{
-                    ScrollViewReader { scrollViewProxy in
+        if let receiverID {
+            NavigationView{ //NavigationView 필요없으면 제거
+                VStack {                    
+                    ScrollView{
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(viewModel.messages.indices, id: \.self) { index in
+                                // index = 0 이 제일 최신 메시지
                                 let message = viewModel.messages[index]
-                                let previousMessage = index > 0 ? viewModel.messages[index - 1] : nil
+                                // 마지막 메시지면 nil 아니면 전 메시지 출력
+                                let previousMessage = message==viewModel.messages.last ? nil : viewModel.messages[index + 1]
+
+                                let isCurrentUser = message.senderUID == viewModel.currentUID
+
+                                DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage).flippedUpsideDown()
+                                    .onAppear {
+                                        count += 1
+                                        print("온어피어호출수:\(count)")
+                                        print("messageCount:\(viewModel.messages.count)")
+
+                                        if message.id == viewModel.messages.last?.id && viewModel.paginationDoc != nil  {
+                                            guard let docRef = viewModel.dmPeopleRef else{return}
+                                            viewModel.fetchPrevMessage(dmPeopleRef: docRef)
+                                        }
+                                    }
                                 
+                                // 날짜 출력
                                 if isNewDay(previousMessage: previousMessage, currentMessage: message) {
-                                    Text(formatDate(message.timestamp))
+                                    Text(formatDate(message.timestamp)).flippedUpsideDown()
                                         .font(.caption)
                                         .foregroundColor(.gray)
                                         .padding(.top)
                                         .frame(maxWidth:.infinity)
                                 }
-                                
-                                let isCurrentUser = message.senderUID == viewModel.currentUID
-                                
-                                DMMessageRow(message: message, identifying: isCurrentUser, name: viewModel.user?.userName, image: viewModel.user?.userImage)
-//                                    .onAppear {
-//                                        if message.id == viewModel.messages.last?.id && viewModel.paginationDoc != nil {
-//                                            guard let docID = viewModel.dmPeopleID else{return}
-//                                            viewModel.fetchPrevMessage(dmPeopleID: docID)
-//                                        }
-//                                    }
                             }
                         }
-                        .onAppear {
-                                    if let lastMessageIndex = viewModel.messages.indices.last {
-                                        scrollViewProxy.scrollTo(lastMessageIndex, anchor: .bottom)
-                                    }
-                                }
-                        .onChange(of: viewModel.messages) { messages in
-                            if let lastMessageIndex = messages.indices.last {
-                                withAnimation {
-                                    scrollViewProxy.scrollTo(lastMessageIndex, anchor: .bottom)
-                                }
+                    }.flippedUpsideDown()
+                    
+                    Spacer()
+                    HStack{
+                        CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $messageText)
+                        Button{
+                            if viewModel.dmPeopleRef != nil{
+                                viewModel.sendDM(message: messageText)
+                                messageText = ""
+                            }
+                        }label: {
+                            if viewModel.dmPeopleRef != nil{
+                                Image(systemName: "paperplane.fill")
+                                    .foregroundColor(.white)
+                                    .padding(10)
+                                    .background(Color("lightblue"))
+                                    .cornerRadius(50)
+                            } else {
+                                ProgressView()
                             }
                         }
-                    }
-                }
-                Spacer()
-                HStack{
-                    CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $messageText)
-                    Button{
-                        viewModel.sendDM(message: messageText, receiverID: receiverID)
-                        messageText = ""
-                    }label: {
-                        Image(systemName: "paperplane.fill")
-                            .foregroundColor(.white)
-                            .padding(10)
-                            .background(Color("lightblue"))
-                            .cornerRadius(50)
                     }
                 }
                 .padding(.horizontal)
@@ -238,3 +241,16 @@ struct DMCustomTextFieldRow: View {
 }
 
 
+struct FlippedUpsideDown: ViewModifier {
+   func body(content: Content) -> some View {
+    content
+      .rotationEffect(Angle(radians: Double.pi))
+      .scaleEffect(x: -1, y: 1, anchor: .center)
+   }
+}
+extension View{
+   func flippedUpsideDown() -> some View{
+     self.modifier(FlippedUpsideDown())
+   }
+}
+  

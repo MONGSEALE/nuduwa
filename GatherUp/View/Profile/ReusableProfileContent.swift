@@ -27,29 +27,27 @@ struct ReusableProfileContent: View {
     
 
     var body: some View {
-        ZStack{
-            NavigationStack{
-                ScrollView(.vertical, showsIndicators: false) {
-                    LazyVStack(){
-                        HStack(spacing:0){
-                            
-                            ZStack{
-                                if let imageData,
-                                   let uiImage = UIImage(data: imageData) {
-                                    Image(uiImage: uiImage)
-                                        .resizable()
-                                        .frame(width: 50,height: 50)
-                                        .aspectRatio(contentMode: .fill)
-                                        .clipShape(Circle())
-                                        .padding(.leading, -20)
-                                }else{
-                                    WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
-                                        .resizable()
-                                        .frame(width: 50,height: 50)
-                                        .aspectRatio(contentMode: .fill)
-                                        .clipShape(Circle())
-                                        .padding(.leading, -20)
-                                }
+        NavigationStack{
+            ScrollView(.vertical, showsIndicators: false) {
+                LazyVStack(){
+                    HStack(spacing:0){
+                        ZStack{
+                            if isEdit, let imageData,
+                               let uiImage = UIImage(data: imageData) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .frame(width: 50,height: 50)
+                                    .aspectRatio(contentMode: .fill)
+                                    .clipShape(Circle())
+                                    .padding(.leading, -20)
+                            }else{
+                                WebImage(url: user.userImage).placeholder{ProgressView()}
+                                    .resizable()
+                                    .frame(width: 50,height: 50)
+                                    .aspectRatio(contentMode: .fill)
+                                    .clipShape(Circle())
+                                    .padding(.leading, -20)
+                            }
                                 
                                 if isEdit {
                                     Image(systemName: "square.and.arrow.down")

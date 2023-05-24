@@ -168,48 +168,36 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         isLoading = true
         Task{
             do{
-                guard let memberUID = memberUID else{return}
+                guard let currentUID,
+                      let memberUID else{return}
 
-                let doc = db.collection(strMeetings).document(meetingID)
-                let query = doc.collection(strMembers)
+                let meetingDoc = db.collection(strMeetings).document(meetingID)
+                let memberQuery = meetingDoc.collection(strMembers)
                             .whereField("memberUID", isEqualTo: memberUID)
+                let meetingListQuery = db.collection(strUsers).document(currentUID).collection(strMeetingList).whereField("meetingID", isEqualTo: meetingID)
 
                 let member = try await getUserData(memberUID)
 
-                let querySnapshot = try await query.getDocuments()
-
-                for document in querySnapshot.documents {
-                    try await doc.collection(strMembers).document(document.documentID).delete()
-                }
+                try await memberQuery.getDocuments().documents.first?.reference.delete()
+                
+                try await meetingListQuery.getDocuments().documents.first?.reference.delete()
+                
+//                try await querySnapshot.documents.first?.reference.delete()
+//
+//                for document in querySnapshot.documents {
+//                    try await doc.collection(strMembers).document(document.documentID).delete()
+//                }
+                
+                    
 
                 let text = "\(member.userName)님이 채팅에 나가셨습니다."
                 let message = Message(text, uid: "", isSystemMessage: true)
 
-                try await doc.collection(strMessage).addDocument(data: message.firestoreData)
-                    
+                try await meetingDoc.collection(strMessage).addDocument(data: message.firestoreData)
                 
-                isLoading = false
-                // query.getDocuments { (querySnapshot, error) in
-                //     if let error = error {
-                //         print("에러: \(error)")
-                //         return
-                //     } else {
-                //         guard let documents = querySnapshot?.documents else { return }
-                //         for document in documents {
-                //             doc.collection(self.strMembers).document(document.documentID).delete()
-                //         }
-                //         doc.collection(self.strMessage).addDocument(data: [
-                //             "text": "\(self.user!.userName)님이 채팅에 나가셨습니다.",
-                //             "userId": "SYSTEM",
-                //             "userName": "SYSTEM",
-                //             "timestamp": Timestamp(),
-                //             "isSystemMessage": true
-                //         ])
-                //     }
-                // }
-                // await MainActor.run(body: {
-                //     isLoading = false
-                // })
+                await MainActor.run{
+                    isLoading = false
+                }
             }catch{
                 await handleError(error)
             }
@@ -221,34 +209,34 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         print("deleteMeeting")
         isLoading = true
         Task{
-            let doc = db.collection(strMeetings).document(meetingID)
-            doc.delete{ error in
-                if let error = error{
-                    self.handleErrorTask(error)
-                }else{
-                    doc.collection(self.strMembers).getDocuments{ querySnapshot, error in
-                        if let error = error{
-                            self.handleErrorTask(error)
-                        }else{
-                            for document in querySnapshot!.documents {
-                                document.reference.delete()
-                            }
-                        }
-                    }
-                    doc.collection(self.strMessage).getDocuments{ querySnapshot, error in
-                        if let error = error{
-                            self.handleErrorTask(error)
-                        }else{
-                            for document in querySnapshot!.documents {
-                                document.reference.delete()
-                            }
-                        }
-                    }
+            do{
+                guard let currentUID else{return}
+                let meetingDoc = db.collection(strMeetings).document(meetingID)
+                let meetingListQuery = db.collection(strUsers).document(currentUID).collection(strMeetingList).whereField("meetingID", isEqualTo: meetingID)
+                
+                let meetingsListDocs = try await meetingListQuery.getDocuments()
+                
+                try await meetingsListDocs.documents.first?.reference.delete()
+                
+                try await meetingDoc.delete()
+
+                let membersDocs = try await meetingDoc.collection(self.strMembers).getDocuments()
+                for document in membersDocs.documents {
+                    try await document.reference.delete()
                 }
+                
+                let meesageDocs = try await meetingDoc.collection(self.strMessage).getDocuments()
+                for document in meesageDocs.documents {
+                    try await document.reference.delete()
+                }
+
+                
+                await MainActor.run(body: {
+                    isLoading = false
+                })
+            }catch{
+                print("모임삭제 오류")
             }
-            await MainActor.run(body: {
-                isLoading = false
-            })
         }
     }
     
