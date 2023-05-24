@@ -70,6 +70,7 @@ struct MeetingIconView: View {
         .scaleEffect(isClicked ? 1.7: 1.0)
         .onAppear{
             viewModel.fetchUser(meeting.hostUID)
+            print("호스트:\(meeting.hostUID)")
         }
     }
 }

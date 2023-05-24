@@ -19,7 +19,8 @@ struct User: Identifiable, Codable, FirestoreConvertible {
     var userEmail: String?
     var userImage: URL?
     var userGoogleData: UserProviderData?
-
+    var introduction: String?
+    var interests: [String]?
     var signUpDate: Timestamp
     
     init(id: String? = nil, userName: String, userEmail: String? = nil, userImage: URL? = nil, userGoogleData: UserProviderData? = nil){
@@ -29,6 +30,8 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         self.userGoogleData = userGoogleData
         self.userImage = userImage
         self.signUpDate = Timestamp(date: Date())
+        self.introduction = nil
+        self.interests = nil
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -40,6 +43,7 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         self.id = id
         self.userName = userName
         self.userEmail = data["userEmail"] as? String? ?? nil
+        
         let userImage = data["userImage"] as? String? ?? nil
         if let userImage {
             self.userImage = URL(string: userImage)
@@ -52,7 +56,11 @@ struct User: Identifiable, Codable, FirestoreConvertible {
             self.userGoogleData = UserProviderData(uid: data.uid, name: data.name, email: data.email, image: data.image)
         } else {
             self.userGoogleData = nil
-        }   
+        }
+        
+       self.introduction = data["introduction"] as? String ?? nil   // String이아니면 nil값을 반환함 ,만약 introduction이 nil값이 들어가면 안될때 끝에 ?? 를 붙임
+       self.interests = data["interests"] as? [String] ?? nil   // 서버에서 가져온 타입이 String배열이 아닐때 nil 처리
+
 
         self.signUpDate = signUpDate
     }
@@ -78,19 +86,8 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         if let googleData = userGoogleData {
             data["userGoogleData"] = [ "googleUID": googleData.uid, "name": googleData.name, "email": googleData.email, "image": googleData.image?.absoluteString ]
         }
-        // if let userGoogleEmail = userGoogleEmail {
-        //     data["userEmail"] = userGoogleEmail
-        //     data["userGoogleEmail"] = userGoogleEmail
-        // }
-        // if let userImage = userImage {
-        //     data["userImage"] = userImage.absoluteString
-        // }
         
         return data
-    }
-    
-    static func convertUserData(_ userData: UserData) -> User {
-        return User(id: userData.id, userName: userData.userName, userImage: userData.userImage)
     }
     
      static func newGoogleUser(userGoogleData: UserProviderData) -> User {
@@ -101,52 +98,22 @@ struct User: Identifiable, Codable, FirestoreConvertible {
          return User(userName: name, userEmail: email, userImage: image, userGoogleData: userGoogleData)
      }
     
-    // system 메시지
-//    static func systemMessage(_ text: String) -> [String: Any] {
-//        return [
-//            "text": text,
-//            "senderUID": "SYSTEM",
-//            "timestamp" : FieldValue.serverTimestamp(),
-//            "isSystemMessage": true
-//        ]
-//    }
-
-    /*
-    enum CodingKeys: CodingKey {
-        case id
-        case username
-        case userUID
-        case userSnsID
-        case userEmail
-        case userImage
+    static func firestoreUpdate(introduction:String?, interests:[String]?) -> [String:Any]{
+        var data : [String:Any] = [:]
+        if let introduction {
+            data["introduction"] = introduction
+        }
+        if let interests {
+            data["interests"] = interests
+        }
+        return data
     }
-     */
+    
+    
 }
 struct UserProviderData: Codable {
     var uid: String?
     var name: String?
     var email: String?
     var image: URL?
-}
-
-struct UserData: Identifiable, Codable {
-    @DocumentID var id: String?
-
-    var userName: String
-    var userImage: URL?
-
-    // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
-    init?(data: [String: Any]) {
-        guard let id = data["id"] as? String,
-              let userName = data["userName"] as? String
-        else { return nil }
-        
-        self.id = id
-        self.userName = userName
-        let userImage = data["userImage"] as? String? ?? nil
-        if let userImage {
-            self.userImage = URL(string: userImage)
-        }
-
-    }
 }
