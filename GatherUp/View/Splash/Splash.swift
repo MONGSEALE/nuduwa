@@ -9,16 +9,17 @@ import SwiftUI
 
 struct Splash: View {
     var body: some View {
-        ZStack(alignment: .center){
-            LinearGradient(gradient: Gradient(colors: [Color(UIColor.blue), Color(UIColor.orange)]),
-                           startPoint: .top, endPoint: .bottom)
-            .edgesIgnoringSafeArea(.all)
-            
-            Text("Welcome to Nuduwa")
-                .font(.title)
-                .foregroundColor(.white)
-            
-        }
+//        ZStack(alignment: .center){
+//            LinearGradient(gradient: Gradient(colors: [Color(UIColor.blue), Color(UIColor.orange)]),
+//                           startPoint: .top, endPoint: .bottom)
+//            .edgesIgnoringSafeArea(.all)
+//
+//            Text("Welcome to Nuduwa")
+//                .font(.title)
+//                .foregroundColor(.white)
+//
+//        }
+        Image("Splash")
     }
 }
 

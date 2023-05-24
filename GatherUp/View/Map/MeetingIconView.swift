@@ -46,6 +46,7 @@ struct MeetingIconView: View {
                 .offset( y : -3)
                 .padding(.bottom , 40)
         }
+        .shadow(radius: 30)
         .onTapGesture {
             if(showAnnotation==false){
                 showSheet = true

@@ -120,15 +120,17 @@ class ProfileViewModel: FirebaseViewModel {
             }
         }
     }
-    func textFunc(introduction:String?,interests:[Interests]) {
+    func textFunc(introduction:String?,interests:[[Interests]]) {
         guard let currentUID = currentUID else{
             return
         }
         Task{
             do{
                 var textArr: [String] = []
-                for interest in interests{
-                    textArr.append(interest.interestText)
+                for group in interests {
+                    for interest in group {
+                        textArr.append(interest.interestText)
+                    }
                 }
                 let docs = db.collection(strUsers).document(currentUID)
                 docs.updateData(User.firestoreUpdate(introduction: introduction, interests: textArr))
@@ -138,5 +140,6 @@ class ProfileViewModel: FirebaseViewModel {
             }
         }
     }
+
     
 }

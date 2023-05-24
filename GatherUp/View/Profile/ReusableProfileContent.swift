@@ -16,7 +16,7 @@ struct ReusableProfileContent: View {
     @State var isBool = true
     @State var editName: String?
     @State var editIntroduction: String?
-    @State var editInterests: [Interests] = []
+    @State var editInterests: [[Interests]] = []
     @State var isEdit: Bool = false
     @State private var progress: CGFloat = 0.7
     
@@ -84,7 +84,7 @@ struct ReusableProfileContent: View {
                         
                         GaugeView(progress: $progress)
                             .frame(width: 200, height: 200)
-                        Slider(value: $progress)
+                    Slider(value: $progress)
                         
                         Divider()
                         HStack{
@@ -93,7 +93,7 @@ struct ReusableProfileContent: View {
                                     .font(.title)
                                     .font(.system(size:17))
                                     .fontWeight(.bold)
-                                Text("만든 모임")
+                                Text("만든모임")
                                     .font(.system(size:15))
                                     .fontWeight(.light)
                                     .foregroundColor(.gray)
@@ -109,7 +109,14 @@ struct ReusableProfileContent: View {
                                     .foregroundColor(.gray)
                             }
                             VStack{
-                                
+                                Text("12")
+                                    .font(.title)
+                                    .font(.system(size:17))
+                                    .fontWeight(.bold)
+                                Text("왕관")
+                                    .font(.system(size:15))
+                                    .fontWeight(.light)
+                                    .foregroundColor(.gray)
                             }
                         }
                         Divider()
@@ -147,7 +154,6 @@ struct ReusableProfileContent: View {
                               }
                         }
                     }
-                
                     .padding(15)
                 }
                 .navigationTitle("내 정보")
@@ -298,7 +304,7 @@ struct EditTextProfile: View {
 struct EditInterestProfile : View{
     var isEditable : Bool
     @State var text = ""
-    @Binding var interests : [Interests]
+    @Binding var interests : [[Interests]]
     let interestsTest: [String]
 //    @State private var showPopup = false
     var showPopup : (String)->()
@@ -310,31 +316,32 @@ struct EditInterestProfile : View{
                 VStack(spacing:25){
                     VStack(spacing:10){
                         ForEach(interests.indices,id: \.self){index in
-                            HStack{
-//                                ForEach(interests[index].indices,id: \.self){interestIndex in
-                                    HStack{
-                                        Text(interests[index].interestText)
-                                        Image(systemName:"xmark")
-                                    }
-                                    .padding(.vertical,10)
-                                    .padding(.horizontal)
-                                    .background(Capsule().stroke(Color.black,lineWidth: 1))
-                                    .lineLimit(1)
-                                    .overlay(
-                                        GeometryReader{reader -> Color in
-                                            
-                                            let maxX = reader.frame(in: .global).maxX
-                                            
-                                            //
-                                            if (maxX > UIScreen.main.bounds.width - 70 && !interests[index].isExceeded){
-                                                DispatchQueue.main.async{
-                                                    interests[index].isExceeded = true
-                                                    let lastItem =
-                                                    interests[index]
-                                                    interests.append(lastItem)
-                                                    interests.remove(at:index)
-                                                }
-                                            }
+                                               HStack{
+                                                   ForEach(interests[index].indices,id: \.self){interestIndex in
+                                                       
+                                                       HStack{
+                                                           Text(interests[index][interestIndex].interestText)
+                                                        Image(systemName:"xmark")
+                                                       }
+                                                       .padding(.vertical,10)
+                                                       .padding(.horizontal)
+                                                       .background(Capsule().stroke(Color.black,lineWidth: 1))
+                                                       .lineLimit(1)
+                                                       .overlay(
+                                                           GeometryReader{reader -> Color in
+                                                               
+                                                               let maxX = reader.frame(in: .global).maxX
+                                                               
+                                                               
+                                                               if (maxX > UIScreen.main.bounds.width - 70 && !interests[index][interestIndex].isExceeded){
+                                                                   DispatchQueue.main.async{
+                                                                       interests[index][interestIndex].isExceeded = true
+                                                                       let lastItem =
+                                                                       interests[index][interestIndex]
+                                                                       interests.append([lastItem])
+                                                                       interests[index].remove(at:interestIndex)
+                                                                   }
+                                                               }
                                             
                                             return Color.clear
                                         },
@@ -345,8 +352,10 @@ struct EditInterestProfile : View{
                                         interests.remove(at:index)
                                     }
                                 }
-//                            }
+                            
+                                        }
                         }
+
                     }
                     .padding()
                     .frame(width:UIScreen.main.bounds.width - 30, height: UIScreen.main.bounds.height/3)
@@ -363,29 +372,18 @@ struct EditInterestProfile : View{
                             .frame(width:UIScreen.main.bounds.width - 30,height: 50 )
                             .background(RoundedRectangle(cornerRadius: 15).stroke(Color.gray.opacity(0.5),lineWidth: 1.5))
                         Button{
-                            if interests.flatMap({ $0 }).count < 8{
+                            if interests.flatMap({ $0 }).count < 5{
                                 if interests.isEmpty{
-                                    interests = []
+                                    interests.append([])
                                 }
-                                
+            
                                 withAnimation(.default){
-                                    interests.append(Interests(interestText: text))
+                                    interests[interests.count - 1].append(Interests(interestText: text))
                                     text = ""
                                 }
                             }
                             else {
-                                showPopup("최대 8개까지에요")
-                                
-                                //                                    withAnimation(.easeInOut){
-                                //                                    showPopup = true
-                                //                                        }
-                                //
-                                //
-                                //                                           DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                //                                               withAnimation(.easeInOut){
-                                //                                                   showPopup = false
-                                //                                               }
-                                //                                           }
+                                showPopup("최대 5개까지!")
                             }
                         } label: {
                             Text("추가하기")
@@ -400,34 +398,33 @@ struct EditInterestProfile : View{
                         
                         .disabled(text=="")
                         .opacity(text == "" ? 0.45 : 1)
-                        
-                        //                    if showPopup {
-                        //                                    Text("최대 8개까지에요")
-                        //                                        .fontWeight(.semibold)
-                        //                                        .foregroundColor(.white)
-                        //                                        .padding()
-                        //                                        .background(Color.black)
-                        //                                        .cornerRadius(10)
-                        //                                      //  .transition(.move(edge: .top))
-                        //                                        .zIndex(1)
-                        //                    }
                     }
                 }
                 .padding()
             }
             else {
-                HStack{
-                    ForEach(interestsTest, id: \.self){ interest in
-                        Text(interest)
+                VStack{
+                    ForEach(interests.indices , id: \.self){ rowIndex in
+                        HStack{
+                            ForEach(interests[rowIndex].indices, id: \.self){ columnIndex in
+                                Text(interests[rowIndex][columnIndex].interestText)
+                                    .padding(.vertical,10)
+                                    .padding(.horizontal)
+                                    .background(Capsule().stroke(Color.black,lineWidth: 1))
+                                    .lineLimit(1)
+                            }
+                        }
                     }
                 }
             }
         }
         .onAppear{
-            for text in interestsTest{
-                let inter = Interests(interestText: text)
-                interests.append(inter)
-            }
+//            interests.append([])
+//
+//            for text in interestsTest{
+//                let inter = Interests(interestText: text)
+//                interests[0].append(inter)
+//            }
         }
     }
 }
@@ -455,6 +452,10 @@ struct GaugeView: View {
                     .stroke(style: StrokeStyle(lineWidth: strokeWidth, lineCap: .butt))
                     .rotation(Angle(degrees: 180))
                     .foregroundColor(Color(red: 1.0 - Double(progress), green: Double(progress), blue: 0.0))
+                Text("\(Int((progress*10)))/10")
+                    .font(.title)
+                    .font(.system(size:20))
+                    .padding(.top, -55)
                 Text(ratingText(for: progress))
                     .font(.title)
                     .font(.system(size:20))

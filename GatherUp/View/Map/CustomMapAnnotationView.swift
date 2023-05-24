@@ -35,6 +35,7 @@ struct CustomMapAnnotationView: View {
                 .offset( y : -3)
                 .padding(.bottom , 40)
         }
+        .shadow(radius: 30)
     }
 }
 

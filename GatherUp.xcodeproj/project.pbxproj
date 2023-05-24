@@ -235,9 +235,9 @@
 		33ADB13629D6604A00352451 /* Map */ = {
 			isa = PBXGroup;
 			children = (
+				4285616429DFDBE7004DCDB9 /* MeetingSetSheetView.swift */,
 				4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */,
 				4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */,
-				4285616429DFDBE7004DCDB9 /* MeetingSetSheetView.swift */,
 				429515DC29C4A766006DD4B3 /* MapView.swift */,
 				428C040229E8E6F3003443BA /* MeetingInfoSheetView.swift */,
 				33A797D02A020C1A00287D69 /* CustomCancleView.swift */,

@@ -49,6 +49,7 @@ struct MapView: View {
                             }
                         case .new:
                             CustomMapAnnotationView()
+                                .shadow(radius: 30)
                         }
                     })
                 }
