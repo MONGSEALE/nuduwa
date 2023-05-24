@@ -15,9 +15,9 @@ struct SearchUserView: View {
         List{
             ForEach(fetchedUsers){ user in
                 NavigationLink {
-                    ReusableProfileContent(isEdit: $isEdit, user: user){ _,_  in
-                        //
-                    }
+//                    ReusableProfileContent(isEdit: $isEdit, user: user){ _,_  in
+//                        //
+//                    }
                 } label: {
                     Text(user.userName)
                         .font(.callout)

@@ -27,7 +27,7 @@ class FirebaseViewModel: ObservableObject {
     /// Users 콜렉션
     let strUsers = "Users"
     let strDMList = "DMList"
-    let strMeetingList = "MeetingsList"
+    let strJoinMeetings = "JoinMeetings"
     /// Meetings 콜렉션
     let strMeetings = "Meetings"
     let strMembers = "Members"
@@ -52,8 +52,7 @@ class FirebaseViewModel: ObservableObject {
     }
     /// 에러처리용 enum 일단은 임시용
     enum SomeError: Error {
-        case missCurrentUID
-        case missSomething
+        case miss
         case error
     }
     /// 클래스 종료시 리스너 제거
@@ -97,6 +96,7 @@ class FirebaseViewModel: ObservableObject {
             let docRef = db.collection(strUsers).document(userUID)
             // 경로로 가져오기 - 비동기함수라서 await 씀
             let user = try await docRef.getDocument(as: User.self)
+
             return user
         }catch{
             throw error

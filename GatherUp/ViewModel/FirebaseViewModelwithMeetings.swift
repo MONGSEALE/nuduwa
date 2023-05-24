@@ -18,10 +18,11 @@ import FirebaseFirestore
 
 class FirebaseViewModelwithMeetings: FirebaseViewModel {
 
+    
+    
     @Published var members: [Member] = []
     @Published var meetings: [Meeting] = []     // 모임 배열
-    
-    @Published var meetingsList: [MeetingList] = []  //수정
+    @Published var joinMeetingIDs: [String] = []     // 가입모임ID 배열
 
     //나중에 하위 클래스로 이동
     @Published var meeting: Meeting?
@@ -101,7 +102,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     // }
     
     /// 모임 참가하기
-    func joinMeeting(meetingID: String, meetingDate: Date, hostUID: String, numbersOfMembers: Int){
+    func joinMeeting(meetingID: String, numbersOfMembers: Int){
         print("joinMeeting")
         isLoading = true
         Task{
@@ -189,7 +190,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                         }
                     }
                 }
-                
+               
                 //참가 실패시 에러핸들 구현
                 await MainActor.run {
                     isLoading = false
@@ -209,13 +210,24 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
         Task{
             do{
                 let doc = db.collection(strMeetings).document(meetingID)
+    func joinMeetingsListener(){
+        guard let currentUID = currentUID else{return}
 
-                try await doc.updateData(Meeting.firestorePastMeeting())
+        let col = db.collection(strUsers).document(currentUID).collection(strJoinMeetings)
 
-            }catch{
-                print("지난모임오류")
+        let listener = col.addSnapshotListener { querySnapshot, error in
+            if let error = error{
+                self.handleErrorTask(error)
+                return
+            }
+            guard let querySnapshot = querySnapshot else{
+                return
+            }
+            self.joinMeetingIDs = querySnapshot.documents.compactMap{ documents -> String? in
+                try? documents.data()["meetingID"] as? String
             }
         }
+        listeners[col.path] = listener
     }
 }
 

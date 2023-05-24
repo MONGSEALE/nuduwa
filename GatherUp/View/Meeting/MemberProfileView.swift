@@ -10,12 +10,11 @@ import SDWebImageSwiftUI
 
 struct MemberProfileView: View {
     let member: Member
-    let isCurrent: Bool
-
+    @State var showMessage: Bool = false
+    @State var message: String = ""
     @State private var showDMView: Bool = false
+    let isCurrent: Bool
     
-    @State var receiverID: String?
-
     var body: some View {
         ZStack{
             VStack{
@@ -45,8 +44,7 @@ struct MemberProfileView: View {
                             .background(.blue, in: Capsule())
                     }
                     .fullScreenCover(isPresented: $showDMView){
-//                        DMView(receiverID: member.memberUID, dmPeopleDocRef: nil, showDMView: $showDMView)
-                        DMView(receiverID: $receiverID, showDMView: $showDMView)
+                        DMView(receiverID: member.memberUID, showDMView: $showDMView)
                             .edgesIgnoringSafeArea(.all)
                             .transition(.move(edge: .trailing))
                             .animation(.easeInOut(duration: 0.3))
@@ -55,8 +53,5 @@ struct MemberProfileView: View {
             }
         }
         .padding(30)
-        .onAppear{
-            receiverID = member.memberUID
-        }
     }
 }

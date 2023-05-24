@@ -12,11 +12,11 @@ import Firebase
 import FirebaseAuth
 
 struct DMView: View {
-    @StateObject private var viewModel: DMViewModel = .init()
+    @StateObject private var viewModel = DMViewModel()
     
+    @Environment(\.dismiss) private var dismiss
     @State private var messageText: String = ""
-    @Binding var receiverID: String?
-//    let receiverID: String?
+    let receiverID: String
     @Binding var showDMView: Bool
     @State private var count: Int = 0 //테스트용 변수
     
@@ -78,42 +78,41 @@ struct DMView: View {
                             }
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical,10)
-                    .background(Color("gray"))
-                    .cornerRadius(50)
-                    .padding()
                 }
-                .navigationBarTitle("채팅방", displayMode: .inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button(action: {
-                            showDMView = false
-                            print("뒤로")
-                        }) {
-                            HStack {
-                                Image(systemName: "arrow.left")
-                                Text("뒤로")
-                            }
+                .padding(.horizontal)
+                .padding(.vertical,10)
+                .background(Color("gray"))
+                .cornerRadius(50)
+                .padding()
+            }
+            .navigationBarTitle("채팅방", displayMode: .inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        showDMView = false
+                        print("뒤로")
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.left")
+                            Text("뒤로")
                         }
                     }
                 }
-                // .onChange(of: viewModel.dmPeopleRef){ id in
-                //     viewModel.dmListener(dmPeopleRef: id)
-                // }
-                .onAppear {
-                    viewModel.setDMRoom(receiverUID: receiverID)
-                    viewModel.fetchUser(receiverID)
-                }
-                .onDisappear {
-                    print("디스어피어")
-                    viewModel.ifNoChatRemoveDoc()
-                    viewModel.removeListeners()
-                }
-                
             }
-        }else{
-            ProgressView()
+            .onAppear {
+                viewModel.startListeningDM(chatterUID: receiverID)
+                viewModel.fetchUserData(receiverID)
+            }
+            .onDisappear {
+                print("바이")
+                viewModel.fetchChatRoomID(receiverID: receiverID) { chatRoomID in
+                    // 새로운 메시지가 도착하면 unreadMessages를 0으로 설정
+                    guard let senderID = viewModel.currentUID else{return}
+                    viewModel.resetUnreadMessages(userID: senderID, chatRoomID: chatRoomID)
+                }
+                viewModel.removeListeners()
+            }
+            
         }
     }
     func isNewDay(previousMessage: Message?, currentMessage: Message) -> Bool {
@@ -139,10 +138,11 @@ struct DMView: View {
 
 struct DMMessageRow: View {
   
-    let message : Message
-    let identifying: Bool
+    @State var message : Message
+    @State var identifying:Bool
     let name: String?
     let image: URL?
+    
 
     var body: some View {
         HStack{
@@ -163,12 +163,14 @@ struct DMMessageRow: View {
                     }
                     .background(Color.blue.clipShape(ChatBubble()))
                     .padding(5)
-                
+                    
+                    // Text(formatTimestamp(message.timestamp))
                     Text(formatTimestamp(message.timestamp))
                         .font(.caption2)
                         .foregroundColor(.gray)
                         .padding(.leading,15)
-                })
+                }
+                )
                 Spacer()
             }
             else{
@@ -189,6 +191,7 @@ struct DMMessageRow: View {
                         .padding(.trailing,15)
                 }
             }
+            
         }
     }
     // Function to format the timestamp
@@ -198,7 +201,11 @@ struct DMMessageRow: View {
         let date = timestamp.dateValue()
         return dateFormatter.string(from: date)
     }
+    
+    
+
 }
+
 
 struct DMChatBubble: Shape {
     func path(in rect: CGRect) -> Path{

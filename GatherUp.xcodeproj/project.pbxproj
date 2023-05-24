@@ -51,6 +51,7 @@
 		33AF5AC12A0C84490060427E /* DMViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5AC02A0C84490060427E /* DMViewModel.swift */; };
 		33AF5AC32A0C974D0060427E /* DMCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AF5AC22A0C974D0060427E /* DMCardView.swift */; };
 		33EDC97929DFF1DB0087FA29 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */; };
+		427E60512A1B4D7C00AB54BD /* Interests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 427E60502A1B4D7C00AB54BD /* Interests.swift */; };
 		4285616029DFDAAB004DCDB9 /* MeetingIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */; };
 		4285616329DFDACA004DCDB9 /* CustomMapAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */; };
 		4285616529DFDBE7004DCDB9 /* MeetingSetSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4285616429DFDBE7004DCDB9 /* MeetingSetSheetView.swift */; };
@@ -101,6 +102,7 @@
 		33AF5AC02A0C84490060427E /* DMViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMViewModel.swift; sourceTree = "<group>"; };
 		33AF5AC22A0C974D0060427E /* DMCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMCardView.swift; sourceTree = "<group>"; };
 		33EDC97829DFF1DB0087FA29 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
+		427E60502A1B4D7C00AB54BD /* Interests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interests.swift; sourceTree = "<group>"; };
 		4285615F29DFDAAB004DCDB9 /* MeetingIconView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingIconView.swift; sourceTree = "<group>"; };
 		4285616229DFDACA004DCDB9 /* CustomMapAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMapAnnotationView.swift; sourceTree = "<group>"; };
 		4285616429DFDBE7004DCDB9 /* MeetingSetSheetView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingSetSheetView.swift; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 				33AEB8902A11B80D0048A8C7 /* DMList.swift */,
 				33AEB8922A11B8B00048A8C7 /* MeetingList.swift */,
 				33AEB8942A11B8E40048A8C7 /* Message.swift */,
+				427E60502A1B4D7C00AB54BD /* Interests.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -211,11 +214,11 @@
 			children = (
 				33A797CE2A01FE8200287D69 /* ChatView.swift */,
 				42E3A1232A01FAAC004739C5 /* SlideOverView.swift */,
+				33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */,
 				429515E029C4A9AD006DD4B3 /* MeetingsView.swift */,
 				33ADB13929D666A500352451 /* ReusableMeetingsView.swift */,
 				33ADB13B29D667E500352451 /* MeetingCardView.swift */,
 				33A82CB829DBA57500FA2BA0 /* DetailMeetingView.swift */,
-				33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */,
 			);
 			path = Meeting;
 			sourceTree = "<group>";
@@ -398,6 +401,7 @@
 				429515DF29C4A776006DD4B3 /* ProfileView.swift in Sources */,
 				33ADB13829D6610900352451 /* Meeting.swift in Sources */,
 				33EDC97929DFF1DB0087FA29 /* CustomTextField.swift in Sources */,
+				427E60512A1B4D7C00AB54BD /* Interests.swift in Sources */,
 				33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */,
 				33ADDF7B2A035D8F003FE79B /* PiledMeetingCardView.swift in Sources */,
 				33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */,
