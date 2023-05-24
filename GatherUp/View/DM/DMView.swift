@@ -27,7 +27,9 @@ struct DMView: View {
                     ScrollView{
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(viewModel.messages.indices, id: \.self) { index in
+                                // index = 0 이 제일 최신 메시지
                                 let message = viewModel.messages[index]
+                                // 마지막 메시지면 nil 아니면 전 메시지 출력
                                 let previousMessage = message==viewModel.messages.last ? nil : viewModel.messages[index + 1]
 
                                 let isCurrentUser = message.senderUID == viewModel.currentUID
