@@ -15,6 +15,7 @@ import _PhotosUI_SwiftUI
 class ProfileViewModel: FirebaseViewModel {
     
     @Published var userProfilePicData: Data?
+    @Published var meetingCount: Int = 0
     
     // 로그아웃
     func logOutUser() {
@@ -141,5 +142,26 @@ class ProfileViewModel: FirebaseViewModel {
         }
     }
 
+    /// 모임 데이터 가져오기
+    func fetchMeetingCount(_ userUID: String){
+        print("meetingListner")
+        Task{
+            do{
+                let query = db.collection(strMeetings).whereField("hostUID", isEqualTo: userUID)
+                let snapshot = try await query.getDocuments()
+
+                guard let documents = snapshot?.documents else{return}
+
+                let meetings = documents.compactMap{ documents -> Meeting? in
+                    documents.data(as: Meeting.self)
+                }
+                meetingCount = meetings.count
+
+            }catch{
+                print("에러fetchMeetings")
+            }
+            
+        }
+    }
     
 }

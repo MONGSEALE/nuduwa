@@ -89,7 +89,7 @@ struct ProfileView: View {
                         Divider()
                         HStack{
                             VStack{
-                                Text("87")
+                                Text(viewModel.meetingCount)
                                     .font(.title)
                                     .font(.system(size:17))
                                     .fontWeight(.bold)
@@ -222,6 +222,7 @@ struct ProfileView: View {
         }
         .onAppear{
             viewModel.userListener(viewModel.currentUID)
+            viewModel.fetchMeetingCount(viewModel.currentUID)
         }
     }
     func image(from asset: PHAsset, completion: @escaping (UIImage?) -> Void) {
@@ -310,13 +311,36 @@ struct EditInterestProfile : View{
     let interestsText: [String]
 //    @State private var showPopup = false
     var showPopup : (String)->()
-    
+    @State private var height: CGFloat = 0
     
     
     var body : some View{
         VStack{
             if(isEditable==true){
+                
+
+                    GeometryReader { p in
+                        WrappingHStack (
+                        width: p.frame(in: .global).width,
+                        alignment: .top, spacing: 8,
+                        content: interestsText
+                        )
+                        .anchorPreference(
+                        key: CGFloatPreferenceKey.self, value: .bounds,
+                        transform: { p[$0].size.height }
+                        )
+                    }
+                    .frame(height: height)
+                    .onPreferenceChange(CGFloatPreferenceKey.self, perform: {
+                        height = $0
+                    })
+
+
+
+
+
 //                LazyHGrid(rows: [GridItem(.adaptive(minimum: 30))], spacing: 16){
+    /*
                 LazyVGrid(columns: [GridItem(.flexible()),
                                     GridItem(.flexible()),
                                     GridItem(.flexible())], spacing: 16){
@@ -334,7 +358,7 @@ struct EditInterestProfile : View{
                             //                            editInterests.remove(at:interestIndex)
                         }
                     }
-                }
+                }*/
                     Spacer()
                     /*
                      
@@ -629,7 +653,57 @@ struct EditInterestProfile : View{
     }
 }
 
+struct WrappingHStack<Content: View>: View {
 
+    var alignment: Alignment
+    var spacing: CGFloat
+    var content: [Content]
+
+    var laneBounds: [Int] {
+        let (laneBounds, _, _) = content.reduce(([], 0, width)) { (accum, item) -> ([Int], Int, CGFloat) in
+            var (laneBounds, index, laneWidth) = accum
+            // Let's measure the item's size
+            let itemWidth = UIHostingController(rootView: item)
+            .view.intrinsicContentSize.width
+            if laneWidth + itemWidth > width { // Lane full
+                laneWidth= itemWidth
+                laneBounds.append(index)
+            } else { // Lane not full yet
+                laneWidth += itemWidth + spacing
+            }
+            index += 1
+            return (laneBounds, index, laneWidth)
+        }
+        return laneBounds
+    }
+
+    var totalLanes: Int {
+        laneBounds.count
+    }
+
+    var body: some View {
+        VStack {
+            ForEach(0 ..< totalLanes, id: \.self) { i in
+                // Lane
+                HStack(alignment: alignment.vertical, spacing: spacing) {
+                    // Lane items
+                    ForEach(lowerBound(lane: i) ..< upperBound(lane: i), id: \.self) {
+                        content[$0]
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: Alignment(horizontal: alignment.horizontal, vertical: .center))
+            }
+        }
+    }
+
+    func lowerBound(lane i: Int) -> Int {
+        laneBounds[i]
+    }
+
+    func upperBound(lane i: Int) -> Int {
+        i == totalLanes - 1 ? content.count : laneBounds[i + 1]
+    }
+}
 
 
 struct GaugeView: View {
