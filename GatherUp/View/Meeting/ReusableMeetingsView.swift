@@ -36,7 +36,7 @@ struct ReusableMeetingsView: View {
                             .navigationTitle(title)
                             .navigationBarTitleDisplayMode(.inline)
                             .listStyle(.plain)
-//                            Divider()
+                            Divider()
                         }
                     }
                 }
