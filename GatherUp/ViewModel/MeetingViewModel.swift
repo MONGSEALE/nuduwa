@@ -105,17 +105,17 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
             
             var meetings: [Meeting] = []
 
-            guard let querySnapshot = querySnapshot else{return}
-            for diff in querySnapshot.documentChanges{
-                if (diff.type == .modified) {
-                    let meetingID = diff.document.reference.parent.parent?.documentID
-                    guard let meetingID = meetingID else{continue}
-                    self.fetchMeeting(meetingID)
-                }
-                if (diff.type == .removed) {
-                    print("Removed city: \(diff.document.data())")
-                }
-            }
+            // guard let querySnapshot = querySnapshot else{return}
+            // for diff in querySnapshot.documentChanges{
+            //     if (diff.type == .modified) {
+            //         let meetingID = diff.document.reference.parent.parent?.documentID
+            //         guard let meetingID = meetingID else{continue}
+            //         self.fetchMeeting(meetingID)
+            //     }
+            //     if (diff.type == .removed) {
+            //         print("Removed city: \(diff.document.data())")
+            //     }
+            // }
             
 //                        guard let documents = querySnapshot.documents else{return}
             for document in querySnapshot.documents {
