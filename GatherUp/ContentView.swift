@@ -10,7 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject var loginViewModel: LoginViewModel = .init()
     @State var isLoading: Bool = true
-    @State var receiverID: String?
+    @State var receiverUID: String?
     @State var showDMView: Bool = false
    
     var body: some View {
@@ -29,7 +29,7 @@ struct ContentView: View {
                             .tabItem{
                                 Label("모임",systemImage: "person.3.sequence")
                             }
-                        DMListView(receiverID: $receiverID, showDMView: $showDMView)
+                        DMListView(receiverUID: $receiverUID, showDMView: $showDMView)
                             .tabItem{
                                 Label("채팅",systemImage: "message")
                             }
@@ -39,7 +39,7 @@ struct ContentView: View {
                             }
                     }
                     .fullScreenCover(isPresented: $showDMView){
-                        DMView(receiverID: $receiverID,  showDMView: $showDMView)
+                        DMView(receiverUID: $receiverUID,  showDMView: $showDMView)
                     }
                 } else {
                     Login()

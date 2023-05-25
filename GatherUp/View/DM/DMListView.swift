@@ -13,7 +13,7 @@ import SDWebImageSwiftUI
 struct DMListView: View {
     
     @StateObject private var viewModel: DMViewModel = .init()
-    @Binding var receiverID: String?
+    @Binding var receiverUID: String?
     @Binding var showDMView: Bool
     
     var body: some View {
@@ -46,10 +46,11 @@ struct DMListView: View {
                             .padding(.top,30)
                     }else{
                         ForEach(viewModel.chattingRooms, id: \.dmPeopleRef) { chattingRoom in
-                            DMCardView(chattingRoom: chattingRoom){ receiverID in
-                                self.receiverID = receiverID
-                                showDMView = true
-                            }
+                            DMCardView(chattingRoom: chattingRoom, receiverUID: $receiverUID, showDMView: $showDMView)
+//                            { receiverUID in
+//                                self.receiverUID = receiverUID
+//                                showDMView = true
+//                            }
                             .padding(.bottom,5)
                                 
                             Divider()

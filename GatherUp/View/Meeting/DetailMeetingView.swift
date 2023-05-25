@@ -9,7 +9,7 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct DetailMeetingView: View {
-     @StateObject var viewModel: MeetingViewModel = .init()
+    @StateObject var viewModel: MeetingViewModel = .init()
 
     // var meeting: Meeting
     let meetingID: String

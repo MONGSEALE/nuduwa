@@ -15,13 +15,13 @@ struct DMView: View {
     @StateObject private var viewModel: DMViewModel = .init()
     
     @State private var messageText: String = ""
-    @Binding var receiverID: String?
-//    let receiverID: String?
+    @Binding var receiverUID: String?
+//    let receiverUID: String?
     @Binding var showDMView: Bool
     @State private var count: Int = 0 //테스트용 변수
     
     var body: some View {
-        VStack {
+        NavigationStack {
             ScrollView{
                 LazyVStack(alignment: .leading, spacing: 8) {
                     ForEach(viewModel.messages.indices, id: \.self) { index in
@@ -80,17 +80,17 @@ struct DMView: View {
             .background(Color("gray"))
             .cornerRadius(50)
             .padding()
-        }
-        .navigationBarTitle("채팅방", displayMode: .inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    showDMView = false
-                    print("뒤로")
-                }) {
-                    HStack {
-                        Image(systemName: "arrow.left")
-                        Text("뒤로")
+            .navigationBarTitle("채팅방", displayMode: .inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        showDMView = false
+                        print("뒤로")
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.left")
+                            Text("뒤로")
+                        }
                     }
                 }
             }
@@ -99,9 +99,9 @@ struct DMView: View {
         //     viewModel.dmListener(dmPeopleRef: id)
         // }
         .onAppear {
-            if let receiverID {
-                viewModel.setDMRoom(receiverUID: receiverID)
-                viewModel.fetchUser(receiverID)
+            if let receiverUID {
+                viewModel.setDMRoom(receiverUID: receiverUID)
+                viewModel.fetchUser(receiverUID)
             } else {
                 showDMView = false
             }

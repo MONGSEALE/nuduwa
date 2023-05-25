@@ -13,7 +13,10 @@ struct DMCardView: View {
     @StateObject var viewModel: DMViewModel = .init()
     
     let chattingRoom: DMList
-    var showDMView: (String?)->()
+//    var showDMView: (String?)->()
+    
+    @Binding var receiverUID: String?
+    @Binding var showDMView: Bool
     
     var body: some View {
         HStack(spacing: 16) {
@@ -46,7 +49,8 @@ struct DMCardView: View {
         }
         .buttonStyle(PlainButtonStyle())
         .onTapGesture {
-            showDMView(chattingRoom.receiverUID)
+            receiverUID = chattingRoom.receiverUID
+            showDMView = true
         }
         .contextMenu { // 길게 눌렀을 때 표시할 메뉴
             Button(action: {
