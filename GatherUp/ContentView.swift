@@ -25,7 +25,7 @@ struct ContentView: View {
                             .tabItem{
                                 Label("찾기",systemImage:"map.circle")
                             }
-                        MeetingsView(receiverID: $receiverID, showDMView: $showDMView)
+                        MeetingsView()
                             .tabItem{
                                 Label("모임",systemImage: "person.3.sequence")
                             }

@@ -24,9 +24,6 @@ struct DetailMeetingView: View {
     @State private var editMeetingDate: Date? = nil
     
     @State private var toChatView: Bool = false
-    
-    @Binding var receiverID: String?
-    @Binding var showDMView: Bool
  
     
     /// 시간 설정 제한 범위
@@ -85,7 +82,7 @@ struct DetailMeetingView: View {
                                 .font(.caption2)
                             HStack{
                                 ForEach(Array(viewModel.dicMembers.values)){ member in
-                                    MemberImageButton(member: member, isCurrent: member.memberUID == viewModel.currentUID, receiverID: $receiverID, showDMView: $showDMView)
+                                    MemberImageButton(member: member, isCurrent: member.memberUID == viewModel.currentUID)
                                 }
                             }
                                 .frame(maxWidth: 340 , alignment: .center)
@@ -109,7 +106,7 @@ struct DetailMeetingView: View {
                         .padding(.top, -10)
                         .fullScreenCover(isPresented: $toChatView) {
                             NavigationView {
-                                ChatView(meetingID: meeting.id!, meetingTitle: meeting.title, hostUID: meeting.hostUID, members: $viewModel.dicMembers, showDMView: $showDMView, receiverID: $receiverID)
+                                ChatView(meetingID: meeting.id!, meetingTitle: meeting.title, hostUID: meeting.hostUID, members: $viewModel.dicMembers)
                             }
                         }
 
@@ -283,9 +280,6 @@ struct MemberImageButton: View {
     let isCurrent: Bool
     @State var showProfile: Bool = false
     
-    @Binding var receiverID: String?
-    @Binding var showDMView: Bool
-    
     var body: some View {
         Button{
             showProfile = true
@@ -296,7 +290,7 @@ struct MemberImageButton: View {
                 .frame(width: 30, height: 30)
                 .clipShape(Circle())
                 .sheet(isPresented: $showProfile){
-                    MemberProfileView(member: member, isCurrent: isCurrent, receiverID: $receiverID, showDMView: $showDMView)
+                    MemberProfileView(member: member, isCurrent: isCurrent)
                 }
         }
     }

@@ -11,9 +11,6 @@ struct ReusableMeetingsView: View {
     @StateObject var viewModel: MeetingViewModel = .init()
     let title: String
     
-    @Binding var receiverID: String?
-    @Binding var showDMView: Bool
-    
     var body: some View {
         NavigationStack{
             if viewModel.isLoading{
@@ -32,7 +29,7 @@ struct ReusableMeetingsView: View {
                         ForEach(viewModel.meetingsList){ meeting in
                             //                            let itemViewModel: MeetingViewModel = .init() //수정
                             NavigationLink(
-                                destination: DetailMeetingView(meetingID: meeting.meetingID, hostUID: meeting.hostUID, receiverID: $receiverID, showDMView: $showDMView)
+                                destination: DetailMeetingView(meetingID: meeting.meetingID, hostUID: meeting.hostUID)
                             ){
                                 MeetingCardView(meetingID: meeting.meetingID, hostUID: meeting.hostUID)
                             }

@@ -8,9 +8,7 @@
 import SwiftUI
 
 struct MeetingsView: View {
-    @Binding var receiverID: String?
-    @Binding var showDMView: Bool
     var body: some View {
-        ReusableMeetingsView(title: "내 모임",receiverID: $receiverID, showDMView: $showDMView)
+        ReusableMeetingsView(title: "내 모임")
     }
 }

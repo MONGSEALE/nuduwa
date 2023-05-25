@@ -12,12 +12,8 @@ struct MemberProfileView: View {
     let member: Member
     let isCurrent: Bool
 
-    @Binding var receiverID: String?
-    @Binding var showDMView: Bool
-    @State var showDM: Bool = false
-    
+    @State var showDMView: Bool = false
     @State var receiverUID: String?
-    
 
     var body: some View {
         ZStack{
@@ -38,7 +34,7 @@ struct MemberProfileView: View {
                 Spacer()
                 if !isCurrent{
                     Button {
-                        showDM = true
+                        showDMView = true
                     } label: {
                         Text("1:1 메시지")
                             .font(.callout)
@@ -47,8 +43,8 @@ struct MemberProfileView: View {
                             .padding(.vertical, 10)
                             .background(.blue, in: Capsule())
                     }
-                    .fullScreenCover(isPresented: $showDM){
-                        DMView(receiverID: $receiverUID, showDMView: $showDM)
+                    .fullScreenCover(isPresented: $showDMView){
+                        DMView(receiverID: $receiverUID, showDMView: $showDMView)
                             .edgesIgnoringSafeArea(.all)
                             .transition(.move(edge: .trailing))
                             .animation(.easeInOut(duration: 0.3))
@@ -59,7 +55,6 @@ struct MemberProfileView: View {
         .padding(30)
         .onAppear{
             receiverUID = member.memberUID
-            print("receiverID:\(receiverID)")
         }
     }
 }
