@@ -141,7 +141,7 @@ struct ReusableProfileContent: View {
                                 .fontWeight(.semibold)
                             Spacer()
                         }
-                    EditInterestProfile(isEditable: isEdit, interests: $editInterests, interestsTest: viewModel.user?.interests ?? []){errorText in
+                    EditInterestProfile(isEditable: isEdit, editInterests: $editInterests, interestsText: viewModel.user?.interests ?? []){errorText in
                             errorMessage = errorText
                             withAnimation(.easeInOut){
                                   showPopup = true
@@ -304,10 +304,12 @@ struct EditTextProfile: View {
 struct EditInterestProfile : View{
     var isEditable : Bool
     @State var text = ""
-    @Binding var interests : [[Interests]]
-    let interestsTest: [String]
+    @Binding var editInterests : [[Interests]]
+    @State var interests: [[Interests]] = []
+    let interestsText: [String]
 //    @State private var showPopup = false
     var showPopup : (String)->()
+    
     
     
     var body : some View{
@@ -315,47 +317,53 @@ struct EditInterestProfile : View{
             if(isEditable==true){
                 VStack(spacing:25){
                     VStack(spacing:10){
-                        ForEach(interests.indices,id: \.self){index in
-                                               HStack{
-                                                   ForEach(interests[index].indices,id: \.self){interestIndex in
-                                                       
-                                                       HStack{
-                                                           Text(interests[index][interestIndex].interestText)
-                                                        Image(systemName:"xmark")
-                                                       }
-                                                       .padding(.vertical,10)
-                                                       .padding(.horizontal)
-                                                       .background(Capsule().stroke(Color.black,lineWidth: 1))
-                                                       .lineLimit(1)
-                                                       .overlay(
-                                                           GeometryReader{reader -> Color in
-                                                               
-                                                               let maxX = reader.frame(in: .global).maxX
-                                                               
-                                                               
-                                                               if (maxX > UIScreen.main.bounds.width - 70 && !interests[index][interestIndex].isExceeded){
-                                                                   DispatchQueue.main.async{
-                                                                       interests[index][interestIndex].isExceeded = true
-                                                                       let lastItem =
-                                                                       interests[index][interestIndex]
-                                                                       interests.append([lastItem])
-                                                                       interests[index].remove(at:interestIndex)
-                                                                   }
-                                                               }
-                                            
-                                            return Color.clear
-                                        },
-                                        alignment: .trailing
+                        ForEach(editInterests.indices,id: \.self){index in
+                            HStack{
+                               ForEach(editInterests[index].indices,id: \.self){interestIndex in
+                                   var interest = editInterests[index][interestIndex]
+                                   HStack{
+                                       Text(interest.interestText)
+                                       Image(systemName:"xmark")
+                                   }
+                                   .padding(.vertical,10)
+                                   .padding(.horizontal)
+                                   .background(Capsule().stroke(Color.black,lineWidth: 1))
+                                   .lineLimit(1)
+                                   .overlay(
+                                       GeometryReader{reader -> Color in
+                                           let maxX = reader.frame(in: .global).maxX
+                                           
+                                           if (maxX > UIScreen.main.bounds.width - 70 && !interest.isExceeded){
+                                               DispatchQueue.main.async{
+//                                                   interest.isExceeded = true
+////                                                   let lastItem = interest
+//                                                   let lastItems = editInterests[index].suffix(from: interestIndex)
+//                                                   let items:[Interests] = Array(lastItems).insert(interest, at: 0)
+//                                                   editInterests.append(contentsOf: items)
+//                                                   editInterests[index].removeSubrange(interestIndex)
+                                                   
+                                                   let i = interests[index].firstIndex(of: interest)
+                                                   interest.isExceeded = true
+                                                   let lastItem = interest
+                                                   interests.append([lastItem])
+                                                   
+                                                   if let i {
+                                                       interests[index].remove(at:i)
+                                                   }
+                                               }
+                                           }
+
+                                           return Color.clear
+                                       }
+                                       ,alignment: .trailing
                                     )
                                     .clipShape(Capsule())
                                     .onTapGesture{
-                                        interests.remove(at:index)
+                                        editInterests[index].remove(at:interestIndex)
                                     }
-                                }
-                            
-                                        }
+                               }
+                            }
                         }
-
                     }
                     .padding()
                     .frame(width:UIScreen.main.bounds.width - 30, height: UIScreen.main.bounds.height/3)
@@ -372,13 +380,13 @@ struct EditInterestProfile : View{
                             .frame(width:UIScreen.main.bounds.width - 30,height: 50 )
                             .background(RoundedRectangle(cornerRadius: 15).stroke(Color.gray.opacity(0.5),lineWidth: 1.5))
                         Button{
-                            if interests.flatMap({ $0 }).count < 5{
-                                if interests.isEmpty{
-                                    interests.append([])
+                            if editInterests.flatMap({ $0 }).count < 5{
+                                if editInterests.isEmpty{
+                                    editInterests.append([])
                                 }
             
                                 withAnimation(.default){
-                                    interests[interests.count - 1].append(Interests(interestText: text))
+                                    editInterests[editInterests.count - 1].append(Interests(interestText: text))
                                     text = ""
                                 }
                             }
@@ -403,32 +411,63 @@ struct EditInterestProfile : View{
                 .padding()
             }
             else {
-                VStack{
-                    ForEach(interests.indices , id: \.self){ rowIndex in
+                VStack(spacing:10){
+                    ForEach(interests.indices,id: \.self){index in
                         HStack{
-                            ForEach(interests[rowIndex].indices, id: \.self){ columnIndex in
-                                Text(interests[rowIndex][columnIndex].interestText)
-                                    .padding(.vertical,10)
-                                    .padding(.horizontal)
-                                    .background(Capsule().stroke(Color.black,lineWidth: 1))
-                                    .lineLimit(1)
-                            }
+                            ForEach(interests[index].indices,id: \.self){interestIndex in
+                                var interest = interests[index][interestIndex]
+                                HStack{
+                                    Text(interest.interestText)
+                                }
+                                .padding(.vertical,10)
+                                .padding(.horizontal)
+                                .background(Capsule().stroke(Color.black,lineWidth: 1))
+                                .lineLimit(1)
+                                .overlay(
+                                    GeometryReader{reader -> Color in
+                                        let maxX = reader.frame(in: .global).maxX
+                                        
+                                        
+                                        if (maxX > UIScreen.main.bounds.width - 70 && !interest.isExceeded){
+                                            DispatchQueue.main.async{
+                                                let i = interests[index].firstIndex(of: interest)
+                                                interest.isExceeded = true
+                                                let lastItem = interest
+                                                interests.append([lastItem])
+                                                
+                                                if let i {
+                                                    interests[index].remove(at:i)
+                                                }
+                                            }
+                                        }
+
+                                        return Color.clear
+                                    }
+                                    ,alignment: .trailing
+                                 )
+                                .clipShape(Capsule())
+                           }
+                            Spacer()
                         }
+                        
+                    }
+                }
+                .padding()
+                .onChange(of: interestsText){ item in
+                    interests.removeAll()
+                    editInterests.removeAll()
+                    interests.append([])
+                    editInterests.append([])
+                    
+                    for text in item{
+                        interests[interests.count - 1].append(Interests(interestText: text))
+                        editInterests[editInterests.count - 1].append(Interests(interestText: text))
                     }
                 }
             }
         }
-        .onAppear{
-//            interests.append([])
-//
-//            for text in interestsTest{
-//                let inter = Interests(interestText: text)
-//                interests[0].append(inter)
-//            }
-        }
     }
 }
-
 
 
 
