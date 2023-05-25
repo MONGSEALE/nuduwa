@@ -24,8 +24,6 @@ struct ChatView: View {
     @State private var showMemberList = false
     @State private var xOffset: CGFloat = UIScreen.main.bounds.width
     
-  
-    
     var body: some View {
         ZStack{
             VStack{
@@ -114,7 +112,7 @@ struct ChatView: View {
                     }
                 }
             }
-            MemberList(meetingID: meetingID, members: Array(members.values), hostUID: hostUID ,userUID: chatViewModel.currentUID!)
+            MemberList(meetingID: meetingID, members: Array(members.values), hostUID: hostUID ,userUID: chatViewModel.currentUID ?? "")
                            .slideOverView(isPresented: $showMemberList)
                            .onDisappear{
                                showMemberList = false
@@ -180,6 +178,7 @@ struct MemberItemView: View {
     let userUID: String
     @State var isShowMember: Bool = false
     @StateObject var viewModel: MeetingViewModel = .init()
+    
     
     var body: some View {
             HStack {

@@ -44,6 +44,7 @@ class DMViewModel: FirebaseViewModel {
                 self.dmPeopleRef = data.0
                 self.currentDMListDocRef = data.1
                 self.receiverDMListDocRef = data.2
+
                 
                 isReading = true
                 dmListener(dmPeopleRef: self.dmPeopleRef)
@@ -90,6 +91,7 @@ class DMViewModel: FirebaseViewModel {
                 receiverDocRef = data.0
                 dmPeopleDocRef = data.1
             }
+            print("상대방:\(receiverUID)")
 
             if currentDocRef != nil && receiverDocRef != nil{
                 // 사용자와 상대방 모두 DMList에 서로간 DM데이터 있을때
@@ -115,27 +117,46 @@ class DMViewModel: FirebaseViewModel {
             } else {
                 // 둘 다 DMList에 서로간의 DM데이터가 없을때, DMPeople 콜렉션에서 검색
                 print("사용자와 상대방 모두 DMList에 서로간 DM데이터 없음")
-                let query = dmPeopleCol.whereField("chattersUID", arrayContainsAny: [currentUID,receiverUID])
+                let query = dmPeopleCol.whereField("chattersUID", arrayContains: currentUID)
                 let dmPeopleSnapshot = try await query.getDocuments()
+                
+                for document in dmPeopleSnapshot.documents {
+                    let peopleUID = document.data()["chattersUID"] as? [String] ?? []
+                    if peopleUID.contains(receiverUID) {
+                        print("이전 대화있음:\(currentUID),\(receiverUID)")
+                        dmPeopleDocRef = document.reference
+                    }
+                }
 
-                if let dmPeopleDoc = dmPeopleSnapshot.documents.first {
-                    // 상대방과 이전에 대화기록 있을때
-                    dmPeopleDocRef = dmPeopleDoc.reference
-                } else {
+//                if let dmPeopleDoc = dmPeopleSnapshot.documents.first {
+//                    print("이전 대화있음:\(currentUID),\(receiverUID)")
+//                    // 상대방과 이전에 대화기록 있을때
+//                    dmPeopleDocRef = dmPeopleDoc.reference
+//                } else {
+                if dmPeopleDocRef == nil {
+                    print("이전 대화없음:\(currentUID),\(receiverUID)")
                     // 상대방과 첫 DM일때, DMPeople에 문서 생성
                     let dmPeople = DMPeople(chattersUID: [currentUID,receiverUID])
+                    print("1")
                     let documentRef = try await dmPeopleCol.addDocument(data: dmPeople.firestoreData)
+                    print("2")
                     dmPeopleDocRef = documentRef
                 }
                 guard let dmPeopleDocRef = dmPeopleDocRef else{throw SomeError.missSomething}
+                print("3")
                 // 사용자 DMList에 상대방과의 DM데이터 문서 생성
                 let currentDMList = DMList(receiverUID: receiverUID, dmPeopleRef: dmPeopleDocRef)
+                print("3")
                 let currentDMListRef = try await dmListCorrentCol.addDocument(data: currentDMList.firestoreData)
+                print("3")
                 // 상대방 DMList에 사용자와의 DM데이터 문서 생성
                 let receiverDMList = DMList(receiverUID: currentUID, dmPeopleRef: dmPeopleDocRef)
+                print("3")
                 let receiverDMListRef = try await dmListReceiverCol.addDocument(data: receiverDMList.firestoreData)
+                print("3")
                 // DMListDocRef 저장
                 currentDocRef = currentDMListRef
+                print("3")
                 receiverDocRef = receiverDMListRef
             }
             guard let dmPeopleDocRef = dmPeopleDocRef,
@@ -291,9 +312,9 @@ class DMViewModel: FirebaseViewModel {
                 self.paginationDoc = document
                 self.fetchPrevMessage(dmPeopleRef: dmPeopleRef)
             }
-            withAnimation {
+//            withAnimation {
                 self.messages.insert(data, at: 0)
-            }
+//            }
             self.readDM()
         }
         listeners[query.description] = listener
