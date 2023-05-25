@@ -92,25 +92,25 @@ struct MeetingInfoSheetView: View {
                     
                     Spacer()
                     
-//                    if let numbersOfMembers = viewModel.meeting?.numbersOfMembers{
-//                        if viewModel.currentUID != meeting.hostUID{  // host가 아니면
-//                            if viewModel.members.first(where: { $0.memberUID == viewModel.currentUID}) == nil{  // members 배열에 user가 없으면
-//                                if viewModel.members.count<numbersOfMembers {  // 모임에 자리가 있으면
+                    if let numbersOfMembers = viewModel.meeting?.numbersOfMembers{
+                        if viewModel.currentUID != meeting.hostUID{  // host가 아니면
+                            if viewModel.members.first(where: { $0.memberUID == viewModel.currentUID}) == nil{  // members 배열에 user가 없으면
+                                if viewModel.members.count<numbersOfMembers {  // 모임에 자리가 있으면
                                     Button {
                                         viewModel.joinMeeting(meetingID: meeting.id!, meetingDate: meeting.meetingDate, hostUID: meeting.hostUID,numbersOfMembers: 10)
                                     } label: {
                                         Text("참여하기")
                                     }
-//                                } else {  // 모임에 자리가 없으면
-//                                    Text("참여불가")
-//                                }
-//                            } else {  // members 배열에 user가 있으면
-//                                Text("참여중")
-//                            }
-//                        }
-//                    } else {
-//                        ProgressView()
-//                    }
+                                } else {  // 모임에 자리가 없으면
+                                    Text("참여불가")
+                                }
+                            } else {  // members 배열에 user가 있으면
+                                Text("참여중")
+                            }
+                        }
+                    } else {
+                        ProgressView()
+                    }
                     
                 }
                 

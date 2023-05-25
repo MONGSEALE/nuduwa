@@ -109,7 +109,7 @@ struct DMView: View {
         .onDisappear {
             print("디스어피어")
             viewModel.ifNoChatRemoveDoc()
-            viewModel.removeListeners()
+//            viewModel.removeListeners()
         }
                 
     }

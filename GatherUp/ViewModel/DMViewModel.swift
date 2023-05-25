@@ -173,6 +173,7 @@ class DMViewModel: FirebaseViewModel {
     func readDM() {
         print("readDM")
         if isReading {
+            print("오키")
             guard let currentDMListDocRef = currentDMListDocRef else{return}
             Task{
                 try await currentDMListDocRef.updateData(DMList.readDM)

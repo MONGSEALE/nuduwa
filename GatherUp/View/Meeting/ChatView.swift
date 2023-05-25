@@ -143,7 +143,7 @@ struct ChatView: View {
 
 struct MemberList: View {
     let meetingID: String
-    let members: [Member]
+    var members: [Member]
     let hostUID: String
     let userUID: String
     
@@ -209,7 +209,7 @@ struct MemberItemView: View {
                 Spacer()
             }
             .sheet(isPresented: $isShowMember){
-                MemberProfileView(member: member, isCurrent: member.memberUID == viewModel.currentUID)
+                ProfilePreview(user: User(id: member.memberUID, userName: member.memberName ?? "", userEmail: nil, userImage: member.memberImage, userGoogleData: nil), isCurrent: member.memberUID == viewModel.currentUID)
             }
             .padding(.horizontal)
     }

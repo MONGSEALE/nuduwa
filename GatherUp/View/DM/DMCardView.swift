@@ -30,7 +30,7 @@ struct DMCardView: View {
             VStack(alignment: .leading) {
                 Text(viewModel.user?.userName ?? "")
                     .font(.system(size: 16, weight: .bold))
-                Text(viewModel.messages.last?.text ?? "")
+                Text(viewModel.messages.first?.text ?? "")
                     .font(.system(size: 14))
                     .foregroundColor(Color(.lightGray))
             }
@@ -64,9 +64,9 @@ struct DMCardView: View {
             viewModel.fetchUser(chattingRoom.receiverUID)
             viewModel.dmListener(dmPeopleRef: chattingRoom.dmPeopleRef)
         }
-        .onDisappear{
-            viewModel.removeListeners()
-        }
+//        .onDisappear{
+//            viewModel.removeListeners()
+//        }
     }
         
 }

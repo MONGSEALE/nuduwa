@@ -290,7 +290,7 @@ struct MemberImageButton: View {
                 .frame(width: 30, height: 30)
                 .clipShape(Circle())
                 .sheet(isPresented: $showProfile){
-                    MemberProfileView(member: member, isCurrent: isCurrent)
+                    ProfilePreview(user: User(id: member.memberUID, userName: member.memberName ?? "", userEmail: nil, userImage: member.memberImage, userGoogleData: nil), isCurrent: isCurrent)
                 }
         }
     }

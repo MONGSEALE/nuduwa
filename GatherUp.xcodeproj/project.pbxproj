@@ -13,7 +13,7 @@
 		339A101829D3EAE500B4DD98 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101729D3EAE500B4DD98 /* User.swift */; };
 		339A101C29D3EBBF00B4DD98 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101A29D3EBBE00B4DD98 /* ViewExtensions.swift */; };
 		339A101D29D3EBBF00B4DD98 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A101B29D3EBBE00B4DD98 /* LoadingView.swift */; };
-		339A102329D4093800B4DD98 /* ReusableProfileContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A102229D4093800B4DD98 /* ReusableProfileContent.swift */; };
+		339A102329D4093800B4DD98 /* ProfilePreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339A102229D4093800B4DD98 /* ProfilePreview.swift */; };
 		339A102629D4098400B4DD98 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 339A102529D4098400B4DD98 /* SDWebImageSwiftUI */; };
 		33A21E4629FB4F4C009AFD5A /* GeoFire in Frameworks */ = {isa = PBXBuildFile; productRef = 33A21E4529FB4F4C009AFD5A /* GeoFire */; };
 		33A21E4829FB4F4C009AFD5A /* GeoFireUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 33A21E4729FB4F4C009AFD5A /* GeoFireUtils */; };
@@ -73,7 +73,7 @@
 		339A101729D3EAE500B4DD98 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		339A101A29D3EBBE00B4DD98 /* ViewExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		339A101B29D3EBBE00B4DD98 /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
-		339A102229D4093800B4DD98 /* ReusableProfileContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReusableProfileContent.swift; sourceTree = "<group>"; };
+		339A102229D4093800B4DD98 /* ProfilePreview.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilePreview.swift; sourceTree = "<group>"; };
 		33A21E5729FB4FF4009AFD5A /* MapViewModel2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewModel2.swift; sourceTree = "<group>"; };
 		33A6B84129EE460A0030E85B /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		33A797CE2A01FE8200287D69 /* ChatView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
@@ -227,7 +227,7 @@
 			isa = PBXGroup;
 			children = (
 				429515DE29C4A776006DD4B3 /* ProfileView.swift */,
-				339A102229D4093800B4DD98 /* ReusableProfileContent.swift */,
+				339A102229D4093800B4DD98 /* ProfilePreview.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -429,7 +429,7 @@
 				33AF5ABF2A0C7F7F0060427E /* DMView.swift in Sources */,
 				429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */,
 				33AD61BD2A0A313100CD908D /* PiledMeetingIconView.swift in Sources */,
-				339A102329D4093800B4DD98 /* ReusableProfileContent.swift in Sources */,
+				339A102329D4093800B4DD98 /* ProfilePreview.swift in Sources */,
 				4285616029DFDAAB004DCDB9 /* MeetingIconView.swift in Sources */,
 				33AD61C12A0A31B400CD908D /* FirebaseViewModel.swift in Sources */,
 				33A21E5829FB4FF4009AFD5A /* MapViewModel2.swift in Sources */,

@@ -33,7 +33,7 @@ struct ContentView: View {
                             .tabItem{
                                 Label("채팅",systemImage: "message")
                             }
-                        ReusableProfileContent()
+                        ProfileView()
                             .tabItem{
                                 Label("내 정보",systemImage:"person.crop.circle")
                             }
