@@ -502,8 +502,7 @@ struct EditInterestProfile : View{
                    
                    }
                    }*/
-                VStack(spacing:25){
-                    VStack(spacing:10){
+                    VStack{
                         ForEach(interests.indices,id: \.self){index in
                             HStack{
                                 ForEach(interests[index].indices,id: \.self){interestIndex in
@@ -542,7 +541,7 @@ struct EditInterestProfile : View{
                             
                         }
                         
-                    }
+                    
                     .padding()
                     .onChange(of: interestsText){ item in
                         interests.removeAll()
