@@ -55,6 +55,12 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
             "hostUID": hostUID
         ]
     }
+    // 종료된 모임 수정
+    static var firestoreEndMeeting: [String: Any] {
+        return [
+            "isEnd" : true
+        ]
+    }
 
 //    static func createMeeting(_ meetingID: String) -> MeetingList {
 //        return MeetingList(meetingID: meetingID, isHost: true)

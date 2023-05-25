@@ -120,20 +120,20 @@ class ProfileViewModel: FirebaseViewModel {
             }
         }
     }
-    func textFunc(introduction:String?,interests:[[Interests]]) {
+    func textFunc(introduction:String?,interests:[String]) {
         guard let currentUID = currentUID else{
             return
         }
         Task{
             do{
-                var textArr: [String] = []
-                for group in interests {
-                    for interest in group {
-                        textArr.append(interest.interestText)
-                    }
-                }
+//                var textArr: [String] = []
+//                for group in interests {
+//                    for interest in group {
+//                        textArr.append(interest.interestText)
+//                    }
+//                }
                 let docs = db.collection(strUsers).document(currentUID)
-                docs.updateData(User.firestoreUpdate(introduction: introduction, interests: textArr))
+                docs.updateData(User.firestoreUpdate(introduction: introduction, interests: interests))
             }
             catch{
                 print("수정오류")

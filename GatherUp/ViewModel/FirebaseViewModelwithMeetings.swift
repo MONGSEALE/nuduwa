@@ -21,7 +21,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     @Published var members: [Member] = []
     @Published var meetings: [Meeting] = []     // 모임 배열
     
-    @Published var meetingsList: [MeetingList] = []  //수정
+    @Published var meetingList: [MeetingList] = []  //수정
 
     //나중에 하위 클래스로 이동
     @Published var meeting: Meeting?
@@ -47,7 +47,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     }
 
     /// 유저가 참여한 모임리스트 실시간으로 클래스 변수 meetings에 저장
-    func meetingsListListener(){
+    func meetingListListener(){
         print("meetingsListListener")
         guard let currentUID = currentUID else{return}
         isLoading = true
@@ -63,7 +63,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                     if let error = error {print("에러!meetingsListener:\(error)");return}
                                         
                     guard let documents = querySnapshot?.documents else{return}
-                    self.meetingsList = documents.compactMap { document -> MeetingList? in
+                    self.meetingList = documents.compactMap { document -> MeetingList? in
                         document.data(as: MeetingList.self)
                     }.sorted(by: { meeting1, meeting2 in
                     // 자신이 만든 모임이 제일 앞으로 가게 정렬한다음 모임시간순으로 정렬

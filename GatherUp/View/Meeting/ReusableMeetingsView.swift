@@ -11,6 +11,8 @@ struct ReusableMeetingsView: View {
     @StateObject var viewModel: MeetingViewModel = .init()
     let title: String
     
+    @State var showMessage: Bool = false
+    
     var body: some View {
         NavigationStack{
             if viewModel.isLoading{
@@ -18,7 +20,7 @@ struct ReusableMeetingsView: View {
                 ProgressView()
                     .padding(.top,30)
             } else {
-                if viewModel.meetingsList.isEmpty{
+                if viewModel.meetingList.isEmpty{
                     /// 모임 배열이 비어있을때
                     Text("가입한 모임이 없습니다")
                         .font(.caption)
@@ -26,10 +28,12 @@ struct ReusableMeetingsView: View {
                         .padding(.top,30)
                 }else{
                     ScrollView{
-                        ForEach(viewModel.meetingsList){ meeting in
+                        ForEach(viewModel.meetingList){ meeting in
                             //                            let itemViewModel: MeetingViewModel = .init() //수정
                             NavigationLink(
-                                destination: DetailMeetingView(meetingID: meeting.meetingID, hostUID: meeting.hostUID)
+                                destination: DetailMeetingView(meetingID: meeting.meetingID, hostUID: meeting.hostUID){
+                                    showPopupMessage()
+                                }
                             ){
                                 MeetingCardView(meetingID: meeting.meetingID, hostUID: meeting.hostUID)
                             }
@@ -40,10 +44,25 @@ struct ReusableMeetingsView: View {
                         }
                     }
                 }
+                if showMessage{
+                    ShowMessage(message: "모임이 종료되었습니다")
+                }
             }
         }
         .onAppear{
-            viewModel.meetingsListListener()
+            viewModel.meetingListListener()
+        }
+    }
+    func showPopupMessage() {
+        // Show the message
+        withAnimation {
+            showMessage = true
+        }
+        // Hide the message after the specified duration
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            withAnimation {
+                showMessage = false
+            }
         }
     }
 }

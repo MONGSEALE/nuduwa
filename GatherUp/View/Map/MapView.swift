@@ -34,14 +34,14 @@ struct MapView: View {
                         /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
                         switch item.type {
                         case .basic:
-                            MeetingIconView(showAnnotation: $showAnnotation, isJoin: serverViewModel.meetingsList.contains(where: { $0.meetingID == item.id! }), meeting: item) { locate in
+                            MeetingIconView(showAnnotation: $showAnnotation, isJoin: serverViewModel.meetingList.contains(where: { $0.meetingID == item.id! }), meeting: item) { locate in
                                 withAnimation(.easeInOut(duration: 0.25)){
                                     viewModel.region.center = locate
                                 }
                             }
                         case .piled:
                             if let meetings = serverViewModel.bigIconMeetings[item.id!] {
-                                PiledMeetingIconView(showAnnotation: $showAnnotation, meetings: meetings, isJoinIDs: serverViewModel.meetingsList.map{ $0.meetingID }) { locate in
+                                PiledMeetingIconView(showAnnotation: $showAnnotation, meetings: meetings, isJoinIDs: serverViewModel.meetingList.map{ $0.meetingID }) { locate in
                                     withAnimation(.easeInOut(duration: 0.25)){
                                         viewModel.region.center = locate
                                     }
@@ -62,7 +62,7 @@ struct MapView: View {
                 .onAppear{
                     serverViewModel.mapMeetingsListener(region: viewModel.region)              /// Map이 보여지는동안 Firebase와 실시간 연동
                     viewModel.checkIfLocationServicesIsEnabled()
-                    serverViewModel.meetingsListListener()
+                    serverViewModel.meetingListListener()
                 }
                 .onTapGesture { tapLocation in
                     if(showAnnotation==true){

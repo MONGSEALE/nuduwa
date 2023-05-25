@@ -25,6 +25,7 @@ struct DetailMeetingView: View {
     
     @State private var toChatView: Bool = false
  
+    var onCancle: ()->()
     
     /// 시간 설정 제한 범위
     var dateRange: ClosedRange<Date>{
@@ -148,7 +149,6 @@ struct DetailMeetingView: View {
                                         Button("모임 삭제", role: .destructive, action: {
                                             viewModel.deleteMeeting(meetingID: meeting.id!)
                                             dismiss()
-                                            
                                         })
                                     }
                                     else{
@@ -177,6 +177,12 @@ struct DetailMeetingView: View {
                     }
                 }
         .navigationBarBackButtonHidden(isEdit)
+        .onChange(of: viewModel.meeting?.geoHash){ item in
+            if item == nil{
+                onCancle()
+                dismiss()
+            }
+        }
         .onAppear{
             viewModel.fetchUser(hostUID)
             viewModel.meetingListener(meetingID: meetingID)
