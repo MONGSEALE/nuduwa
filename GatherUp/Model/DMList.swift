@@ -62,5 +62,12 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
             "unreadMessages": 0
         ]
     }
+    // update Message
+    static var disAppear: [String: Any] {
+        return [
+            "unreadMessages": FieldValue.delete(),
+            "latestMessage": FieldValue.delete()
+        ]
+    }
     
 }

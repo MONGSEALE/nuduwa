@@ -91,7 +91,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         }
         self.meetings = sortMeeings
     }
-    
+    /* meetingListListener로 변경
     /// FireStore와 meetings 배열 실시간 연동
     func meetingsListener(){
         print("meetingsListener")
@@ -135,7 +135,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         listeners[query.description] = listener
         
     }
-     
+     */
 
     /// 모임 데이터 가져오기
     func fetchMeeting(_ meetingID: String){

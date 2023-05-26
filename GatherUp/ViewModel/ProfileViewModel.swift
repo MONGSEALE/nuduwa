@@ -15,6 +15,7 @@ import _PhotosUI_SwiftUI
 class ProfileViewModel: FirebaseViewModel {
     
     @Published var userProfilePicData: Data?
+    @Published var meetingCount: Int = 0
     
     // 로그아웃
     func logOutUser() {
@@ -120,24 +121,39 @@ class ProfileViewModel: FirebaseViewModel {
             }
         }
     }
-    func textFunc(introduction:String?,interests:[String]) {
+    func textFunc(introduction:String?,interests:[[Interests]]) {
         guard let currentUID = currentUID else{
             return
         }
+        var textArr: [String] = []
+        for group in interests {
+            for interest in group {
+                textArr.append(interest.interestText)
+            }
+        }
+        let docs = db.collection(strUsers).document(currentUID)
+        docs.updateData(User.firestoreUpdate(introduction: introduction, interests: textArr))
+
+    }
+    
+    /// 모임 데이터 가져오기
+    func fetchMeetingCount(_ userUID: String?){
+        print("meetingListner")
+        guard let userUID else{return}
         Task{
             do{
-//                var textArr: [String] = []
-//                for group in interests {
-//                    for interest in group {
-//                        textArr.append(interest.interestText)
-//                    }
-//                }
-                let docs = db.collection(strUsers).document(currentUID)
-                docs.updateData(User.firestoreUpdate(introduction: introduction, interests: interests))
+                let query = db.collection(strMeetings).whereField("hostUID", isEqualTo: userUID)
+                let snapshot = try await query.getDocuments()
+
+                let meetings = snapshot.documents.compactMap{ documents -> Meeting? in
+                    documents.data(as: Meeting.self)
+                }
+                meetingCount = meetings.count
+
+            }catch{
+                print("에러fetchMeetings")
             }
-            catch{
-                print("수정오류")
-            }
+
         }
     }
 

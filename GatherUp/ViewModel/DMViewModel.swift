@@ -127,12 +127,6 @@ class DMViewModel: FirebaseViewModel {
                         dmPeopleDocRef = document.reference
                     }
                 }
-
-//                if let dmPeopleDoc = dmPeopleSnapshot.documents.first {
-//                    print("이전 대화있음:\(currentUID),\(receiverUID)")
-//                    // 상대방과 이전에 대화기록 있을때
-//                    dmPeopleDocRef = dmPeopleDoc.reference
-//                } else {
                 if dmPeopleDocRef == nil {
                     print("이전 대화없음:\(currentUID),\(receiverUID)")
                     // 상대방과 첫 DM일때, DMPeople에 문서 생성
@@ -143,20 +137,14 @@ class DMViewModel: FirebaseViewModel {
                     dmPeopleDocRef = documentRef
                 }
                 guard let dmPeopleDocRef = dmPeopleDocRef else{throw SomeError.missSomething}
-                print("3")
                 // 사용자 DMList에 상대방과의 DM데이터 문서 생성
                 let currentDMList = DMList(receiverUID: receiverUID, dmPeopleRef: dmPeopleDocRef)
-                print("3")
                 let currentDMListRef = try await dmListCorrentCol.addDocument(data: currentDMList.firestoreData)
-                print("3")
                 // 상대방 DMList에 사용자와의 DM데이터 문서 생성
                 let receiverDMList = DMList(receiverUID: currentUID, dmPeopleRef: dmPeopleDocRef)
-                print("3")
                 let receiverDMListRef = try await dmListReceiverCol.addDocument(data: receiverDMList.firestoreData)
-                print("3")
                 // DMListDocRef 저장
                 currentDocRef = currentDMListRef
-                print("3")
                 receiverDocRef = receiverDMListRef
             }
             guard let dmPeopleDocRef = dmPeopleDocRef,
@@ -331,7 +319,7 @@ class DMViewModel: FirebaseViewModel {
                     self.currentDMListDocRef = doc?.0
                 }
                 guard let currentDMListDocRef = currentDMListDocRef else{throw SomeError.missSomething}
-                try await currentDMListDocRef.delete()
+                try await currentDMListDocRef.updateData(DMList.disAppear)
             }catch{
                 print("오류")
             }
