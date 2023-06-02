@@ -199,8 +199,10 @@ class ProfileViewModel: FirebaseViewModel {
             let col = self.db.collection(self.strUsers).document(currentUID).collection(self.strBlockList)
             let snapshot = try? await col.getDocuments()
             guard let documents = snapshot?.documents else{return}
-            blockList = documents.compactMap{ document -> Block? in
-                document.data(as: Block.self)
+            await MainActor.run{
+                blockList = documents.compactMap{ document -> Block? in
+                    document.data(as: Block.self)
+                }
             }
         }
     }
