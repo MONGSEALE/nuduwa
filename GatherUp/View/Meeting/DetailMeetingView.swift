@@ -295,9 +295,9 @@ struct MemberImageButton: View {
                 .aspectRatio(contentMode: .fill)
                 .frame(width: 30, height: 30)
                 .clipShape(Circle())
-                .sheet(isPresented: $showProfile){
-                    ProfilePreview(user: User(id: member.memberUID, userName: member.memberName ?? "", userEmail: nil, userImage: member.memberImage, userGoogleData: nil), isCurrent: isCurrent)
-                }
+        }
+        .sheet(isPresented: $showProfile){
+            ProfilePreview(user: User(id: member.memberUID, userName: member.memberName ?? "", userImage: member.memberImage), isCurrent: isCurrent, showChatButton: true)
         }
     }
 }

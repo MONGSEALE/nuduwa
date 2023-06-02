@@ -20,6 +20,8 @@ struct DMView: View {
     @Binding var showDMView: Bool
     @State private var count: Int = 0 //테스트용 변수
     
+    @State var showProfile: Bool = false
+    
     var body: some View {
         NavigationStack {
             ScrollView{
@@ -37,10 +39,12 @@ struct DMView: View {
                                 count += 1
                                 print("온어피어호출수:\(count)")
                                 print("messageCount:\(viewModel.messages.count)")
-
-                                if message.id == viewModel.messages.last?.id && viewModel.paginationDoc != nil  {
-                                    guard let docRef = viewModel.dmPeopleRef else{return}
-                                    viewModel.fetchPrevMessage(dmPeopleRef: docRef)
+                                
+                                if viewModel.messages.endIndex > 10 {
+                                    if (viewModel.messages.endIndex - 5 == index) && (viewModel.paginationDoc != nil) {
+                                        guard let docRef = viewModel.dmPeopleRef else{return}
+                                        viewModel.fetchPrevMessage(dmPeopleRef: docRef)
+                                    }
                                 }
                             }
                         
@@ -93,6 +97,20 @@ struct DMView: View {
                         }
                     }
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showProfile = true
+                    }) {
+                        HStack {
+                            Image(systemName: "gear")
+                        }
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showProfile){
+            if let receiverUser = viewModel.user {
+                ProfilePreview(user: receiverUser, isCurrent: false, showChatButton: false)
             }
         }
         // .onChange(of: viewModel.dmPeopleRef){ id in
@@ -109,7 +127,7 @@ struct DMView: View {
         .onDisappear {
             print("디스어피어")
             viewModel.ifNoChatRemoveDoc()
-//            viewModel.removeListeners()
+            viewModel.removeListeners()
         }
                 
     }

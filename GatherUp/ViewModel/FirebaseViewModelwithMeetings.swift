@@ -105,6 +105,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                 // 모임-멤버 컬렉션에 유저추가
                 let docRef = try await membersCol.addDocument(data: member.firestoreData)
 
+                /* Firestore 보안수칙으로 해결
                 if numbersOfMembers != 0 {
                     // numbersOfMembers가 0이면 최초생성이므로 확인작업 패스
                     // 멤버수가 최대멤버수 초과하지 않았는지 다시 확인
@@ -131,6 +132,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                         return
                     }
                 }
+                 */
                 // 멤버수가 최대멤버수 초과하지 않았을때
                 // 비동기로 2개 작업 동시 실행
                 await withThrowingTaskGroup(of: Void.self) { group in

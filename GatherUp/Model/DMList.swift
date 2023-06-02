@@ -11,12 +11,10 @@ import FirebaseFirestoreSwift
 
 struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
     @DocumentID var id: String?
-    let receiverUID: String
-    // let DMPeopleID: String
-    let dmPeopleRef: DocumentReference
-    var unreadMessages: Int
-    let latestMessage: Date
-    // let latestReadTime: Date
+    let receiverUID: String             // 상대방 UID
+    let dmPeopleRef: DocumentReference  // Firestore 경로 데이터 타입
+    var unreadMessages: Int             // 안읽은 메시지 수 - DM방 나갈시 삭제
+    let latestMessage: Date             // 마지막 메시지 시간 - DM방 나갈시 삭제
 
     // 기본 생성자
     init(receiverUID: String, dmPeopleRef: DocumentReference) {
@@ -41,7 +39,7 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         self.latestMessage = latestMessage.dateValue()
     }
     
-    // Firestore에 저장할 필드 - unreadMessages와 latestMessage는 채팅 치면 생성
+    // Firestore에 저장할 필드 - DMList애서는 안보이고 서버에만 일단 저장
     var firestoreData: [String: Any] {
         return [
             "receiverUID": receiverUID,
@@ -49,20 +47,20 @@ struct DMList : Identifiable, Codable, Equatable, FirestoreConvertible {
         ]
     }
 
-    // update Message
+    // 새로운 메시지 생성 될 때 - DMList에서 나타남
     static var firestoreUpdate: [String: Any] {
         return [
             "unreadMessages": FieldValue.increment(Int64(1)),
             "latestMessage": FieldValue.serverTimestamp()
         ]
     }
-    // update unread
+    // DM방 들어갔을 때 unreadMessages = 0
     static var readDM: [String: Any] {
         return [
             "unreadMessages": 0
         ]
     }
-    // update Message
+    // DM방 나갈 때, unreadMessages와 latestMessage 삭제 - DMList에서 안보임
     static var disAppear: [String: Any] {
         return [
             "unreadMessages": FieldValue.delete(),

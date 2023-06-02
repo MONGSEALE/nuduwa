@@ -14,7 +14,7 @@ class DMViewModel: FirebaseViewModel {
     
     @Published var messages: [Message] = []             // 메시지 배열 - 채팅방에서 사용
     @Published var chattingRooms: [DMList] = []         // DMList 배열 - 채팅방리스트에서 사용
-
+    
     @Published var dmPeopleRef: DocumentReference? = nil            // Firestore 메시지 저장될 경로
     var currentDMListDocRef: DocumentReference? = nil   // Firestore 사용자 DMList 경로
     var receiverDMListDocRef: DocumentReference? = nil  // Firestore 상대방 DMList 경로
@@ -22,21 +22,17 @@ class DMViewModel: FirebaseViewModel {
     
     var isReading: Bool = false                         // 채팅방 들어갔는지 확인변수
     
-    
-    // var dmList: DMList? = nil
-    // var isFirstDM: Bool = false
-    // var unreadCount: Int = 0
+//    var isBlock: Bool = false                           // 상대방이 유저 차단확인변수
+    var receiverUID: String? = nil
     
     override func removeListeners() {
-        print("removeListeners")
         super.removeListeners()
         messages.removeAll()
-        chattingRooms.removeAll()
     }
-
+    
     /// 채팅방 들어갔을때 실행하는 함수
     func setDMRoom(receiverUID: String) {
-//        guard let currentUID = currentUID else{return}
+        guard let currentUID else{return}
         isLoading = true
         Task{
             do{
@@ -44,8 +40,8 @@ class DMViewModel: FirebaseViewModel {
                 self.dmPeopleRef = data.0
                 self.currentDMListDocRef = data.1
                 self.receiverDMListDocRef = data.2
-
                 
+                self.receiverUID = receiverUID
                 isReading = true
                 dmListener(dmPeopleRef: self.dmPeopleRef)
             }catch{
@@ -69,6 +65,7 @@ class DMViewModel: FirebaseViewModel {
         }
     }
     /// dmPeopleRef와 사용자, 상대방 DMList 경로 가져오는 함수
+    /// dmPeople경로, currentDMList경로, receiverDMList경로 리턴함
     private func fetchDMPeopleID(receiverUID: String) async throws -> (DocumentReference, DocumentReference, DocumentReference) {
         print("fetchDMPeopleID")
         guard let currentUID = currentUID else{throw SomeError.missCurrentUID}
@@ -77,7 +74,7 @@ class DMViewModel: FirebaseViewModel {
             let dmListCorrentCol = db.collection(strUsers).document(currentUID).collection(strDMList)     // 사용자 DMLIst경로
             let dmListReceiverCol = db.collection(strUsers).document(receiverUID).collection(strDMList)  // 상대방 DMList경로
             let dmPeopleCol = db.collection(strDMPeople)
-
+            
             var dmPeopleDocRef: DocumentReference?
             var currentDocRef: DocumentReference?
             var receiverDocRef: DocumentReference?
@@ -86,13 +83,13 @@ class DMViewModel: FirebaseViewModel {
                 currentDocRef = data.0
                 dmPeopleDocRef = data.1
             }
-        
+            
             if let data = try await getDMListDoc(uid: receiverUID, otherUID: currentUID) {
                 receiverDocRef = data.0
                 dmPeopleDocRef = data.1
             }
             print("상대방:\(receiverUID)")
-
+            
             if currentDocRef != nil && receiverDocRef != nil{
                 // 사용자와 상대방 모두 DMList에 서로간 DM데이터 있을때
                 print("사용자와 상대방 모두 DMList에 서로간 DM데이터 있음")
@@ -175,6 +172,7 @@ class DMViewModel: FirebaseViewModel {
         Task{
             do{
                 guard let senderUID = currentUID,
+                      let receiverUID = receiverUID,
                       let dmPeopleRef = dmPeopleRef,
                       let currentDMListDocRef = currentDMListDocRef,
                       let receiverDMListDocRef = receiverDMListDocRef else{print("sendDM오류");return}
@@ -194,14 +192,20 @@ class DMViewModel: FirebaseViewModel {
                             throw error
                         }
                     }
-                    // 상대방 DMList 업데이트
                     group.addTask {
                         do {
-                            try await receiverDMListDocRef.updateData(DMList.firestoreUpdate)
+                            // 상대방이 차단했는지 확인
+                            let query = self.db.collection(self.strUsers).document(receiverUID).collection(self.strBlockList).whereField("blockUID", isEqualTo: senderUID)
+                            let snapshot = try await query.getDocuments()
+                            print("snapshot:\(snapshot)")
+                            if snapshot.documents.first == nil {
+                                try await receiverDMListDocRef.updateData(DMList.firestoreUpdate)
+                            }
                         } catch {
                             throw error
                         }
                     }
+                    
                 }
                 readDM()
             }catch{
@@ -284,7 +288,7 @@ class DMViewModel: FirebaseViewModel {
             }
         }
     }
-    func dmListener(dmPeopleRef: DocumentReference?) {
+    func dmListener(dmPeopleRef: DocumentReference?, listenerKey: String? = nil) {
         print("dmListener")
         guard let dmPeopleRef = dmPeopleRef else{return}
         let query = dmPeopleRef.collection(strDM)
@@ -301,12 +305,14 @@ class DMViewModel: FirebaseViewModel {
                 self.paginationDoc = document
                 self.fetchPrevMessage(dmPeopleRef: dmPeopleRef)
             }
-//            withAnimation {
-                self.messages.insert(data, at: 0)
-//            }
+            self.messages.insert(data, at: 0)
             self.readDM()
         }
-        listeners[query.description] = listener
+        if let key = listenerKey {
+            listeners[key] = listener
+        } else {
+            listeners[query.description] = listener
+        }
     }
     
     func leaveChatroom(receiverUID: String) {
@@ -331,39 +337,13 @@ class DMViewModel: FirebaseViewModel {
         print("dmListListener")
         guard let currentUID = currentUID else{return}
         isLoading = true
-
+        
         let dmListCol = db.collection(strUsers).document(currentUID).collection(strDMList)
         
         let listener = dmListCol.addSnapshotListener{ querySnapshot, error in
             if let error = error {self.handleErrorTask(error);return}
             guard let querySnapshot else{return}
             
-//            querySnapshot.documentChanges.forEach { diff in
-//                if (diff.type == .added) {
-//                    guard let data = diff.document.data(as: DMList.self) else{return}
-//                    print("추가: \(diff.document.data())")
-//                    if self.chattingRooms.contains(where: {$0.dmPeopleRef != data.dmPeopleRef} ) {
-//                        self.chattingRooms.append(data)
-//                    }
-//
-//                }
-//
-//                if (diff.type == .modified) {
-//                    guard let data = diff.document.data(as: DMList.self) else{return}
-//                    print("변경: \(diff.document.data())")
-//                    self.chattingRooms.append(data)
-//                }
-//            }
-//            self.chattingRooms = self.chattingRooms.sorted{ $0.latestMessage > $1.latestMessage}
-//            print("chattingRooms\(self.chattingRooms)")
-//            for document in querySnapshot.documents {
-//                guard let data = document.data(as: DMList.self) else{continue}
-//                print("data\(data)")
-//                if !self.chattingRooms.contains(where: {$0.dmPeopleRef == data.dmPeopleRef} ) {
-//                    self.chattingRooms.append(data)
-//                }
-//            }
-//            self.chattingRooms = self.chattingRooms.sorted{ $0.latestMessage > $1.latestMessage}
             self.chattingRooms = querySnapshot.documents.compactMap{ document -> DMList? in
                 document.data(as: DMList.self)
             }
@@ -371,55 +351,5 @@ class DMViewModel: FirebaseViewModel {
         }
         listeners[dmListCol.path] = listener
     }
-
-//    func fetchUnreadCount() {
-//        print("fetchUnreadCount")
-//        unreadCount = 0
-//        guard let dmList = dmList else{return}
-//        messages.forEach{ message in
-//            if message.timestamp.dateValue() > dmList.latestReadTime{
-//                unreadCount += 1
-//            }
-//        }
-//    }
 }
-
-
-    /*
-    func updateReadTime(){
-        print("updateReadTime")
-        guard let currentDMListDocRef = currentDMListDocRef else{return}
-        Task{
-            try await currentDMListDocRef.updateData(DMList.firestoreUpdate)
-        }
-    }*/
-/*
-    querySnapshot.documentChanges.forEach { diff in
-                if (diff.type == .added) {
-                    guard let data = diff.document.data(as: Message.self) else{return}
-                    if self.paginationDoc == nil{
-                        print("nil")
-                        self.messages = [data]
-                        self.paginationDoc = diff.document
-                    } else {
-                        print("nonil")
-                        self.messages.append(data)
-                    }
-                    print("추가: \(diff.document.data())")
-                }
-                
-                if (diff.type == .modified) {
-                    guard let data = diff.document.data(as: Message.self) else{return}
-                    if self.paginationDoc == nil{
-                        print("nil")
-                        self.messages = [data]
-                        self.paginationDoc = diff.document
-                    } else {
-                        print("nonil")
-                        self.messages.append(data)
-                    }
-                    print("변경: \(diff.document.data())")
-                }
-            }
-            */
 

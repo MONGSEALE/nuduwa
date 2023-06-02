@@ -28,7 +28,8 @@ struct ProfileView: View {
     @State var showPopup : Bool = false
     @State var errorMessage: String = ""
     
-
+    @State var showBlockList: Bool = false
+    
     var body: some View {
         ZStack{
             NavigationStack{
@@ -171,6 +172,7 @@ struct ProfileView: View {
                                 }
                                 Menu {
                                     Button("프로필 편집", action: {isEdit = true})
+                                    Button("차단 관리", action: {showBlockList = true})
                                     Button("로그아웃", action: viewModel.logOutUser)
                                     Button("계정 삭제", role: .destructive, action: viewModel.deleteAccount)
                                 } label: {
@@ -178,6 +180,9 @@ struct ProfileView: View {
                                         .rotationEffect(.init(degrees: 90))
                                         .tint(.black)
                                         .scaleEffect(0.8)
+                                }
+                                .sheet(isPresented: $showBlockList){
+                                    BlockListView()
                                 }
                             }
                         }

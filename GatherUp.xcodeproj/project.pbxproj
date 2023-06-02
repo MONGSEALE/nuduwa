@@ -28,6 +28,8 @@
 		33A797CF2A01FE8200287D69 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A797CE2A01FE8200287D69 /* ChatView.swift */; };
 		33A797D12A020C1A00287D69 /* CustomCancleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A797D02A020C1A00287D69 /* CustomCancleView.swift */; };
 		33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A82CB829DBA57500FA2BA0 /* DetailMeetingView.swift */; };
+		33A862122A29835500D4D6EF /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A862112A29835500D4D6EF /* Block.swift */; };
+		33A862142A29906700D4D6EF /* BlockListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A862132A29906700D4D6EF /* BlockListView.swift */; };
 		33A9112029ED0B0000C36FA2 /* Member.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A9111F29ED0AFF00C36FA2 /* Member.swift */; };
 		33ABB70229DD2B030049D482 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ABB70129DD2B030049D482 /* MeetingViewModel.swift */; };
 		33ABB70429DD421E0049D482 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ABB70329DD421E0049D482 /* ProfileViewModel.swift */; };
@@ -79,6 +81,8 @@
 		33A797CE2A01FE8200287D69 /* ChatView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		33A797D02A020C1A00287D69 /* CustomCancleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCancleView.swift; sourceTree = "<group>"; };
 		33A82CB829DBA57500FA2BA0 /* DetailMeetingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailMeetingView.swift; sourceTree = "<group>"; };
+		33A862112A29835500D4D6EF /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
+		33A862132A29906700D4D6EF /* BlockListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockListView.swift; sourceTree = "<group>"; };
 		33A9111F29ED0AFF00C36FA2 /* Member.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Member.swift; sourceTree = "<group>"; };
 		33ABB70129DD2B030049D482 /* MeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingViewModel.swift; sourceTree = "<group>"; };
 		33ABB70329DD421E0049D482 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
@@ -194,6 +198,7 @@
 				33AEB8922A11B8B00048A8C7 /* MeetingList.swift */,
 				33AEB8942A11B8E40048A8C7 /* Message.swift */,
 				427E60502A1B4D7C00AB54BD /* Interests.swift */,
+				33A862112A29835500D4D6EF /* Block.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -228,6 +233,7 @@
 			children = (
 				429515DE29C4A776006DD4B3 /* ProfileView.swift */,
 				339A102229D4093800B4DD98 /* ProfilePreview.swift */,
+				33A862132A29906700D4D6EF /* BlockListView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -406,6 +412,7 @@
 				33ADDF7B2A035D8F003FE79B /* PiledMeetingCardView.swift in Sources */,
 				33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */,
 				33AF5ABD2A0C7F770060427E /* DMListView.swift in Sources */,
+				33A862142A29906700D4D6EF /* BlockListView.swift in Sources */,
 				33AEB8952A11B8E40048A8C7 /* Message.swift in Sources */,
 				33A9112029ED0B0000C36FA2 /* Member.swift in Sources */,
 				33AEB8932A11B8B00048A8C7 /* MeetingList.swift in Sources */,
@@ -436,6 +443,7 @@
 				429515E129C4A9AD006DD4B3 /* MeetingsView.swift in Sources */,
 				42E3A1242A01FAAC004739C5 /* SlideOverView.swift in Sources */,
 				33A6B84229EE460A0030E85B /* ChatViewModel.swift in Sources */,
+				33A862122A29835500D4D6EF /* Block.swift in Sources */,
 				33AF5AC12A0C84490060427E /* DMViewModel.swift in Sources */,
 				33ABB70229DD2B030049D482 /* MeetingViewModel.swift in Sources */,
 			);

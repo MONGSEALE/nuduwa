@@ -17,6 +17,10 @@ class ProfileViewModel: FirebaseViewModel {
     @Published var userProfilePicData: Data?
     @Published var meetingCount: Int = 0
     
+    @Published var blockList: [Block] = []
+    
+    @Published var isBlock: Bool = false
+    
     // 로그아웃
     func logOutUser() {
         Task{
@@ -138,7 +142,7 @@ class ProfileViewModel: FirebaseViewModel {
     
     /// 모임 데이터 가져오기
     func fetchMeetingCount(_ userUID: String?){
-        print("meetingListner")
+        print("fetchMeetingCount")
         guard let userUID else{return}
         Task{
             do{
@@ -157,5 +161,56 @@ class ProfileViewModel: FirebaseViewModel {
         }
     }
 
-    
+    /// 차단하기
+    func blockUser(_ userUID: String?) {
+        print("blockUser")
+        guard let currentUID,
+              let userUID else{return}
+        Task{
+            do{
+                let block = Block(userUID)
+                let ref = db.collection(strUsers).document(currentUID).collection(strBlockList)
+                try await ref.addDocument(data: block.firestoreData)
+            }catch{
+                print("에러!blockUser")
+            }
+        }
+        
+    }
+    /// 차단한 유저 확인
+    func fetchBlockUser(_ userUID: String?) {
+        guard let currentUID,
+              let userUID else{return}
+        Task{
+            let col = self.db.collection(self.strUsers).document(currentUID).collection(self.strBlockList)
+            let query = col.whereField("blockUID", isEqualTo: userUID)
+            let snapshot = try? await query.getDocuments()
+            if snapshot?.documents.first != nil {
+                await MainActor.run{
+                    isBlock = true
+                }
+            }
+        }
+    }
+    /// 차단한 유저 전부 보기
+    func fetchBlockList() {
+        guard let currentUID else{return}
+        Task{
+            let col = self.db.collection(self.strUsers).document(currentUID).collection(self.strBlockList)
+            let snapshot = try? await col.getDocuments()
+            guard let documents = snapshot?.documents else{return}
+            blockList = documents.compactMap{ document -> Block? in
+                document.data(as: Block.self)
+            }
+        }
+    }
+    /// 차단해제
+    func unBlockUser(_ blockID: String?) {
+        print("blockUser")
+        guard let currentUID,
+              let blockID else{return}
+        
+        let ref = db.collection(strUsers).document(currentUID).collection(strBlockList).document(blockID)
+        ref.delete()
+    }
 }

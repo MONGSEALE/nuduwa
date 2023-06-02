@@ -28,6 +28,7 @@ class FirebaseViewModel: ObservableObject {
     let strUsers = "Users"
     let strDMList = "DMList"
     let strMeetingList = "MeetingsList"
+    let strBlockList = "BlockList"
     /// Meetings 콜렉션
     let strMeetings = "Meetings"
     let strMembers = "Members"
