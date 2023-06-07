@@ -14,6 +14,8 @@ struct Review: Identifiable, Equatable, Hashable, FirestoreConvertible{
     
     let meetingID: String
     let memberUID: String
+    var memberName: String?
+    var memberImage: URL?
     let reviewText: String
     let rating: Int
     let timestamp: Date
@@ -22,6 +24,8 @@ struct Review: Identifiable, Equatable, Hashable, FirestoreConvertible{
         self.id = UUID().uuidString
         self.meetingID = meetingID
         self.memberUID = memberUID
+        self.memberName = nil
+        self.memberImage = nil
         self.reviewText = reviewText
         self.rating = rating
         self.timestamp = Date()
@@ -39,6 +43,8 @@ struct Review: Identifiable, Equatable, Hashable, FirestoreConvertible{
         self.id = id
         self.meetingID = meetingID
         self.memberUID = memberUID
+        self.memberName = nil
+        self.memberImage = nil
         self.reviewText = reviewText
         self.rating = rating
         self.timestamp = timestamp.dateValue()

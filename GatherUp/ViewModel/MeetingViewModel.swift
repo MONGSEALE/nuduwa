@@ -139,7 +139,7 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
 
     /// 모임 데이터 가져오기
     func fetchMeeting(_ meetingID: String){
-        print("meetingListner")
+        print("fetchMeeting")
         Task{
             do{
                 let doc = db.collection(strMeetings).document(meetingID)
@@ -198,11 +198,16 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
         Task{
             do{
                 let meetingDoc = db.collection(strMeetings).document(meetingID)
+                let membersUID = self.members.map{$0.memberUID}
                 for member in members {
                     Task{
+                        let index = membersUID.firstIndex(of: member.memberUID)
+                        guard let index else {return}
+                        var membersUIDwithoutMember = membersUID
+                        membersUIDwithoutMember.remove(at: index)
                         let memberMeetingListQuery = db.collection(strUsers).document(member.memberUID).collection(strMeetingList).whereField("meetingID", isEqualTo: meetingID)
                         let meetingListDoc = try await memberMeetingListQuery.getDocuments()
-                        try await meetingListDoc.documents.first?.reference.updateData(MeetingList.firestoreEndMeeting)
+                        try await meetingListDoc.documents.first?.reference.updateData(MeetingList.firestoreEndMeeting(membersUIDwithoutMember))
                     }
                 }
                 try await meetingDoc.updateData(Meeting.firestorePastMeeting())

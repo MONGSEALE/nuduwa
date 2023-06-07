@@ -110,7 +110,7 @@ struct DMView: View {
         }
         .sheet(isPresented: $showProfile){
             if let receiverUser = viewModel.user {
-                ProfilePreview(user: receiverUser, isCurrent: false, meetingID: nil, showChatButton: false)
+                ProfilePreview(user: receiverUser, isCurrent: false, showChatButton: false)
             }
         }
         .onAppear {

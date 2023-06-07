@@ -51,7 +51,9 @@ struct MeetingInfoSheetView: View {
                     Text(meeting.title)
                         .padding(.bottom, geometry.size.height <= 200 ? 0 : 8)
                         .font(.system(size:24))
+                    Spacer()
                 }
+                .padding(.leading, 30)
                 if geometry.size.height > 310 {
                     Spacer()
                     HStack {

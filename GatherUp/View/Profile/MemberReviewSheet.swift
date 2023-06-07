@@ -7,37 +7,21 @@
 
 import SwiftUI
 import SDWebImageSwiftUI
-/*
-struct MemberReviewView: View {
-    @StateObject var viewModel: MeetingViewModel = .init()
+
+struct MemberReviewListView: View {
+    let member: Member
+    let meetings: [Meeting]
     
-    let meetingID : String
-    let meetingTitle: String
-    let hostUID: String
-    let members: [Member]
-    @Binding var showReview: Bool
+    var createReview: ()->()
     
     var body: some View {
         NavigationView{
             ScrollView{
-                ForEach(members) { member in
-                    if member.memberUID != viewModel.currentUID{
-                        MemberCardView(member: member)
-                        Divider()
+                ForEach(meetings) { meeting in
+                    MeetingReviewCardView(member: member, meeting: meeting){
+                        createReview()
                     }
-                }
-            }
-            .navigationBarTitle("\(meetingTitle)", displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button{
-                        showReview = false
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrow.left")
-                            Text("뒤로")
-                        }
-                    }
+                    Divider()
                 }
             }
             .padding(20)
@@ -45,28 +29,38 @@ struct MemberReviewView: View {
     }
 }
 
-struct MemberCardView: View {
+struct MeetingReviewCardView: View {
+    @StateObject var viewModel: ProfileViewModel = .init()
+    
     let member: Member
+    let meeting: Meeting
     
     @State var showSheet: Bool = false
     @State var reviewText: String?
+    
+    var createReview: ()->()
     
     var body: some View {
         Button{
             showSheet = true
         } label: {
             HStack(spacing: 10){
-                WebImage(url: member.memberImage).placeholder{ProgressView()}
+                WebImage(url: viewModel.user?.userImage).placeholder{ProgressView()}
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 40, height: 40)
                     .clipShape(Circle())
                 
+                Text(viewModel.user?.userName ?? "")
+                    .font(.title)
+                    .foregroundColor(.black)
+                
                 VStack(alignment: .leading, spacing: 5){
-                    Text(member.memberName ?? "")
-                        .font(.title)
+                    Text(meeting.title)
+                        .font(.system(size: 20))
+                        .fontWeight(.semibold)
                         .foregroundColor(.black)
-                    Text("\(member.joinDate.formatted(date: .abbreviated, time: .shortened))에 참여함")
+                    Text("\(meeting.publishedDate.formatted(date: .abbreviated, time: .shortened))에 생성됨")
                         .font(.caption2)
                         .foregroundColor(.gray)
                 }
@@ -74,12 +68,16 @@ struct MemberCardView: View {
         }
         .sheet(isPresented: $showSheet) {
             MemberReviewSheet(memberImage: member.memberImage, memberName: member.memberName, showSheet: $showSheet){ reviewText, progress in
-                //
+                viewModel.createReview(memberUID: member.memberUID, meetingID: meeting.id, reviewText: reviewText, progress: progress)
+                createReview()
             }
+        }
+        .onAppear{
+            viewModel.fetchUser(meeting.hostUID)
         }
     }
 }
-*/
+
 struct MemberReviewSheet: View {
     let memberImage: URL?
     let memberName: String?

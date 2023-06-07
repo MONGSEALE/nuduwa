@@ -17,6 +17,7 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
     var meetingDate: Date
     var joinDate: Date
     let hostUID: String
+    let nonReviewMembers: [String]?
 
     // 기본 생성자
     init(meetingID: String, meetingDate: Date, hostUID: String) {
@@ -26,6 +27,7 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
         self.meetingDate = meetingDate
         self.joinDate = Date()
         self.hostUID = hostUID
+        self.nonReviewMembers = nil
     }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
@@ -43,6 +45,7 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
         self.meetingDate = meetingDate.dateValue()
         self.joinDate = joinDate.dateValue()
         self.hostUID = hostUID
+        self.nonReviewMembers = data["nonReviewMembers"] as? [String] ?? nil
     }
     
     // Firestore에 저장할 필드
@@ -56,32 +59,18 @@ struct MeetingList: Identifiable, Codable, FirestoreConvertible {
         ]
     }
     // 종료된 모임 수정
-    static var firestoreEndMeeting: [String: Any] {
+    static func firestoreEndMeeting(_ membersUID: [String]) -> [String: Any] {
         return [
-            "isEnd" : true
+            "isEnd" : true,
+            "nonReviewMembers" : membersUID
         ]
     }
-
-//    static func createMeeting(_ meetingID: String) -> MeetingList {
-//        return MeetingList(meetingID: meetingID, isHost: true)
-//    }
-    /*
-    // member가 가입
-    static func member(_ meetingID: String) -> [String: Any] {
+    // 멤버리뷰 썼을때 수정
+    static func createReview(_ userUID: String) -> [String: Any] {
+        print("createReview구조체")
         return [
-            "meetingID": meetingID,
-            "joinDate": FieldValue.serverTimestamp()
+            "nonReviewMembers" : FieldValue.arrayRemove([userUID])
         ]
     }
-    
-    // 모임 새로 만들어서 host가 가입시
-    static func host(_ meetingID: String) -> [String: Any] {
-        return [
-            "meetingID": meetingID,
-            "joinDate": FieldValue.serverTimestamp(),
-            "isHost" : true
-        ]
-    }
-     */
 }
 

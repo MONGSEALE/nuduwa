@@ -12,7 +12,7 @@ struct ProfilePreview: View {
     @StateObject var viewModel: ProfileViewModel = .init()
     let user: User
     let isCurrent: Bool
-    let meetingID: String?
+//    let meetingID: String?
 
     @State var showDMView: Bool = false
     @State var receiverUID: String?
@@ -39,7 +39,7 @@ struct ProfilePreview: View {
                 GaugeView(progress: $viewModel.rating)
                         .frame(width: 200, height: 200)
                         .padding(.top, 30)
-                List(viewModel.review){ review in
+                List(viewModel.reviews){ review in
                     HStack{
                         Text(review.reviewText)
                     }
@@ -78,7 +78,7 @@ struct ProfilePreview: View {
                                     .animation(.easeInOut(duration: 0.3))
                             }
                         }
-                        if meetingID != nil{
+                        if !viewModel.meetingsWithMemeberOfReview.isEmpty{
                             Button {
                                 showReview = true
                             } label: {
@@ -90,8 +90,8 @@ struct ProfilePreview: View {
                                     .background(.green, in: Capsule())
                             }
                             .sheet(isPresented: $showReview) {
-                                MemberReviewSheet(memberImage: user.userImage, memberName: user.userName, showSheet: $showReview){ reviewText, progress in
-                                    viewModel.createReview(memberUID: user.id, meetingID: meetingID, reviewText: reviewText, progress: progress)
+                                MemberReviewListView(member: Member(memberUID: user.id ?? "", memberName: user.userName, memberImage: user.userImage), meetings: viewModel.meetingsWithMemeberOfReview){
+                                    showReview = false
                                 }
                             }
                         }
@@ -103,6 +103,7 @@ struct ProfilePreview: View {
         .onAppear{
             viewModel.fetchReview(user.id)
             viewModel.fetchBlockUser(user.id)
+            viewModel.fetchReviewList(user.id)
             receiverUID = user.id
         }
     }

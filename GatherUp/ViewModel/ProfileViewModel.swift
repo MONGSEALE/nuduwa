@@ -21,8 +21,10 @@ class ProfileViewModel: FirebaseViewModel {
     
     @Published var isBlock: Bool = false
     
-    @Published var review: [Review] = []
+    @Published var reviews: [Review] = []
     @Published var rating: CGFloat = 0.5
+    
+    @Published var meetingsWithMemeberOfReview: [Meeting] = []
     
     // 로그아웃
     func logOutUser() {
@@ -223,11 +225,24 @@ class ProfileViewModel: FirebaseViewModel {
     func createReview(memberUID:String?, meetingID:String?, reviewText: String, progress: CGFloat) {
         print("createReview")
         guard let currentUID, let memberUID, let meetingID else{return}
-        
-        let review = Review(meetingID: meetingID, memberUID: currentUID, reviewText: reviewText, rating: Int(progress*10))
-        let ref = db.collection(strUsers).document(memberUID).collection(strReviewList)
-        ref.addDocument(data: review.firestoreData)
-        
+        print("memberUID:\(memberUID)")
+        print("meetingID:\(meetingID)")
+        Task{
+            do{
+                let review = Review(meetingID: meetingID, memberUID: currentUID, reviewText: reviewText, rating: Int(progress*10))
+                let reviewListRef = db.collection(strUsers).document(memberUID).collection(strReviewList)
+                try await reviewListRef.addDocument(data: review.firestoreData)
+                let meetingListRef = db.collection(strUsers).document(currentUID).collection(strMeetingList)
+                let query = meetingListRef
+                    .whereField("meetingID", isEqualTo: meetingID)
+                    .whereField("nonReviewMembers", arrayContains: memberUID)
+                let snapshot = try? await query.getDocuments()
+                let doc = snapshot?.documents.first
+                try await doc?.reference.updateData(MeetingList.createReview(memberUID))
+            }catch{
+                print("오류!createReview")
+            }
+        }
     }
     
     /// 리뷰가져오기
@@ -238,16 +253,77 @@ class ProfileViewModel: FirebaseViewModel {
             let snapshot = try? await ref.getDocuments()
             guard let docs = snapshot?.documents else{return}
             
-            let review = docs.compactMap{ doc -> Review? in
+            var reviews = docs.compactMap{ doc -> Review? in
                 doc.data(as: Review.self)
             }
-            guard review.count != 0 else{return}
-            let rating = CGFloat(review.map{$0.rating}.reduce(0,+) / review.count) / 10
+            guard reviews.count != 0 else{return}
+            let rating = CGFloat(reviews.map{$0.rating}.reduce(0,+) / reviews.count) / 10
+            
+            // 동시에 여러개 비동기작업 수행 - 동시에 수행 할 필요 없으면 withTaskGroup 안 써도 됨
+            let updateReviews = await withTaskGroup(of: Review?.self) { group in
+                for review in reviews {
+                    group.addTask {
+                        // 각각의 리뷰쓴 UID에서 Name과 Image를 가져온다
+                        let user = try? await self.getUser(review.memberUID)
+                        var updateReview = review
+                        updateReview.memberName = user?.userName
+                        updateReview.memberImage = user?.userImage
+                        return updateReview
+                    }
+                }
+                var updateReviews: [Review] = []
+                for await result in group {
+                    if let result {
+                        updateReviews.append(result)
+                    }
+                }
+                return updateReviews
+            }
             
             await MainActor.run{
-                self.review = review
+                self.reviews = updateReviews
                 self.rating = rating
-                print("rating:\(review.map{$0.rating}.reduce(0,+)),\(rating)")
+                print("rating:\(updateReviews.map{$0.rating}.reduce(0,+)),\(rating)")
+            }
+        }
+    }
+    
+    /// 프로필에서 리뷰 클릭시 수행할 함수
+    ///  사용자가 상대방에게 쓸 수 있는 리뷰를 보여줌(여러 모임에서 만났을 경우 다 보여줌)
+    func fetchReviewList(_ userUID: String?){
+        guard let currentUID, let userUID else {return}
+        Task{
+            let meetingListRef = db.collection(strUsers).document(currentUID).collection(strMeetingList)
+            let query = meetingListRef.whereField("nonReviewMembers", arrayContains: userUID)
+            
+            let snapshot = try? await query.getDocuments()
+            
+            guard let docs = snapshot?.documents else{return}
+            let meetingList = docs.compactMap{ doc -> MeetingList? in
+                doc.data(as: MeetingList.self)
+            }
+            print("미팅리뷰리스트:\(meetingList)")
+            
+            let meetings = await withTaskGroup(of: Meeting?.self) { group in
+                for list in meetingList {
+                    group.addTask {
+                        let meetingRef = self.db.collection(self.strMeetings).document(list.meetingID)
+                        let doc = try? await meetingRef.getDocument()
+                        return doc?.data(as: Meeting.self)
+                    }
+                }
+                var meetings: [Meeting] = []
+                for await result in group {
+                    if let result {
+                        meetings.append(result)
+                    }
+                }
+                return meetings
+            }
+            
+            await MainActor.run{
+                meetingsWithMemeberOfReview = meetings
+                print("리뷰미팅:\(meetingsWithMemeberOfReview)")
             }
         }
     }

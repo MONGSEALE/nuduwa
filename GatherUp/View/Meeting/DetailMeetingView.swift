@@ -315,7 +315,7 @@ struct MemberImageButton: View {
                 .clipShape(Circle())
         }
         .sheet(isPresented: $showProfile){
-            ProfilePreview(user: User(id: member.memberUID, userName: member.memberName ?? "", userImage: member.memberImage), isCurrent: isCurrent, meetingID: meetingID, showChatButton: true)
+            ProfilePreview(user: User(id: member.memberUID, userName: member.memberName ?? "", userImage: member.memberImage), isCurrent: isCurrent, showChatButton: true)
         }
     }
 }
