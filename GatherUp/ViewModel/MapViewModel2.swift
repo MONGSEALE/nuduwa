@@ -22,7 +22,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
 
     @Published var category: Meeting.Category? = nil
 
-    private var checkRegion: MKCoordinateRegion?    // 쿼리 리셋기준 위치
+    private var currentRegion: MKCoordinateRegion?    // 쿼리 리셋기준 위치
     
     @Published var isOverlap: Bool = false  // 모임 중복 생성 확인
     
@@ -93,30 +93,35 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
         bigIconMeetings = piledMeetings
         combineNewMeetings()
     }
+    func setRegion(region: MKCoordinateRegion){
+        currentRegion = region
+    }
 
     ///  지도 위치 체크해서 리스너 쿼리 변경
     func checkedLocation(region: MKCoordinateRegion) {
 //        print("checkedLocation, 현재 리스너갯수: \(listeners.count)")
-        if let checkRegion = checkRegion {
+        if let checkRegion = currentRegion {
             let changedLatitude = abs(checkRegion.span.latitudeDelta - region.span.latitudeDelta) > region.span.latitudeDelta / 3
             let changedLongitude = abs(checkRegion.span.longitudeDelta - region.span.longitudeDelta) > region.span.longitudeDelta / 3
             let movedLatitude = abs(checkRegion.center.latitude - region.center.latitude) > region.span.latitudeDelta
             let movedLongitude = abs(checkRegion.center.longitude - region.center.longitude) > region.span.longitudeDelta
             
             if changedLatitude || changedLongitude || movedLatitude || movedLongitude  {
-                mapMeetingsListener(region: region)
+                setRegion(region: region)
+                mapMeetingsListener()
             }
         }
     }
     /// FireStore와 meetings 배열 실시간 연동
-    func mapMeetingsListener(region: MKCoordinateRegion){
+    func mapMeetingsListener(){
         print("mapMeetingsListener, 현재 리스너갯수: \(listeners.count)")
-        checkRegion = region
+        
+        guard let currentRegion else{return}
 
         let metersPerDegree: Double = 111_319.9 // 지구의 반지름 (m) * 2 * pi / 360
-        let latitudeDeltaInMeters = region.span.latitudeDelta * metersPerDegree * 3
+        let latitudeDeltaInMeters = currentRegion.span.latitudeDelta * metersPerDegree * 3
         // region.center에서 latitudeDeltaInMeters범위만큼 해당하는 geoHash값 저장
-        let queryBounds = GFUtils.queryBounds(forLocation: region.center,
+        let queryBounds = GFUtils.queryBounds(forLocation: currentRegion.center,
                                             withRadius: latitudeDeltaInMeters)
         // queryBounds를 사용해 Firestore 쿼리 만들기
         var queries: [String:Query] = [:]
@@ -159,7 +164,7 @@ class MapViewModel2: FirebaseViewModelwithMeetings {
                 print("미팅:\(self.fetchedMeetings.values.count)")
                 // 마지막 이벤트 후에만 mergeMeetings 호출
                 if key == queries.keys.sorted().last {
-                    self.mergeMeetings(latitudeDelta: region.span.latitudeDelta)
+                    self.mergeMeetings(latitudeDelta: currentRegion.span.latitudeDelta)
                 }
             }
             listeners[key] = listener

@@ -29,6 +29,7 @@ struct ProfileView: View {
     @State var errorMessage: String = ""
     
     @State var showBlockList: Bool = false
+    @State var showEndMeeting: Bool = false
     
     var body: some View {
         ZStack{
@@ -83,9 +84,9 @@ struct ProfileView: View {
                         }
                         .padding(.bottom,20)
                         
-                        GaugeView(progress: $progress)
+                    GaugeView(progress: $viewModel.rating)
                             .frame(width: 200, height: 200)
-                    Slider(value: $progress)
+//                    Slider(value: $progress)
                         
                         Divider()
                         HStack{
@@ -172,6 +173,7 @@ struct ProfileView: View {
                                 }
                                 Menu {
                                     Button("프로필 편집", action: {isEdit = true})
+                                    Button("지난 모임", action: {showEndMeeting = true})
                                     Button("차단 관리", action: {showBlockList = true})
                                     Button("로그아웃", action: viewModel.logOutUser)
                                     Button("계정 삭제", role: .destructive, action: viewModel.deleteAccount)
@@ -180,6 +182,9 @@ struct ProfileView: View {
                                         .rotationEffect(.init(degrees: 90))
                                         .tint(.black)
                                         .scaleEffect(0.8)
+                                }
+                                .sheet(isPresented: $showEndMeeting){
+                                    EndMeetingListView()
                                 }
                                 .sheet(isPresented: $showBlockList){
                                     BlockListView()
@@ -226,6 +231,7 @@ struct ProfileView: View {
             }
         }
         .onAppear{
+            viewModel.fetchReview(viewModel.currentUID)
             viewModel.userListener(viewModel.currentUID)
             viewModel.fetchMeetingCount(viewModel.currentUID)
         }

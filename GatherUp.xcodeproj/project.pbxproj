@@ -41,6 +41,9 @@
 		33ADB13829D6610900352451 /* Meeting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13729D6610900352451 /* Meeting.swift */; };
 		33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13929D666A500352451 /* ReusableMeetingsView.swift */; };
 		33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13B29D667E500352451 /* MeetingCardView.swift */; };
+		33ADC0A32A2D691A003A7511 /* EndMeetingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADC0A22A2D691A003A7511 /* EndMeetingListView.swift */; };
+		33ADC0A52A2D6CDD003A7511 /* MemberReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADC0A42A2D6CDD003A7511 /* MemberReviewSheet.swift */; };
+		33ADC0A72A2DA05D003A7511 /* Review.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADC0A62A2DA05D003A7511 /* Review.swift */; };
 		33ADDF7B2A035D8F003FE79B /* PiledMeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADDF7A2A035D8F003FE79B /* PiledMeetingCardView.swift */; };
 		33ADDF7D2A036AFE003FE79B /* MemberProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */; };
 		33AEB88F2A11B7D40048A8C7 /* FirestoreConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEB88E2A11B7D40048A8C7 /* FirestoreConvertible.swift */; };
@@ -94,6 +97,9 @@
 		33ADB13729D6610900352451 /* Meeting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meeting.swift; sourceTree = "<group>"; };
 		33ADB13929D666A500352451 /* ReusableMeetingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableMeetingsView.swift; sourceTree = "<group>"; };
 		33ADB13B29D667E500352451 /* MeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCardView.swift; sourceTree = "<group>"; };
+		33ADC0A22A2D691A003A7511 /* EndMeetingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndMeetingListView.swift; sourceTree = "<group>"; };
+		33ADC0A42A2D6CDD003A7511 /* MemberReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberReviewSheet.swift; sourceTree = "<group>"; };
+		33ADC0A62A2DA05D003A7511 /* Review.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Review.swift; sourceTree = "<group>"; };
 		33ADDF7A2A035D8F003FE79B /* PiledMeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiledMeetingCardView.swift; sourceTree = "<group>"; };
 		33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberProfileView.swift; sourceTree = "<group>"; };
 		33AEB88E2A11B7D40048A8C7 /* FirestoreConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreConvertible.swift; sourceTree = "<group>"; };
@@ -199,6 +205,7 @@
 				33AEB8942A11B8E40048A8C7 /* Message.swift */,
 				427E60502A1B4D7C00AB54BD /* Interests.swift */,
 				33A862112A29835500D4D6EF /* Block.swift */,
+				33ADC0A62A2DA05D003A7511 /* Review.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -234,6 +241,8 @@
 				429515DE29C4A776006DD4B3 /* ProfileView.swift */,
 				339A102229D4093800B4DD98 /* ProfilePreview.swift */,
 				33A862132A29906700D4D6EF /* BlockListView.swift */,
+				33ADC0A22A2D691A003A7511 /* EndMeetingListView.swift */,
+				33ADC0A42A2D6CDD003A7511 /* MemberReviewSheet.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -413,6 +422,7 @@
 				33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */,
 				33AF5ABD2A0C7F770060427E /* DMListView.swift in Sources */,
 				33A862142A29906700D4D6EF /* BlockListView.swift in Sources */,
+				33ADC0A52A2D6CDD003A7511 /* MemberReviewSheet.swift in Sources */,
 				33AEB8952A11B8E40048A8C7 /* Message.swift in Sources */,
 				33A9112029ED0B0000C36FA2 /* Member.swift in Sources */,
 				33AEB8932A11B8B00048A8C7 /* MeetingList.swift in Sources */,
@@ -433,6 +443,7 @@
 				33ABB70429DD421E0049D482 /* ProfileViewModel.swift in Sources */,
 				33A797CF2A01FE8200287D69 /* ChatView.swift in Sources */,
 				4285616529DFDBE7004DCDB9 /* MeetingSetSheetView.swift in Sources */,
+				33ADC0A72A2DA05D003A7511 /* Review.swift in Sources */,
 				33AF5ABF2A0C7F7F0060427E /* DMView.swift in Sources */,
 				429515CF29C4A744006DD4B3 /* GatherUpApp.swift in Sources */,
 				33AD61BD2A0A313100CD908D /* PiledMeetingIconView.swift in Sources */,
@@ -443,6 +454,7 @@
 				429515E129C4A9AD006DD4B3 /* MeetingsView.swift in Sources */,
 				42E3A1242A01FAAC004739C5 /* SlideOverView.swift in Sources */,
 				33A6B84229EE460A0030E85B /* ChatViewModel.swift in Sources */,
+				33ADC0A32A2D691A003A7511 /* EndMeetingListView.swift in Sources */,
 				33A862122A29835500D4D6EF /* Block.swift in Sources */,
 				33AF5AC12A0C84490060427E /* DMViewModel.swift in Sources */,
 				33ABB70229DD2B030049D482 /* MeetingViewModel.swift in Sources */,

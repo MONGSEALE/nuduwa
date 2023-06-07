@@ -1,15 +1,17 @@
 //
-//  ReusableMeetingsView.swift
+//  PastMeetingListView.swift
 //  GatherUp
 //
-//  Created by DaelimCI00007 on 2023/03/31.
+//  Created by DaelimCI00007 on 2023/06/05.
 //
+
+// 프로필뷰에서 지난 모임리스트 클릭시 보여질 뷰
+// 추후 비슷하면 MeetingsView(ReusableMeetingsView)와 합칠예정
 
 import SwiftUI
 
-struct ReusableMeetingsView: View {
+struct EndMeetingListView: View {
     @StateObject var viewModel: MeetingViewModel = .init()
-    let title: String
     
     @State var showMessage: Bool = false
     
@@ -22,37 +24,37 @@ struct ReusableMeetingsView: View {
             } else {
                 if viewModel.meetingList.isEmpty{
                     /// 모임 배열이 비어있을때
-                    Text("가입한 모임이 없습니다")
+                    Text("지난 모임이 없습니다")
                         .font(.caption)
                         .foregroundColor(.gray)
                         .padding(.top,30)
                 }else{
                     ScrollView{
                         ForEach(viewModel.meetingList){ meeting in
-                            //                            let itemViewModel: MeetingViewModel = .init() //수정
                             NavigationLink(
-                                destination: DetailMeetingView(meetingID: meeting.meetingID, hostUID: meeting.hostUID, isEnd: false){
+                                destination: DetailMeetingView(meetingID: meeting.meetingID, hostUID: meeting.hostUID, isEnd: true){
                                     showPopupMessage()
                                 }
                             ){
                                 MeetingCardView(meetingID: meeting.meetingID, hostUID: meeting.hostUID)
                             }
-                            .navigationTitle(title)
+                            .navigationTitle("지난 모임")
                             .navigationBarTitleDisplayMode(.inline)
                             .listStyle(.plain)
                             Divider()
                         }
                     }
                 }
-                if showMessage{
-                    ShowMessage(message: "모임이 종료되었습니다")
-                }
+//                if showMessage{
+//                    ShowMessage(message: "모임이 종료되었습니다")
+//                }
             }
         }
         .onAppear{
-            viewModel.meetingListListener()
+            viewModel.meetingListListener(isEnd: true)
         }
     }
+    
     func showPopupMessage() {
         // Show the message
         withAnimation {
@@ -66,4 +68,3 @@ struct ReusableMeetingsView: View {
         }
     }
 }
-

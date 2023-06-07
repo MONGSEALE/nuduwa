@@ -14,6 +14,7 @@ struct DetailMeetingView: View {
     // var meeting: Meeting
     let meetingID: String
     let hostUID: String
+    let isEnd: Bool
     @Environment(\.dismiss) private var dismiss
     
     @State private var isEdit: Bool = false
@@ -24,6 +25,7 @@ struct DetailMeetingView: View {
     @State private var editMeetingDate: Date? = nil
     
     @State private var toChatView: Bool = false
+    @State private var showReview: Bool = false
  
     var onCancle: ()->()
     
@@ -83,7 +85,7 @@ struct DetailMeetingView: View {
                                 .font(.caption2)
                             HStack{
                                 ForEach(Array(viewModel.dicMembers.values)){ member in
-                                    MemberImageButton(member: member, isCurrent: member.memberUID == viewModel.currentUID)
+                                    MemberImageButton(member: member, isCurrent: member.memberUID == viewModel.currentUID, meetingID: meetingID)
                                 }
                             }
                                 .frame(maxWidth: 340 , alignment: .center)
@@ -94,32 +96,47 @@ struct DetailMeetingView: View {
                         .cornerRadius(10)
                         .shadow(radius: 5)
                         
-                        Button{
-                            toChatView = true
-                        } label: {
-                            Text("채팅 참가")
-                                .font(.callout)
-                                .foregroundColor(.white)
-                                .padding(.horizontal,150)
-                                .padding(.vertical,10)
-                                .background(.blue,in: RoundedRectangle(cornerRadius: 10))
-                        }
-                        .padding(.top, -10)
-                        .fullScreenCover(isPresented: $toChatView) {
-                            NavigationView {
-                                ChatView(meetingID: meeting.id!, meetingTitle: meeting.title, hostUID: meeting.hostUID, members: $viewModel.dicMembers)
+                        if !isEnd {
+                            Button{
+                                toChatView = true
+                            } label: {
+                                Text("채팅 참가")
+                                    .font(.callout)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal,150)
+                                    .padding(.vertical,10)
+                                    .background(.blue,in: RoundedRectangle(cornerRadius: 10))
+                            }
+                            .padding(.top, -10)
+                            .fullScreenCover(isPresented: $toChatView) {
+                                NavigationView {
+                                    ChatView(meetingID: meeting.id!, meetingTitle: meeting.title, hostUID: meeting.hostUID, members: $viewModel.dicMembers)
+                                }
                             }
                         }
-
-
+                        /*
+                        else {
+                            Button{
+                                showReview = true
+                            } label: {
+                                Text("참여자 리뷰하기")
+                                    .font(.callout)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal,130)
+                                    .padding(.vertical,10)
+                                    .background(.blue,in: RoundedRectangle(cornerRadius: 10))
+                            }
+                            .padding(.top, -10)
+                            .fullScreenCover(isPresented: $showReview) {
+                                MemberReviewView(meetingID: meeting.id!, meetingTitle: meeting.title, hostUID: meeting.hostUID, members: Array(viewModel.dicMembers.values), showReview: $showReview)
+                                
+                                
+                            }
+                        }*/
                     }
                 }
                 .padding(10)
                 
-             
-                
-                
-                /// Host 여부에 따라 버튼 보이기
               
             }
             
@@ -146,8 +163,8 @@ struct DetailMeetingView: View {
                                         Button("모임 수정", action: {
                                             isEdit.toggle()
                                         })
-                                        Button("모임 삭제", role: .destructive, action: {
-                                            viewModel.deleteMeeting(meetingID: meeting.id!)
+                                        Button("모임 취소", role: .destructive, action: {
+                                            viewModel.cancleMeeting(meetingID: meeting.id!)
                                             dismiss()
                                         })
                                     }
@@ -284,6 +301,7 @@ struct EditDatePicker: View {
 struct MemberImageButton: View {
     let member: Member
     let isCurrent: Bool
+    let meetingID: String?
     @State var showProfile: Bool = false
     
     var body: some View {
@@ -297,7 +315,7 @@ struct MemberImageButton: View {
                 .clipShape(Circle())
         }
         .sheet(isPresented: $showProfile){
-            ProfilePreview(user: User(id: member.memberUID, userName: member.memberName ?? "", userImage: member.memberImage), isCurrent: isCurrent, showChatButton: true)
+            ProfilePreview(user: User(id: member.memberUID, userName: member.memberName ?? "", userImage: member.memberImage), isCurrent: isCurrent, meetingID: meetingID, showChatButton: true)
         }
     }
 }

@@ -60,7 +60,8 @@ struct MapView: View {
                     serverViewModel.checkedLocation(region: region)
                 }
                 .onAppear{
-                    serverViewModel.mapMeetingsListener(region: viewModel.region)              /// Map이 보여지는동안 Firebase와 실시간 연동
+                    serverViewModel.setRegion(region: viewModel.region)
+                    serverViewModel.mapMeetingsListener()              /// Map이 보여지는동안 Firebase와 실시간 연동
                     viewModel.checkIfLocationServicesIsEnabled()
                     serverViewModel.meetingListListener()
                 }

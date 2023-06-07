@@ -110,12 +110,9 @@ struct DMView: View {
         }
         .sheet(isPresented: $showProfile){
             if let receiverUser = viewModel.user {
-                ProfilePreview(user: receiverUser, isCurrent: false, showChatButton: false)
+                ProfilePreview(user: receiverUser, isCurrent: false, meetingID: nil, showChatButton: false)
             }
         }
-        // .onChange(of: viewModel.dmPeopleRef){ id in
-        //     viewModel.dmListener(dmPeopleRef: id)
-        // }
         .onAppear {
             if let receiverUID {
                 viewModel.setDMRoom(receiverUID: receiverUID)

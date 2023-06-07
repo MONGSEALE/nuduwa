@@ -209,7 +209,7 @@ struct MemberItemView: View {
                 Spacer()
             }
             .sheet(isPresented: $isShowMember){
-                ProfilePreview(user: User(id: member.memberUID, userName: member.memberName ?? "", userImage: member.memberImage), isCurrent: member.memberUID == viewModel.currentUID, showChatButton: true)
+                ProfilePreview(user: User(id: member.memberUID, userName: member.memberName ?? "", userImage: member.memberImage), isCurrent: member.memberUID == viewModel.currentUID, meetingID: nil, showChatButton: true)
             }
             .padding(.horizontal)
     }

@@ -21,6 +21,9 @@ class ProfileViewModel: FirebaseViewModel {
     
     @Published var isBlock: Bool = false
     
+    @Published var review: [Review] = []
+    @Published var rating: CGFloat = 0.5
+    
     // 로그아웃
     func logOutUser() {
         Task{
@@ -214,5 +217,38 @@ class ProfileViewModel: FirebaseViewModel {
         
         let ref = db.collection(strUsers).document(currentUID).collection(strBlockList).document(blockID)
         ref.delete()
+    }
+    
+    /// 멤버리뷰하기
+    func createReview(memberUID:String?, meetingID:String?, reviewText: String, progress: CGFloat) {
+        print("createReview")
+        guard let currentUID, let memberUID, let meetingID else{return}
+        
+        let review = Review(meetingID: meetingID, memberUID: currentUID, reviewText: reviewText, rating: Int(progress*10))
+        let ref = db.collection(strUsers).document(memberUID).collection(strReviewList)
+        ref.addDocument(data: review.firestoreData)
+        
+    }
+    
+    /// 리뷰가져오기
+    func fetchReview(_ userUID: String?) {
+        guard let userUID else{return}
+        Task{
+            let ref = db.collection(strUsers).document(userUID).collection(strReviewList)
+            let snapshot = try? await ref.getDocuments()
+            guard let docs = snapshot?.documents else{return}
+            
+            let review = docs.compactMap{ doc -> Review? in
+                doc.data(as: Review.self)
+            }
+            guard review.count != 0 else{return}
+            let rating = CGFloat(review.map{$0.rating}.reduce(0,+) / review.count) / 10
+            
+            await MainActor.run{
+                self.review = review
+                self.rating = rating
+                print("rating:\(review.map{$0.rating}.reduce(0,+)),\(rating)")
+            }
+        }
     }
 }

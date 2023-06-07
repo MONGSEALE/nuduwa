@@ -12,9 +12,11 @@ struct ProfilePreview: View {
     @StateObject var viewModel: ProfileViewModel = .init()
     let user: User
     let isCurrent: Bool
+    let meetingID: String?
 
     @State var showDMView: Bool = false
     @State var receiverUID: String?
+    @State var showReview: Bool = false
     
     var showChatButton: Bool
 
@@ -33,6 +35,14 @@ struct ProfilePreview: View {
                         .fontWeight(.semibold)
                     
                         .hAlign(.leading)
+                }
+                GaugeView(progress: $viewModel.rating)
+                        .frame(width: 200, height: 200)
+                        .padding(.top, 30)
+                List(viewModel.review){ review in
+                    HStack{
+                        Text(review.reviewText)
+                    }
                 }
                 Spacer()
                 HStack(spacing: 20){
@@ -68,12 +78,30 @@ struct ProfilePreview: View {
                                     .animation(.easeInOut(duration: 0.3))
                             }
                         }
+                        if meetingID != nil{
+                            Button {
+                                showReview = true
+                            } label: {
+                                Text("리뷰")
+                                    .font(.callout)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 30)
+                                    .padding(.vertical, 10)
+                                    .background(.green, in: Capsule())
+                            }
+                            .sheet(isPresented: $showReview) {
+                                MemberReviewSheet(memberImage: user.userImage, memberName: user.userName, showSheet: $showReview){ reviewText, progress in
+                                    viewModel.createReview(memberUID: user.id, meetingID: meetingID, reviewText: reviewText, progress: progress)
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
         .padding(30)
         .onAppear{
+            viewModel.fetchReview(user.id)
             viewModel.fetchBlockUser(user.id)
             receiverUID = user.id
         }

@@ -47,41 +47,35 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
     }
 
     /// 유저가 참여한 모임리스트 실시간으로 클래스 변수 meetings에 저장
-    func meetingListListener(){
-        print("meetingsListListener")
+    func meetingListListener(isEnd: Bool = false){
+        print("meetingListListener")
         guard let currentUID = currentUID else{return}
         isLoading = true
-        Task{
-            do{
-                // 끝나지 않은 모임만 가져오는 쿼리
-                let query = db.collection(strUsers).document(currentUID).collection(strMeetingList)
-                    .whereField("isEnd", isEqualTo: false)
-                    // .order(by: "meetingDate", descending: true) // 밑에서 정렬함
-                let listener = query.addSnapshotListener { querySnapshot, error in
-                    // 리스너 다 실행되면 isLoading = false
-                    defer {self.isLoading = false}
-                    if let error = error {print("에러!meetingsListener:\(error)");return}
-                                        
-                    guard let documents = querySnapshot?.documents else{return}
-                    self.meetingList = documents.compactMap { document -> MeetingList? in
-                        document.data(as: MeetingList.self)
-                    }.sorted(by: { meeting1, meeting2 in
-                    // 자신이 만든 모임이 제일 앞으로 가게 정렬한다음 모임시간순으로 정렬
-                       if meeting1.hostUID == currentUID && meeting2.hostUID != currentUID {
-                            return true // meeting1의 hostUID가 currentUID와 같을 때 meeting1을 앞으로 정렬
-                        } else if meeting1.hostUID != currentUID && meeting2.hostUID == currentUID {
-                            return false // meeting2의 hostUID가 currentUID와 같을 때 meeting2를 앞으로 정렬
-                        } else {
-                            // hostUID가 같은 경우 meetingDate 필드를 기준으로 내림차순 정렬
-                            return meeting1.meetingDate > meeting2.meetingDate
-                        }
-                    })
+        // isEnd 매개변수 값에 따라 달리 가져오는 쿼리
+        let query = db.collection(strUsers).document(currentUID).collection(strMeetingList)
+            .whereField("isEnd", isEqualTo: isEnd)
+            // .order(by: "meetingDate", descending: true) // 밑에서 정렬함
+        let listener = query.addSnapshotListener { querySnapshot, error in
+            // 리스너 다 실행되면 isLoading = false
+            defer {self.isLoading = false}
+            if let error = error {print("에러!meetingsListener:\(error)");return}
+                                
+            guard let documents = querySnapshot?.documents else{return}
+            self.meetingList = documents.compactMap { document -> MeetingList? in
+                document.data(as: MeetingList.self)
+            }.sorted(by: { meeting1, meeting2 in
+            // 자신이 만든 모임이 제일 앞으로 가게 정렬한다음 모임시간순으로 정렬
+               if meeting1.hostUID == currentUID && meeting2.hostUID != currentUID {
+                    return true // meeting1의 hostUID가 currentUID와 같을 때 meeting1을 앞으로 정렬
+                } else if meeting1.hostUID != currentUID && meeting2.hostUID == currentUID {
+                    return false // meeting2의 hostUID가 currentUID와 같을 때 meeting2를 앞으로 정렬
+                } else {
+                    // hostUID가 같은 경우 meetingDate 필드를 기준으로 내림차순 정렬
+                    return meeting1.meetingDate > meeting2.meetingDate
                 }
-                listeners[query.description] = listener
-            }catch{
-                await handleError(error)
-            }
+            })
         }
+        listeners[query.description] = listener
     }
     
     /// 모임 참가하기
@@ -105,7 +99,7 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
                 // 모임-멤버 컬렉션에 유저추가
                 let docRef = try await membersCol.addDocument(data: member.firestoreData)
 
-                /* Firestore 보안수칙으로 해결
+                /* 다시한번 최대인원수 넘었는지 확인작업, Firestore 보안수칙으로 해결에정
                 if numbersOfMembers != 0 {
                     // numbersOfMembers가 0이면 최초생성이므로 확인작업 패스
                     // 멤버수가 최대멤버수 초과하지 않았는지 다시 확인

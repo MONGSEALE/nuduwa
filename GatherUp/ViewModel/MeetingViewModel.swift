@@ -192,17 +192,12 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
     // 예전(주석처리)에는 서버에서 모임데이터를 아예 지웠는데
     // 현재는 서버에는 데이터 남아있고 지도와 모임탭에서 안보이게 수정
     // 추후 프로필에 이전모임 탭이 생기면 거기서 지워진 모임 확인가능하게 수정예정
-    func deleteMeeting(meetingID: String){
-        print("deleteMeeting")
+    func cancleMeeting(meetingID: String){
+        print("cancleMeeting")
         isLoading = true
         Task{
             do{
-//                guard let currentUID else{return}
                 let meetingDoc = db.collection(strMeetings).document(meetingID)
-//                let meetingListQuery = db.collection(strUsers).document(currentUID).collection(strMeetingList).whereField("meetingID", isEqualTo: meetingID)
-                
-//                let membersDocs = try await meetingDoc.collection(self.strMembers).getDocuments()
-                
                 for member in members {
                     Task{
                         let memberMeetingListQuery = db.collection(strUsers).document(member.memberUID).collection(strMeetingList).whereField("meetingID", isEqualTo: meetingID)
@@ -211,24 +206,6 @@ class MeetingViewModel: FirebaseViewModelwithMeetings {
                     }
                 }
                 try await meetingDoc.updateData(Meeting.firestorePastMeeting())
-                /*
-                let meetingsListDocs = try await meetingListQuery.getDocuments()
-                
-                try await meetingsListDocs.documents.first?.reference.delete()
-                
-                try await meetingDoc.delete()
-
-                let membersDocs = try await meetingDoc.collection(self.strMembers).getDocuments()
-                for document in membersDocs.documents {
-                    try await document.reference.delete()
-                }
-                
-                let meesageDocs = try await meetingDoc.collection(self.strMessage).getDocuments()
-                for document in meesageDocs.documents {
-                    try await document.reference.delete()
-                }
-                 */
-
                 
                 await MainActor.run(body: {
                     isLoading = false
