@@ -12,14 +12,14 @@ struct MemberReviewListView: View {
     let member: Member
     let meetings: [Meeting]
     
-    var createReview: ()->()
+    var createReview: (String)->()
     
     var body: some View {
         NavigationView{
             ScrollView{
                 ForEach(meetings) { meeting in
-                    MeetingReviewCardView(member: member, meeting: meeting){
-                        createReview()
+                    MeetingReviewCardView(member: member, meeting: meeting){ meetingID in
+                        createReview(meetingID)
                     }
                     Divider()
                 }
@@ -38,7 +38,7 @@ struct MeetingReviewCardView: View {
     @State var showSheet: Bool = false
     @State var reviewText: String?
     
-    var createReview: ()->()
+    var createReview: (String)->()
     
     var body: some View {
         Button{
@@ -69,7 +69,9 @@ struct MeetingReviewCardView: View {
         .sheet(isPresented: $showSheet) {
             MemberReviewSheet(memberImage: member.memberImage, memberName: member.memberName, showSheet: $showSheet){ reviewText, progress in
                 viewModel.createReview(memberUID: member.memberUID, meetingID: meeting.id, reviewText: reviewText, progress: progress)
-                createReview()
+                if let id = meeting.id {
+                    createReview(id)
+                }
             }
         }
         .onAppear{

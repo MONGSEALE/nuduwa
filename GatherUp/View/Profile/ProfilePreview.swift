@@ -39,9 +39,15 @@ struct ProfilePreview: View {
                 GaugeView(progress: $viewModel.rating)
                         .frame(width: 200, height: 200)
                         .padding(.top, 30)
-                List(viewModel.reviews){ review in
-                    HStack{
-                        Text(review.reviewText)
+                
+                DisclosureGroup("리뷰보기"){
+                    ForEach(viewModel.reviews){ review in
+                        HStack(spacing:10){
+                            Text(review.reviewText)
+                            Spacer()
+                            Image(systemName: "star.fill")
+                            Text("x\(review.rating)")
+                        }
                     }
                 }
                 Spacer()
@@ -90,8 +96,10 @@ struct ProfilePreview: View {
                                     .background(.green, in: Capsule())
                             }
                             .sheet(isPresented: $showReview) {
-                                MemberReviewListView(member: Member(memberUID: user.id ?? "", memberName: user.userName, memberImage: user.userImage), meetings: viewModel.meetingsWithMemeberOfReview){
-                                    showReview = false
+                                MemberReviewListView(member: Member(memberUID: user.id ?? "", memberName: user.userName, memberImage: user.userImage), meetings: viewModel.meetingsWithMemeberOfReview){ meetingID in
+                                    viewModel.meetingsWithMemeberOfReview.removeAll { meeting in
+                                        return meeting.id == meetingID
+                                    }
                                 }
                             }
                         }

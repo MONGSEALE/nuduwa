@@ -101,7 +101,7 @@ struct ProfileView: View {
                                     .foregroundColor(.gray)
                             }
                             VStack{
-                                Text("15")
+                                Text("\(viewModel.reviews.count)")
                                     .font(.title)
                                     .font(.system(size:17))
                                     .fontWeight(.bold)
@@ -234,6 +234,7 @@ struct ProfileView: View {
             viewModel.fetchReview(viewModel.currentUID)
             viewModel.userListener(viewModel.currentUID)
             viewModel.fetchMeetingCount(viewModel.currentUID)
+            viewModel.fetchCreateReview(viewModel.currentUID)
         }
     }
     func image(from asset: PHAsset, completion: @escaping (UIImage?) -> Void) {

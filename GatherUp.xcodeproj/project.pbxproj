@@ -42,7 +42,7 @@
 		33ADB13A29D666A500352451 /* ReusableMeetingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13929D666A500352451 /* ReusableMeetingsView.swift */; };
 		33ADB13C29D667E500352451 /* MeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADB13B29D667E500352451 /* MeetingCardView.swift */; };
 		33ADC0A32A2D691A003A7511 /* EndMeetingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADC0A22A2D691A003A7511 /* EndMeetingListView.swift */; };
-		33ADC0A52A2D6CDD003A7511 /* MemberReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADC0A42A2D6CDD003A7511 /* MemberReviewSheet.swift */; };
+		33ADC0A52A2D6CDD003A7511 /* MemberReviewListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADC0A42A2D6CDD003A7511 /* MemberReviewListView.swift */; };
 		33ADC0A72A2DA05D003A7511 /* Review.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADC0A62A2DA05D003A7511 /* Review.swift */; };
 		33ADDF7B2A035D8F003FE79B /* PiledMeetingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADDF7A2A035D8F003FE79B /* PiledMeetingCardView.swift */; };
 		33ADDF7D2A036AFE003FE79B /* MemberProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */; };
@@ -98,7 +98,7 @@
 		33ADB13929D666A500352451 /* ReusableMeetingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableMeetingsView.swift; sourceTree = "<group>"; };
 		33ADB13B29D667E500352451 /* MeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCardView.swift; sourceTree = "<group>"; };
 		33ADC0A22A2D691A003A7511 /* EndMeetingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndMeetingListView.swift; sourceTree = "<group>"; };
-		33ADC0A42A2D6CDD003A7511 /* MemberReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberReviewSheet.swift; sourceTree = "<group>"; };
+		33ADC0A42A2D6CDD003A7511 /* MemberReviewListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberReviewListView.swift; sourceTree = "<group>"; };
 		33ADC0A62A2DA05D003A7511 /* Review.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Review.swift; sourceTree = "<group>"; };
 		33ADDF7A2A035D8F003FE79B /* PiledMeetingCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiledMeetingCardView.swift; sourceTree = "<group>"; };
 		33ADDF7C2A036AFE003FE79B /* MemberProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberProfileView.swift; sourceTree = "<group>"; };
@@ -242,7 +242,7 @@
 				339A102229D4093800B4DD98 /* ProfilePreview.swift */,
 				33A862132A29906700D4D6EF /* BlockListView.swift */,
 				33ADC0A22A2D691A003A7511 /* EndMeetingListView.swift */,
-				33ADC0A42A2D6CDD003A7511 /* MemberReviewSheet.swift */,
+				33ADC0A42A2D6CDD003A7511 /* MemberReviewListView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -422,7 +422,7 @@
 				33A82CB929DBA57500FA2BA0 /* DetailMeetingView.swift in Sources */,
 				33AF5ABD2A0C7F770060427E /* DMListView.swift in Sources */,
 				33A862142A29906700D4D6EF /* BlockListView.swift in Sources */,
-				33ADC0A52A2D6CDD003A7511 /* MemberReviewSheet.swift in Sources */,
+				33ADC0A52A2D6CDD003A7511 /* MemberReviewListView.swift in Sources */,
 				33AEB8952A11B8E40048A8C7 /* Message.swift in Sources */,
 				33A9112029ED0B0000C36FA2 /* Member.swift in Sources */,
 				33AEB8932A11B8B00048A8C7 /* MeetingList.swift in Sources */,

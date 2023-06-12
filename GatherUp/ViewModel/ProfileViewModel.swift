@@ -327,4 +327,25 @@ class ProfileViewModel: FirebaseViewModel {
             }
         }
     }
+    
+    /// 작성한 리뷰 가져오기
+    func fetchCreateReview(_ userUID: String?) {
+        guard let userUID else{return}
+        Task{
+            do{
+                let ref = db.collectionGroup(strReviewList)
+                let query = ref.whereField("memberUID", isEqualTo: userUID)
+                let snapshot = try await query.getDocuments()
+                let reviews = snapshot.documents.compactMap{ doc -> Review? in
+                    doc.data(as: Review.self)
+                }
+                await MainActor.run{
+                    self.reviews = reviews
+                }
+            }catch{
+                print("오류fetchCreateReview:\(error.localizedDescription)")
+                
+            }
+        }
+    }
 }

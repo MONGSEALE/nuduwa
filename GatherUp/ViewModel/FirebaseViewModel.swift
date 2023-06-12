@@ -9,6 +9,7 @@ import SwiftUI
 import Firebase
 import FirebaseAuth
 import FirebaseFirestore
+import Combine
 
 // Firebase와 연결하는 ViewModel 클래스가 상속하는 부모 클래스
 // 모든 컬렉션 이름이 변수로 저장되어있다
@@ -138,7 +139,7 @@ class FirebaseViewModel: ObservableObject {
         let docRef = db.collection(strUsers).document(userUID)
         // 경로로 리스너 호출 - 리스너는 await으로 비동기처리가 안돼서 클로저로 비동기처리(중괄호 안에 있는 코드는 addSnapshotListener가 다 끝난다음에 실행), 더 좋은 방법은 combine 프레임워크 사용하는것
         let listener = docRef.addSnapshotListener { snapshot, error in
-            if let error = error {return}
+            if error != nil {return}
             // 에러가 안나고 정상적으로 작동했는데 서버에 데이터가 없을때 else문 실행
             guard let document = snapshot else{print("No Users");return}
             self.user = document.data(as: User.self)
@@ -146,6 +147,43 @@ class FirebaseViewModel: ObservableObject {
         }
         listeners[docRef.path] = listener
     }
+    /// 테스트
+    func usersListener() -> AnyPublisher<[User], Error> {
+        print("usersListener")
+        let (publisher, listener) = db.collection(strUsers)
+            .addSnapshotListener(as: User.self)
+        
+        listeners[db.collection(strUsers).path] = listener
+        
+        return publisher
+//        db.collection(strUsers).add
+//        let publisher = PassthroughSubject<[User], Error>()
+//
+//        let docRef = db.collection(strUsers)
+//        let listener = docRef.addSnapshotListener { snapshot, error in
+//            if error != nil {return}
+//            // 에러가 안나고 정상적으로 작동했는데 서버에 데이터가 없을때 else문 실행
+//            guard let documents = snapshot?.documents else{print("No Users");return}
+//
+//            let users = documents.compactMap{ doc -> User? in
+//                doc.data(as: User.self)
+//            }
+//            publisher.send(users)
+//        }
+//
+//        return publisher.eraseToAnyPublisher()
+    }
+    func addListnerForUsers() {
+        var cancellables = Set<AnyCancellable>()
+        self.usersListener()
+            .sink { complete in
+                
+            } receiveValue: { [weak self] users in
+                let users = users
+            }
+            .store(in: &cancellables)
+    }
+    /// 테스트 끝
     
     /// 에러처리 - 아직 형식만 만듬
     func handleError(_ error: Error, isShowError: Bool = false) async {

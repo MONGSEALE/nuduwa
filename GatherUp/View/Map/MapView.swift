@@ -25,39 +25,44 @@ struct MapView: View {
     
     @State private var coordinateCreated = CLLocationCoordinate2D()
     
+    private let maxLatitudeDelta = 0.3 // 이 범위 이상 축소하면 지도에서 모임 안보임
+    
     var body: some View {
         ZStack(alignment:.bottom){
             GeometryReader { geometry in
                 /// serverViewModel의 meetings 배열에서 item(=meeting) 하나씩 가져와서 지도에 Pin 표시
                 Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: serverViewModel.meetings){ item in
-                    MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude), content: {
-                        /// 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
-                        switch item.type {
-                        case .basic:
-                            MeetingIconView(showAnnotation: $showAnnotation, isJoin: serverViewModel.meetingList.contains(where: { $0.meetingID == item.id! }), meeting: item) { locate in
-                                withAnimation(.easeInOut(duration: 0.25)){
-                                    viewModel.region.center = locate
-                                }
-                            }
-                        case .piled:
-                            if let meetings = serverViewModel.bigIconMeetings[item.id!] {
-                                PiledMeetingIconView(showAnnotation: $showAnnotation, meetings: meetings, isJoinIDs: serverViewModel.meetingList.map{ $0.meetingID }) { locate in
+                    MapAnnotation(coordinate: CLLocationCoordinate2D(latitude: item.latitude, longitude: item.longitude)) {
+                        // 너무 축소하면 핀 전부 안보임
+                        if viewModel.region.span.latitudeDelta < maxLatitudeDelta {
+                            // 지도에 표시되는 MapPin중 모임 생성중인 Pin이면 if문 View 아니면 else문 View
+                            switch item.type {
+                            case .basic:
+                                MeetingIconView(showAnnotation: $showAnnotation, isJoin: serverViewModel.meetingList.contains(where: { $0.meetingID == item.id! }), meeting: item) { locate in
                                     withAnimation(.easeInOut(duration: 0.25)){
                                         viewModel.region.center = locate
                                     }
                                 }
+                            case .piled:
+                                if let meetings = serverViewModel.bigIconMeetings[item.id!] {
+                                    PiledMeetingIconView(showAnnotation: $showAnnotation, meetings: meetings, isJoinIDs: serverViewModel.meetingList.map{ $0.meetingID }) { locate in
+                                        withAnimation(.easeInOut(duration: 0.25)){
+                                            viewModel.region.center = locate
+                                        }
+                                    }
+                                }
+                            case .new:
+                                CustomMapAnnotationView()
                             }
-                        case .new:
-                            CustomMapAnnotationView()
-                                .shadow(radius: 30)
                         }
-                    })
+                    }
                 }
                 .edgesIgnoringSafeArea(.top)
                 .accentColor(Color(.systemPink))
                 .onChange(of: viewModel.region) { region in
-//                    viewModel.region = viewModel.region.clampedLongitudeDelta(minValue: 0.01, maxValue: 0.1)
-                    serverViewModel.checkedLocation(region: region)
+                    if region.span.latitudeDelta < maxLatitudeDelta {
+                        serverViewModel.checkedLocation(region: region)
+                    }
                 }
                 .onAppear{
                     serverViewModel.setRegion(region: viewModel.region)
@@ -88,10 +93,10 @@ struct MapView: View {
                         ForEach(Meeting.Category.allCases, id: \.self) { item in
                             // Meeting 구조체 Category에 있는 모든 케이스 반복
                             Button{
-                                if serverViewModel.category != item {
-                                    serverViewModel.filterMeetingsByCategory(category: item, latitudeDelta: viewModel.region.span.latitudeDelta)
-                                } else {
+                                if item == .all {
                                     serverViewModel.filterMeetingsByCategory(category: nil, latitudeDelta: viewModel.region.span.latitudeDelta)
+                                } else {
+                                    serverViewModel.filterMeetingsByCategory(category: item , latitudeDelta: viewModel.region.span.latitudeDelta)
                                 }
                             } label: {
                                 // 선택하면 serverViewModel.category?.rawValue ?? "")==item.rawValue 가 true
@@ -100,21 +105,21 @@ struct MapView: View {
 
                         }
                     } label: {
-                        Text(serverViewModel.category?.rawValue ?? "필터")
+                        Text(serverViewModel.category?.rawValue ?? "전체")
                             .fontWeight(.bold)
                             .font(.system(size: 20))
                             .foregroundColor(Color.white)
                             .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
-                            .background(Color.yellow) // Moved the background modifier inside the else block
+                            .background(Color.yellow)
                             .cornerRadius(20)
                     }
                     .padding(15)
                     Spacer()
                     Button{
-//test 중 비활성화                        /// 모임 중복 생성이면 if문 실행
-//test 중 비활성화                        if (serverViewModel.isOverlap==true){
-//test 중 비활성화                            showPopupMessage(message: "모임은 최대 한개만 생성할 수 있습니다!", duration: 2)
-//test 중 비활성화                        }else{
+                       /// 모임 중복 생성이면 if문 실행
+                        if (serverViewModel.isOverlap==true){
+                            showPopupMessage(message: "모임은 최대 한개만 생성할 수 있습니다!", duration: 2)
+                        }else{
                             /// 모임만들기 버튼 클릭할때마다 if문과 else문 번갈아 실행
                             if(showAnnotation==false){
                                 /// 모임만들기 버튼 클릭하면 "장소를 선택해주세요!" 메시지 출력
@@ -128,7 +133,7 @@ struct MapView: View {
                                 }
                                 serverViewModel.deleteMapAnnotation()     /// 취소 버튼 누르면 MapPin 삭제
                             }
-//test 중 비활성화                        }
+                       }
                     }label: {
                         Group {
                             if showAnnotation {
