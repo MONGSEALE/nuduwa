@@ -192,7 +192,7 @@ struct ChoiceMeetingCategoryView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            ForEach(Meeting.Category.allCases, id: \.self) { item in
+            ForEach(Array(Meeting.Category.allCases.dropFirst()), id: \.self) { item in
                 Text(item.rawValue)
                     .foregroundColor(category == item ? .blue : .gray)
                     .onTapGesture {

@@ -19,6 +19,7 @@ struct SlideOverView<Content: View>: View {
                     .onTapGesture {
                         withAnimation {
                             isPresented = false
+                            print("good")
                         }
                     }
                 

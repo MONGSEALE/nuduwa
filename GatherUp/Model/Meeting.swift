@@ -42,15 +42,6 @@ struct Meeting : Identifiable, Codable, Equatable, Hashable, FirestoreConvertibl
         case piled
     }
     enum Category: String, Codable, CaseIterable {
-        /*
-        case exercise = "Exercise" // 운동
-        case meal = "Meal" // 밥
-        case alcohol = "Alcohol" // 술
-        case study = "Study" // 공부
-        case trip = "Trip" // 여행
-        case play = "Play" // 놀이
-        case volunteer = "Volunteer" // 자원봉사
-         */
         case all = "전체"
         case hobby = "취미활동"
         case meal = "식사"
