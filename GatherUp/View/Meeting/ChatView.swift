@@ -86,7 +86,7 @@ struct ChatView: View {
                 }
                 .padding(.horizontal)
                 .padding(.vertical,10)
-                .background(Color("gray"))
+                .background(Color("lightgray"))
                 .cornerRadius(50)
                 .padding()
             }
@@ -147,6 +147,25 @@ struct MemberList: View {
     let hostUID: String
     let userUID: String
     
+    var sortedMembers: [Member] {
+        members.sorted { (member1, member2) -> Bool in
+            if member1.memberUID == userUID {
+                return true
+            }
+            else if member2.memberUID == userUID {
+                return false
+            }
+            else if member1.memberUID == hostUID {
+                return true
+            }
+            else if member2.memberUID == hostUID {
+                return false
+            }
+            else {
+                return member1.memberName ?? "" < member2.memberName ?? ""
+            }
+        }
+    }
     var body: some View {
         VStack {
             HStack {
@@ -159,8 +178,8 @@ struct MemberList: View {
 
             ScrollView {
                 LazyVStack {
-                    ForEach(members) { member in
-                        MemberItemView(meetingID: meetingID, member: member, hostUID: hostUID, userUID: userUID)
+                    ForEach(sortedMembers, id: \.memberUID) { member in
+                    MemberItemView(meetingID: meetingID, member: member, hostUID: hostUID, userUID: userUID)
                     }
                 }
             }
@@ -200,9 +219,20 @@ struct MemberItemView: View {
                 }
                 
                 if member.memberUID == userUID {
-                    Text("나 - \(member.memberName ?? "")")
+                    HStack {
+                            Circle()
+                            .fill(Color.gray)
+                            .frame(width: 20, height: 20)
+                            .overlay(Text("나").foregroundColor(.white).font(.caption))
+                            Text("- \(member.memberName ?? "")")
+                                .font(.body)
+                    }
+                }
+                else if(member.memberUID == hostUID){
+                    Text("방장 - \(member.memberName ?? "")")
                         .font(.body)
-                } else {
+                }
+                else {
                     Text(member.memberName ?? "")
                         .font(.body)
                 }
@@ -275,10 +305,10 @@ struct MessageRow: View {
                     ZStack{
                         Text(message.text)
                             .fontWeight(.semibold)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                             .padding()
                     }
-                    .background(Color.red.clipShape(MyChatBubble()))
+                    .background(Color("lightgray").clipShape(MyChatBubble()))
                     .padding(10)
                     
                     Text(formatTimestamp(message.timestamp))
