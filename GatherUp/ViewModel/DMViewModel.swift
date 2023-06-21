@@ -44,6 +44,8 @@ class DMViewModel: FirebaseViewModel {
                 self.receiverDMListDocRef = data.2
                 
                 self.receiverUID = receiverUID
+                self.blockListListener()
+                
                 isReading = true
                 dmListener(dmPeopleRef: self.dmPeopleRef)
             }catch{
@@ -352,6 +354,47 @@ class DMViewModel: FirebaseViewModel {
             self.isLoading = false
         }
         listeners[dmListCol.path] = listener
+    }
+    
+    // 차단여부확인
+    func blockListListener() {
+        guard let currentUID,
+              let receiverUID else{return}
+        Task{
+            // 내가 차단했는지 확인
+            let currentQuery = self.db.collection(self.strUsers).document(currentUID).collection(self.strBlockList).whereField("blockUID", isEqualTo: receiverUID)
+            let currentListener = currentQuery.addSnapshotListener{ snapshot, error in
+                print("블락유저")
+                if let error {print("blockListListener에러: \(error)");return;}
+                
+                guard let snapshot else{return}
+                if snapshot.documents.first != nil {
+                    // 내가 차단했으면 isBlocked = true
+                    self.blocked = true
+                } else {
+                    self.blocked = false
+                }
+                print(snapshot.documents.first)
+                
+            }
+            listeners[currentQuery.description] = currentListener
+            
+            // 상대방이 차단했는지 확인
+            let receiverQuery = self.db.collection(self.strUsers).document(receiverUID).collection(self.strBlockList).whereField("blockUID", isEqualTo: currentUID)
+            let receiverListener = receiverQuery.addSnapshotListener{ snapshot, error in
+                print("블락상대방")
+                if let error {print("blockListListener에러: \(error)");return;}
+                guard let snapshot else{return}
+                if snapshot.documents.first != nil {
+                    // 상대방이 차단했으면 isBlocked = true
+                    self.isBlocked = true
+                } else {
+                    self.isBlocked = false
+                }
+                print(snapshot.documents.first)
+            }
+            listeners[receiverQuery.description] = receiverListener
+        }
     }
 }
 
