@@ -22,7 +22,9 @@ class DMViewModel: FirebaseViewModel {
     
     var isReading: Bool = false                         // 채팅방 들어갔는지 확인변수
     
-//    var isBlock: Bool = false                           // 상대방이 유저 차단확인변수
+    @Published var isBlocked: Bool = false  // 유저한테 차단됨
+    @Published var blocked:Bool = false  // 유저를 차단함
+    
     var receiverUID: String? = nil
     
     override func removeListeners() {

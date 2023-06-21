@@ -22,6 +22,7 @@ struct DMView: View {
     
     @State var showProfile: Bool = false
     
+    
     var body: some View {
         NavigationStack {
             ScrollView{
@@ -61,21 +62,32 @@ struct DMView: View {
             }.flippedUpsideDown()
             Spacer()
             HStack{
-                CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $messageText)
-                Button{
-                    if viewModel.dmPeopleRef != nil{
-                        viewModel.sendDM(message: messageText)
-                        messageText = ""
+                if viewModel.blocked{
+                    CustomTextFieldRow(placeholder: Text("차단한 유저입니다"), text: $messageText)
+                        .disabled(true)
+                }
+                else if viewModel.isBlocked {
+                        CustomTextFieldRow(placeholder: Text("차단 당한 상태입니다"), text: $messageText)
+                            .disabled(true)
                     }
-                }label: {
-                    if viewModel.dmPeopleRef != nil{
-                        Image(systemName: "paperplane.fill")
-                            .foregroundColor(.white)
-                            .padding(10)
-                            .background(Color("lightblue"))
-                            .cornerRadius(50)
-                    } else {
-                        ProgressView()
+              
+                else{
+                    CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $messageText)
+                    Button{
+                        if viewModel.dmPeopleRef != nil{
+                            viewModel.sendDM(message: messageText)
+                            messageText = ""
+                        }
+                    }label: {
+                        if viewModel.dmPeopleRef != nil{
+                            Image(systemName: "paperplane.fill")
+                                .foregroundColor(.white)
+                                .padding(10)
+                                .background(Color("lightblue"))
+                                .cornerRadius(50)
+                        } else {
+                            ProgressView()
+                        }
                     }
                 }
             }
