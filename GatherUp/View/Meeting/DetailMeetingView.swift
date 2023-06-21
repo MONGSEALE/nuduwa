@@ -163,7 +163,7 @@ struct DetailMeetingView: View {
                                         Button("모임 수정", action: {
                                             isEdit.toggle()
                                         })
-                                        Button("모임 취소", role: .destructive, action: {
+                                        Button("모임 종료", role: .destructive, action: {
                                             viewModel.cancleMeeting(meetingID: meeting.id!)
                                             dismiss()
                                         })
