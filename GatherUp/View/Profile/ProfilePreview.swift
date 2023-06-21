@@ -18,6 +18,9 @@ struct ProfilePreview: View {
     @State var receiverUID: String?
     @State var showReview: Bool = false
     
+    @State var editText: String? = nil
+    @State var editInterests: [[Interests]] = []
+    
     var showChatButton: Bool
 
     var body: some View {
@@ -39,6 +42,31 @@ struct ProfilePreview: View {
                 GaugeView(progress: $viewModel.rating)
                         .frame(width: 200, height: 200)
                         .padding(.top, 30)
+                VStack{
+                    HStack{
+                        Spacer()
+                            .frame(width: 15)
+                        Text("자기소개")
+                            .font(.body)
+                            .fontWeight(.semibold)
+                        Spacer()
+                    }
+                    EditTextProfile(text: viewModel.user?.introduction ?? "" , editText: $editText, item: "자기소개", isEditable: false)
+                        .font(.body)
+                        .fontWeight(.thin)
+                }
+                .padding(.top, -70)
+                .padding(.bottom, -70)
+                
+                HStack{
+                    Spacer()
+                        .frame(width: 15)
+                    Text("흥미")
+                        .font(.body)
+                        .fontWeight(.semibold)
+                    Spacer()
+                }
+                EditInterestProfile(isEditable: false, editInterests: $editInterests, interests: viewModel.user?.interests ?? []){ _ in}
                 
                 DisclosureGroup("리뷰보기"){
                     ForEach(viewModel.reviews){ review in
@@ -109,6 +137,7 @@ struct ProfilePreview: View {
         }
         .padding(30)
         .onAppear{
+            viewModel.fetchUser(user.id)
             viewModel.fetchReview(user.id)
             viewModel.fetchBlockUser(user.id)
             viewModel.fetchReviewList(user.id)

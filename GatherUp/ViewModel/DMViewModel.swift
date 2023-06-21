@@ -34,7 +34,6 @@ class DMViewModel: FirebaseViewModel {
     
     /// 채팅방 들어갔을때 실행하는 함수
     func setDMRoom(receiverUID: String) {
-        guard let currentUID else{return}
         isLoading = true
         Task{
             do{
@@ -374,7 +373,6 @@ class DMViewModel: FirebaseViewModel {
                 } else {
                     self.blocked = false
                 }
-                print(snapshot.documents.first)
                 
             }
             listeners[currentQuery.description] = currentListener
@@ -391,7 +389,6 @@ class DMViewModel: FirebaseViewModel {
                 } else {
                     self.isBlocked = false
                 }
-                print(snapshot.documents.first)
             }
             listeners[receiverQuery.description] = receiverListener
         }

@@ -167,8 +167,6 @@ class FirebaseViewModelwithMeetings: FirebaseViewModel {
         }
     }
     
-    
-
     /// meetingDate 지나면 지도에서 안보이게
     func pastMeeting(meetingID: String) {
         print("pastMeeting")
