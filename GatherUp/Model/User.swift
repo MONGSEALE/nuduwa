@@ -102,6 +102,8 @@ struct User: Identifiable, Codable, FirestoreConvertible {
         var data : [String:Any] = [:]
         if let introduction {
             data["introduction"] = introduction
+        } else {
+            data["introduction"] = ""
         }
         if let interests {
             data["interests"] = interests
