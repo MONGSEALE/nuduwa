@@ -143,5 +143,8 @@ struct ProfilePreview: View {
             viewModel.fetchReviewList(user.id)
             receiverUID = user.id
         }
+        .onDisappear{
+            viewModel.removeListeners()
+        }
     }
 }
