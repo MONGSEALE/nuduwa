@@ -236,6 +236,9 @@ struct ProfileView: View {
             viewModel.fetchMeetingCount(viewModel.currentUID)
             viewModel.fetchCreateReview(viewModel.currentUID)
         }
+        .onDisappear{
+            viewModel.removeListeners()
+        }
     }
     func image(from asset: PHAsset, completion: @escaping (UIImage?) -> Void) {
         let options = PHImageRequestOptions()
