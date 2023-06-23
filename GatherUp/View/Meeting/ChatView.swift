@@ -37,6 +37,13 @@ struct ChatView: View {
                             ForEach(chatViewModel.messages.indices, id: \.self) { index in
                                 let currentMessage = chatViewModel.messages[index]
                                 let previousMessage = index > 0 ? chatViewModel.messages[index - 1] : nil
+                               
+                                
+                                var isContinuousFromLastMessage =
+                                  (currentMessage.senderUID == previousMessage?.senderUID)
+                                  && !(previousMessage?.isSystemMessage ?? false)
+                                  && !isNewDay(previousMessage: previousMessage, currentMessage: currentMessage)
+
                                 
                                 if isNewDay(previousMessage: previousMessage, currentMessage: currentMessage) {
                                     Text(formatDate(currentMessage.timestamp))
@@ -54,9 +61,12 @@ struct ChatView: View {
                                         .padding(.vertical, 8)
                                         .id("system-\(index)")
                                 }
+                                
+                               
+                                
                                 else{
                                     MessageRow(message: currentMessage, member: members[currentMessage.senderUID] ?? chatViewModel.nonMembers[currentMessage.senderUID] ??
-                                               Member(memberUID: ""), identifying: currentMessage.senderUID == chatViewModel.currentUID)
+                                               Member(memberUID: ""), identifying: currentMessage.senderUID == chatViewModel.currentUID,isContinuousFromLastMessage:isContinuousFromLastMessage)
                                 }
                             }
                         }
@@ -269,55 +279,120 @@ struct MessageRow: View {
     let message: Message
     let member: Member
     let identifying: Bool
+    let isContinuousFromLastMessage: Bool
 
     var body: some View {
-        HStack{
+        HStack(spacing:10){
             if(identifying==false){
-                WebImage(url: member.memberImage).placeholder{ProgressView()}
-                    .resizable()
-                   .scaledToFill()
-                   .frame(width: 40, height: 40)
-                   .clipShape(Circle())
-                VStack(alignment:.leading,spacing: 0, content: {
-                    NickName(name: member.memberName ?? "")
-                        .padding(.leading, 10)
-                    ZStack {
+                if (isContinuousFromLastMessage==false){
+                    WebImage(url: member.memberImage).placeholder{ProgressView()}
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 40, height: 40)
+                        .clipShape(Circle())
+                        .padding(.leading,5)
+                    VStack(alignment:.leading,spacing: 0, content: {
+                        NickName(name: member.memberName ?? "")
+                            .padding(.leading, 10)
+                        HStack(){
+                            Text(message.text)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.blue.clipShape(ChatBubble()))
+                                .padding(5)
+                            VStack{
+                                Spacer()
+                                    .frame(width: 5)
+                                Text(formatTimestamp(message.timestamp))
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                                    .padding(.leading,-5)
+                                Spacer()
+                            }
+                            Spacer()
+                        }
+                        .padding(.leading, -10)
+                        .frame(maxWidth: 300)
+                    }
+                    )
+                    Spacer()
+                }
+                else{
+                    HStack(){
+                        Spacer()
+                            .frame(width: 18)
                         Text(message.text)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
                             .padding()
+                            .background(Color.blue.clipShape(ContinuousChatBubble()))
+                            .padding(5)
+                        VStack{
+                            Spacer()
+                                .frame(width: 5)
+                            Text(formatTimestamp(message.timestamp))
+                                .font(.caption2)
+                                .foregroundColor(.gray)
+                                .padding(.leading,-5)
+                            Spacer()
+                        }
+                        Spacer()
                     }
-                    .background(Color.blue.clipShape(ChatBubble()))
-                    .padding(5)
-                    
-                    // Text(formatTimestamp(message.timestamp))
-                    Text(formatTimestamp(message.timestamp))
-                        .font(.caption2)
-                        .foregroundColor(.gray)
-                        .padding(.leading,15)
+                    .padding(.leading, -10)
+                    .frame(maxWidth: 300)
+
                 }
-                )
-                Spacer()
             }
+            
             else{
-                Spacer()
-                VStack(alignment: .trailing){
-                    ZStack{
+                if(isContinuousFromLastMessage){
+                    Spacer()
+                    HStack{
+                        Spacer()
+                        VStack{
+                            Spacer()
+                                .frame(width: 5)
+                            Text(formatTimestamp(message.timestamp))
+                                .font(.caption2)
+                                .foregroundColor(.gray)
+                                .padding(.trailing,-8)
+                            Spacer()
+                        }
+                        
                         Text(message.text)
                             .fontWeight(.semibold)
                             .foregroundColor(.black)
                             .padding()
+                            .background(Color("lightgray").clipShape(ContinuousChatBubble()))
+                            .padding(5)
                     }
-                    .background(Color("lightgray").clipShape(MyChatBubble()))
-                    .padding(10)
-                    
-                    Text(formatTimestamp(message.timestamp))
-                        .font(.caption2)
-                        .foregroundColor(.gray)
-                        .padding(.trailing,15)
+                    .frame(maxWidth:300)
+                }
+                else{
+                    Spacer()
+                    HStack{
+                        Spacer()
+                        VStack{
+                            Spacer()
+                                .frame(width: 5)
+                            Text(formatTimestamp(message.timestamp))
+                                .font(.caption2)
+                                .foregroundColor(.gray)
+                                .padding(.trailing,-8)
+                            Spacer()
+                        }
+                        
+                        Text(message.text)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.black)
+                            .padding()
+                            .background(Color("lightgray").clipShape(MyChatBubble()))
+                            .padding(5)
+                    }
+                    .frame(maxWidth:300)
                 }
             }
-            
         }
     }
     // Function to format the timestamp
@@ -327,18 +402,19 @@ struct MessageRow: View {
         let date = timestamp.dateValue()
         return dateFormatter.string(from: date)
     }
-    
-  
-
-
-
-
 }
 
 struct ChatBubble: Shape {
     func path(in rect: CGRect) -> Path{
         let path = UIBezierPath(roundedRect: rect, byRoundingCorners: [.topLeft,.topRight,.bottomRight],cornerRadii: CGSize(width: 15, height: 15))
         
+        return Path(path.cgPath)
+    }
+}
+
+struct ContinuousChatBubble: Shape {
+    func path(in rect: CGRect) -> Path{
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: [.topLeft,.topRight,.bottomLeft,.bottomRight],cornerRadii: CGSize(width: 15, height: 15))
         return Path(path.cgPath)
     }
 }
