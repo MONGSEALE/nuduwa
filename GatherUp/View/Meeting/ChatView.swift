@@ -90,9 +90,10 @@ struct ChatView: View {
                         Image(systemName: "paperplane.fill")
                             .foregroundColor(.white)
                             .padding(10)
-                            .background(Color("lightblue"))
+                            .background(message.isEmpty ? Color.gray : Color("lightblue"))
                             .cornerRadius(50)
                     }
+                    .disabled(message.isEmpty)
                 }
                 .padding(.horizontal)
                 .padding(.vertical,10)
