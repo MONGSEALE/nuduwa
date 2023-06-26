@@ -14,7 +14,8 @@ struct ChatView: View {
     let meetingID : String
     let meetingTitle: String
     let hostUID: String
-
+    
+    @State private var isExpanded = false
     @State var message = ""
     @StateObject var chatViewModel = ChatViewModel()
    
@@ -82,12 +83,26 @@ struct ChatView: View {
                 }
                 Spacer()
                 HStack{
-                    CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $message)
+                    Button{
+                        isExpanded.toggle()
+                        if !isExpanded {
+                            UIApplication.shared.endEditing()
+                        }
+                    } label:{
+                        Image(systemName: "plus.circle")
+                            .resizable()
+                            .frame(width: 35, height: 35)
+                            .foregroundColor(.gray)
+                    }
+                        CustomTextFieldRow(placeholder: Text("메시지를 입력하세요"), text: $message)
+                        .background(Color("lightgray"))
+                        .cornerRadius(50)
                     Button{
                         chatViewModel.sendMessage(meetingID: meetingID , text: message)
                         message = ""
                     }label: {
                         Image(systemName: "paperplane.fill")
+                            
                             .foregroundColor(.white)
                             .padding(10)
                             .background(message.isEmpty ? Color.gray : Color("lightblue"))
@@ -95,11 +110,25 @@ struct ChatView: View {
                     }
                     .disabled(message.isEmpty)
                 }
-                .padding(.horizontal)
-                .padding(.vertical,10)
-                .background(Color("lightgray"))
-                .cornerRadius(50)
-                .padding()
+                if isExpanded {
+                HStack {
+                                   Button(action: {
+                                       // 사진 기능 구현
+                                   }) {
+                                       Image(systemName: "photo")
+                                   }
+                                   Button(action: {
+                                       // 카메라 기능 구현
+                                   }) {
+                                       Image(systemName: "camera")
+                                   }
+                                   Button(action: {
+                                       // 장소 기능 구현
+                                   }) {
+                                       Image(systemName: "location")
+                                   }
+                               }
+                }
             }
             .navigationBarTitle("\(meetingTitle) (\(members.values.count))", displayMode: .inline)
             .toolbar {
@@ -431,8 +460,6 @@ struct MyChatBubble: Shape {
 struct CustomTextFieldRow: View {
     let placeholder : Text
     @Binding var text : String
-    // var editingChanged: (Bool) -> () = {_ in}
-    // var commit: () -> () = {}
     
     var body: some View {
         ZStack(alignment: .leading){
@@ -440,7 +467,18 @@ struct CustomTextFieldRow: View {
                 placeholder
                     .opacity(0.5)
             }
-            TextField("",text:$text) //,onEditingChanged:editingChanged,onCommit:commit)
+            TextField("",text:$text)
+                .frame(maxWidth: 250)
         }
+        .padding(13)
     }
 }
+
+extension UIApplication {
+    func endEditing() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+
+
