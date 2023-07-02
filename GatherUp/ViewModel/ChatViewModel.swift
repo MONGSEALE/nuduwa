@@ -51,13 +51,33 @@ class ChatViewModel: FirebaseViewModelwithMeetings {
             }
         }
     }
-    
+    @MainActor
     func sendMessage(meetingID: String, text: String) {
         isLoading = true
         Task{
             do{
                 guard let currentUID = currentUID else{return}
                 let message = Message(text, uid: currentUID)
+                let col = db.collection(strMeetings).document(meetingID).collection(strMessage)
+                try await col.addDocument(data: message.firestoreData)
+                // try await col.addDocument(data: [
+                //     "text": text,
+                //     "userUID": currentUID as Any,
+                //     "timestamp": Timestamp()
+                // ])
+                isLoading = false
+            }catch{
+                await handleError(error)
+            }
+        }
+    }
+    
+    func sendImage(meetingID: String, imageUrl: String) {
+        isLoading = true
+        Task{
+            do{
+                guard let currentUID = currentUID else{return}
+                let message = Message("", uid: currentUID, imageUrl: imageUrl)
                 let col = db.collection(strMeetings).document(meetingID).collection(strMessage)
                 try await col.addDocument(data: message.firestoreData)
                 // try await col.addDocument(data: [

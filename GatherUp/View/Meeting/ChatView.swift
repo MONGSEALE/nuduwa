@@ -8,6 +8,10 @@
 import SwiftUI
 import Firebase
 import SDWebImageSwiftUI
+import UIKit
+import PhotosUI
+
+
 
 struct ChatView: View {
 
@@ -24,6 +28,15 @@ struct ChatView: View {
     
     @State private var showMemberList = false
     @State private var xOffset: CGFloat = UIScreen.main.bounds.width
+    @State var isPickerShowing = false
+    @State private var isPresented : Bool = false
+    @State private var capturedImage: UIImage? = nil
+
+  //  @StateObject var photosModel:PhotoPickerModel = .init()
+  //   @StateObject var photosModel: PhotoPickerModel
+    @ObservedObject var photosModel=PhotoPickerModel()
+
+    
     
     var body: some View {
         ZStack{
@@ -40,7 +53,7 @@ struct ChatView: View {
                                 let previousMessage = index > 0 ? chatViewModel.messages[index - 1] : nil
                                
                                 
-                                var isContinuousFromLastMessage =
+                                let isContinuousFromLastMessage =
                                   (currentMessage.senderUID == previousMessage?.senderUID)
                                   && !(previousMessage?.isSystemMessage ?? false)
                                   && !isNewDay(previousMessage: previousMessage, currentMessage: currentMessage)
@@ -68,6 +81,7 @@ struct ChatView: View {
                                 else{
                                     MessageRow(message: currentMessage, member: members[currentMessage.senderUID] ?? chatViewModel.nonMembers[currentMessage.senderUID] ??
                                                Member(memberUID: ""), identifying: currentMessage.senderUID == chatViewModel.currentUID,isContinuousFromLastMessage:isContinuousFromLastMessage)
+                                    .id("message-\(index)")
                                 }
                             }
                         }
@@ -112,24 +126,26 @@ struct ChatView: View {
                 }
                 if isExpanded {
                 HStack {
-                                   Button(action: {
-                                       // 사진 기능 구현
-                                   }) {
-                                       Image(systemName: "photo")
-                                   }
-                                   Button(action: {
-                                       // 카메라 기능 구현
-                                   }) {
-                                       Image(systemName: "camera")
-                                   }
+                    PhotosPicker(selection:$photosModel.imageSelections, matching: .images){
+                        Image(systemName: "photo")
+                    }
+                    Button(action: {
+                        self.isPresented = true
+                    }) {
+                        Image(systemName: "camera")
+                    }
+                    .fullScreenCover(isPresented: $isPresented) {
+                        CameraView(isPresented: self.$isPresented, image: self.$capturedImage)
+                    }
+
                                    Button(action: {
                                        // 장소 기능 구현
                                    }) {
                                        Image(systemName: "location")
                                    }
-                               }
                 }
             }
+        }
             .navigationBarTitle("\(meetingTitle) (\(members.values.count))", displayMode: .inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -160,7 +176,8 @@ struct ChatView: View {
         }
         .navigationBarHidden(showMemberList)
         .onAppear{
-            chatViewModel.messagesListener(meetingID: meetingID)     // 채팅들이 화면에 보이게함
+            chatViewModel.messagesListener(meetingID: meetingID)
+            photosModel.meetingID = meetingID
         }
     }
     func formatDate(_ timestamp: Timestamp) -> String {
@@ -310,6 +327,7 @@ struct MessageRow: View {
     let member: Member
     let identifying: Bool
     let isContinuousFromLastMessage: Bool
+    
 
     var body: some View {
         HStack(spacing:10){
@@ -324,13 +342,20 @@ struct MessageRow: View {
                     VStack(alignment:.leading,spacing: 0, content: {
                         NickName(name: member.memberName ?? "")
                             .padding(.leading, 10)
-                        HStack(){
-                            Text(message.text)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.blue.clipShape(ChatBubble()))
-                                .padding(5)
+                        HStack{
+                            if let imageUrl = message.imageUrl, imageUrl != "" {
+                                                        FirebaseImageView(imageUrl: imageUrl)
+                                                            .frame(maxWidth: 200)
+                                                            .cornerRadius(10)
+                                                            .padding(5)
+                                                    } else {
+                                                        Text(message.text)
+                                                            .fontWeight(.semibold)
+                                                            .foregroundColor(.white)
+                                                            .padding()
+                                                            .background(Color.blue.clipShape(ChatBubble()))
+                                                            .padding(5)
+                                                    }
                             VStack{
                                 Spacer()
                                     .frame(width: 5)
@@ -352,12 +377,19 @@ struct MessageRow: View {
                     HStack(){
                         Spacer()
                             .frame(width: 18)
-                        Text(message.text)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.blue.clipShape(ContinuousChatBubble()))
-                            .padding(5)
+                        if let imageUrl = message.imageUrl, imageUrl != "" {
+                                                 FirebaseImageView(imageUrl: imageUrl)
+                                                     .frame(maxWidth: 200)
+                                                     .cornerRadius(10)
+                                                     .padding(5)
+                                             } else {
+                                                 Text(message.text)
+                                                     .fontWeight(.semibold)
+                                                     .foregroundColor(.white)
+                                                     .padding()
+                                                     .background(Color.blue.clipShape(ContinuousChatBubble()))
+                                                     .padding(5)
+                                }
                         VStack{
                             Spacer()
                                 .frame(width: 5)
@@ -390,12 +422,19 @@ struct MessageRow: View {
                             Spacer()
                         }
                         
-                        Text(message.text)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.black)
-                            .padding()
-                            .background(Color("lightgray").clipShape(ContinuousChatBubble()))
-                            .padding(5)
+                        if let imageUrl = message.imageUrl, imageUrl != "" {
+                                                  FirebaseImageView(imageUrl: imageUrl)
+                                                      .frame(maxWidth: 200)
+                                                      .cornerRadius(10)
+                                                      .padding(5)
+                                              } else {
+                                                  Text(message.text)
+                                                      .fontWeight(.semibold)
+                                                      .foregroundColor(.black)
+                                                      .padding()
+                                                      .background(Color("lightgray").clipShape(ContinuousChatBubble()))
+                                                      .padding(5)
+                                              }
                     }
                     .frame(maxWidth:300)
                 }
@@ -412,13 +451,19 @@ struct MessageRow: View {
                                 .padding(.trailing,-8)
                             Spacer()
                         }
-                        
-                        Text(message.text)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.black)
-                            .padding()
-                            .background(Color("lightgray").clipShape(MyChatBubble()))
-                            .padding(5)
+                        if let imageUrl = message.imageUrl, imageUrl != "" {
+                                                  FirebaseImageView(imageUrl: imageUrl)
+                                                      .frame(maxWidth: 200)
+                                                      .cornerRadius(10)
+                                                      .padding(5)
+                                              } else {
+                                                  Text(message.text)
+                                                      .fontWeight(.semibold)
+                                                      .foregroundColor(.black)
+                                                      .padding()
+                                                      .background(Color("lightgray").clipShape(MyChatBubble()))
+                                                      .padding(5)
+                                              }
                     }
                     .frame(maxWidth:300)
                 }
@@ -433,6 +478,28 @@ struct MessageRow: View {
         return dateFormatter.string(from: date)
     }
 }
+
+struct FirebaseImageView: View {
+    @ObservedObject var imageLoader: FirebaseImageLoader
+   
+    
+    init(imageUrl: String) {
+           self.imageLoader = FirebaseImageLoader(imageUrl: imageUrl)
+       }
+    
+    var body: some View {
+        if let image = self.imageLoader.image {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+        } else {
+            ProgressView()
+                .scaledToFit()
+                .frame(width:200,height:200)
+        }
+    }
+}
+
 
 struct ChatBubble: Shape {
     func path(in rect: CGRect) -> Path{

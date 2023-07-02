@@ -16,35 +16,40 @@ struct Message: Identifiable, Equatable, Hashable, FirestoreConvertible{
     let senderUID: String
     let timestamp: Timestamp
     var isSystemMessage: Bool
+    var imageUrl: String?
+  
 
-    init(_ text: String, uid: String, isSystemMessage: Bool? = nil) {
-        self.id = UUID().uuidString
-        self.text = text
-        self.senderUID = uid
-        self.timestamp = Timestamp(date: Date())
-        self.isSystemMessage = isSystemMessage ?? false
-    }
+    init(_ text: String, uid: String, imageUrl: String? = nil, isSystemMessage: Bool? = nil) {
+          self.id = UUID().uuidString
+          self.text = text
+          self.senderUID = uid
+          self.timestamp = Timestamp(date: Date())
+          self.imageUrl = imageUrl
+          self.isSystemMessage = isSystemMessage ?? false
+      }
 
     // Firestore에서 가져올 필드 - guard문 값이 하나라도 없으면 nil 반환
     init?(data: [String: Any], id: String) {
-        guard let text = data["text"] as? String,
-              let senderUID = data["senderUID"] as? String,
-              let timestamp = data["timestamp"] as? Timestamp
-        else { return nil }
-        
-        self.id = id
-        self.text = text
-        self.senderUID = senderUID
-        self.timestamp = timestamp
-        self.isSystemMessage = data["isSystemMessage"] as? Bool ?? false
-    }
+            guard let text = data["text"] as? String,
+                  let senderUID = data["senderUID"] as? String,
+                  let timestamp = data["timestamp"] as? Timestamp
+            else { return nil }
+            
+            self.id = id
+            self.text = text
+            self.senderUID = senderUID
+            self.timestamp = timestamp
+            self.isSystemMessage = data["isSystemMessage"] as? Bool ?? false
+            self.imageUrl = data["imageUrl"] as? String  // 이미지 URL 필드 추가
+        }
     
     // Firestore에 저장할 필드
     var firestoreData: [String: Any] {
         var data: [String: Any] = [
             "text": text,
             "senderUID": senderUID,
-            "timestamp" : FieldValue.serverTimestamp()
+            "timestamp" : FieldValue.serverTimestamp(),
+            "imageUrl": imageUrl ?? ""
         ]
         
         // isSystemMessage true일 때만 Firestore에 저장
